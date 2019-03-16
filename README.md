@@ -1,4 +1,6 @@
-## XMPP Dart ##.
+## XMPP Dart
+
+WORK IN PROGRESS, NOT READY FOR PRODUCTION
 
 Lightweight XMPP client library written in Dart
 
@@ -10,7 +12,8 @@ To do
 import 'package:xmpp/xmpp.dart';
 
 main() {
-  var
+  xmpp.Connection connection = new xmpp.Connection("user@domain", "password", 5222);
+  connection.open();
 }
 ```
 
