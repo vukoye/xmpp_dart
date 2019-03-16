@@ -32,15 +32,6 @@ enum XmppConnectionState {
 
 class Connection
     implements BindingResourceCallBack, SessionRequestManagerCallback {
-  String streamOpeningString = """
-      <stream:stream
-      from='user@domain'
-  to='xmpp.jp'
-  version='1.0'
-  xml:lang='en'
-  xmlns='jabber:client'
-  xmlns:stream='http://etherx.jabber.org/streams'>""";
-
   var lock = new Lock(reentrant: true);
 
   String startTls = """<starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls"/>""";
@@ -95,12 +86,24 @@ class Connection
     MessageHandler.getInstance(this);
   }
 
+  void openStream() {
+    String streamOpeningString = """
+      <stream:stream
+  from='${_fullJid.userAtDomain}'
+  to='xmpp.jp'
+  version='1.0'
+  xml:lang='en'
+  xmlns='jabber:client'
+  xmlns:stream='http://etherx.jabber.org/streams'>""";
+    write(streamOpeningString);
+  }
+
   Future open() {
     _completer = new Completer();
     Socket.connect(_fullJid.domain, _port).then((Socket socket) {
       _socket = socket;
       socket.transform(utf8.decoder).listen(handleResponse);
-      write(streamOpeningString);
+      openStream();
       setState(XmppConnectionState.ReceivingFeatures);
     });
     return _completer.future;
@@ -113,60 +116,54 @@ class Connection
   }
 
   void handleResponse(String response) {
-      bool closeConnection = false;
-      if (response.contains("stream:stream") &&
-          !(response.contains("</stream>"))) {
-        response = response + "</stream>"; // fix for crashing xml library
+    bool closeConnection = false;
+    if (response.contains("stream:stream") &&
+        !(response.contains("</stream>"))) {
+      response = response + "</stream>"; // fix for crashing xml library
+    }
+    if (response.contains("</stream:stream>")) {
+      closeConnection = true;
+      var index = response.lastIndexOf("</stream:stream>");
+      response = response.substring(0, index);
+    }
+    print('handleResponse');
+    print(response);
+    if (response.isNotEmpty) {
+      var xmlResponse = xml.parse(response);
+      if (xmlResponse.findElements("stream:stream").isNotEmpty) {
+        processInitialStream(xmlResponse);
       }
-      if (response.contains("</stream:stream>")) {
-        closeConnection = true;
-        var index = response.lastIndexOf("</stream:stream>");
-        response = response.substring(0, index);
+      xmlResponse.findElements('iq').forEach((element) {
+        var stanza = StanzaParser.parseStanza(element);
+        fireNewStanzaEvent(stanza);
+      });
+      if (xmlResponse.findAllElements("stream:features").isNotEmpty) {
+        processFeatures(xmlResponse);
       }
-      print('handleResponse');
-      print(response);
-      if (response.isNotEmpty) {
-        var xmlResponse = xml.parse(response);
-        if (xmlResponse
-            .findElements("stream:stream")
-            .isNotEmpty) {
-          processInitialStream(xmlResponse);
-        }
-        xmlResponse.findElements('iq').forEach((element) {
-          var stanza = StanzaParser.parseStanza(element);
-          fireNewStanzaEvent(stanza);
-        });
-        if (xmlResponse
-            .findAllElements("stream:features")
-            .isNotEmpty) {
-          processFeatures(xmlResponse);
-        }
-        if (xmlResponse
-            .findAllElements("stream:error")
-            .isNotEmpty) {
-          processError(xmlResponse);
-        }
-        xmlResponse.findAllElements("proceed").forEach((element) {
-          if (_state == XmppConnectionState.StartTlsSent &&
-              element.attributes.firstWhere((attribute) =>
-              attribute.name.local == "xmlns" &&
-                  attribute.value == "urn:ietf:params:xml:ns:xmpp-tls") !=
-                  null) {
-            setState(XmppConnectionState.StartingTls);
-            startSecureSocket();
-          }
-        });
-        if (_state == XmppConnectionState.PLaidAuthentication) {
-          proccesAuthResponse(xmlResponse);
-        }
-        if (_state == XmppConnectionState.Authenticated) {
-          write(streamOpeningString);
-        }
+      if (xmlResponse.findAllElements("stream:error").isNotEmpty) {
+        processError(xmlResponse);
       }
-      if (closeConnection) {
-        print("closing Connection");
-        close();
+      xmlResponse.findAllElements("proceed").forEach((element) {
+        if (_state == XmppConnectionState.StartTlsSent &&
+            element.attributes.firstWhere((attribute) =>
+                    attribute.name.local == "xmlns" &&
+                    attribute.value == "urn:ietf:params:xml:ns:xmpp-tls") !=
+                null) {
+          setState(XmppConnectionState.StartingTls);
+          startSecureSocket();
+        }
+      });
+      if (_state == XmppConnectionState.PLaidAuthentication) {
+        proccesAuthResponse(xmlResponse);
       }
+      if (_state == XmppConnectionState.Authenticated) {
+        openStream();
+      }
+    }
+    if (closeConnection) {
+      print("closing Connection");
+      close();
+    }
   }
 
   void processInitialStream(xml.XmlDocument xmlResponse) {
@@ -239,7 +236,7 @@ class Connection
     SecureSocket.secure(_socket).then((secureSocket) {
       _socket = secureSocket;
       _socket.transform(utf8.decoder).listen(handleResponse);
-      write(streamOpeningString);
+      openStream();
     });
   }
 
@@ -265,13 +262,13 @@ class Connection
   }
 
   void fireNewStanzaEvent(AbstractStanza stanza) {
-      print("FireNewStanza");
-      stanzaListeners.forEach((listener) => listener.processStanza(stanza));
+    print("FireNewStanza");
+    stanzaListeners.forEach((listener) => listener.processStanza(stanza));
   }
 
   void addStanzaListener(StanzaProcessor listener) {
-      print("addStanzaListener");
-      stanzaListeners.add(listener);
+    print("addStanzaListener");
+    stanzaListeners.add(listener);
   }
 
   void removeStanzaListener(StanzaProcessor listener) {
