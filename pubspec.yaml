@@ -1,0 +1,18 @@
+name: xmpp
+description: A sample command-line application.
+# version: 0.1.0
+# homepage: https://www.example.com
+# author: nemanja <email@example.com>
+
+environment:
+  sdk: '>=2.2.0 <3.0.0'
+
+#dependencies:
+#  path: ^1.4.1
+dependencies:
+  xml: ^3.4.1
+  cryptoutils: ^0.4.0
+  synchronized: ^2.1.0
+
+dev_dependencies:
+  test: ^1.0.0
