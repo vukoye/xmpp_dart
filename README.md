@@ -1,6 +1,7 @@
 ## XMPP Dart
 
-WORK IN PROGRESS, NOT READY FOR PRODUCTION
+WORK IN PROGRESS, NOT READY FOR PRODUCTION.
+Also I am still learning dart
 
 Lightweight XMPP client library written in Dart
 
