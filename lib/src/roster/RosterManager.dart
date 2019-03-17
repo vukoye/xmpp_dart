@@ -53,7 +53,11 @@ class RosterManager implements ConnectionStateChangedListener, StanzaProcessor {
   }
 
   void _sendInitialPresence() {
-    _connection.write("<presence/>");
+    _connection.write(""""<presence from='${_connection.fullJid.fullJid}'
+    xml:lang='en'>
+    <show>chat</show>
+    <status>Yap</status>
+    </presence>""");
   }
 
   RosterManager(Connection connection) {

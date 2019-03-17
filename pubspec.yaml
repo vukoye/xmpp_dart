@@ -13,6 +13,7 @@ dependencies:
   xml: ^3.4.1
   cryptoutils: ^0.4.0
   synchronized: ^2.1.0
+  console: ^3.1.0 #for example
 
 dev_dependencies:
   test: ^1.0.0

@@ -18,7 +18,7 @@ import 'package:xmpp/xmpp.dart';
 enum XmppConnectionState {
   Closed,
   ReceivingFeatures,
-  PLaidAuthentication,
+  PlainAuthentication,
   Authentication,
   StartTlsSent,
   StartingTls,
@@ -77,7 +77,6 @@ class Connection
     _fullJid = Jid.fromFullJid(jid);
     _password = password;
     _port = port;
-    //iqStanzaHandler = new IqStanzaHandler(this);
     bindingResourceManager = new BindingResourceManager(this);
     addStanzaListener(bindingResourceManager);
     sessionRequestManager = new SessionRequestManager(this);
@@ -137,6 +136,10 @@ class Connection
         var stanza = StanzaParser.parseStanza(element);
         fireNewStanzaEvent(stanza);
       });
+      xmlResponse.findElements('message').forEach((element) {
+        var stanza = StanzaParser.parseStanza(element);
+        fireNewStanzaEvent(stanza);
+      });
       if (xmlResponse.findAllElements("stream:features").isNotEmpty) {
         processFeatures(xmlResponse);
       }
@@ -153,7 +156,7 @@ class Connection
           startSecureSocket();
         }
       });
-      if (_state == XmppConnectionState.PLaidAuthentication) {
+      if (_state == XmppConnectionState.PlainAuthentication) {
         proccesAuthResponse(xmlResponse);
       }
       if (_state == XmppConnectionState.Authenticated) {
@@ -181,7 +184,7 @@ class Connection
     xmlResponse.findAllElements("mechanisms").forEach((element) {
       var mech = element.findElements("mechanism").toList();
       if (mech.first.toString().contains("PLAIN")) {
-        setState(XmppConnectionState.PLaidAuthentication);
+        setState(XmppConnectionState.PlainAuthentication);
         sendPlainAuthMessage();
       }
     });

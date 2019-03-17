@@ -20,6 +20,8 @@ class MessageHandler implements MessageApi, StanzaProcessor {
     return manager;
   }
 
+  List<MessagesListener> _messagesListener = List<MessagesListener>();
+
   Connection _connection;
 
   MessageHandler(Connection connection) {
@@ -34,7 +36,7 @@ class MessageHandler implements MessageApi, StanzaProcessor {
   @override
   processStanza(AbstractStanza stanza) {
     if (stanza is MessageStanza) {
-
+      _messagesListener.forEach((listener) => listener.onNewMessage(stanza));
     }
     return null;
   }
@@ -45,6 +47,14 @@ class MessageHandler implements MessageApi, StanzaProcessor {
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
     _connection.writeStanza(stanza);
+  }
+
+  void addMessagesListener(MessagesListener listener) {
+    _messagesListener.add(listener);
+  }
+
+  void removeMessagesListener(MessagesListener listener) {
+    _messagesListener.remove(listener);
   }
 
 }
