@@ -26,7 +26,7 @@ class RosterManager implements ConnectionStateChangedListener, StanzaProcessor {
     if (manager == null) {
       manager = RosterManager(connection);
       instances[connection] = manager;
-      connection.addStanzaListener(manager);
+      connection.stanzasStream.listen(manager.processStanza);
     }
 
     return manager;
@@ -62,7 +62,7 @@ class RosterManager implements ConnectionStateChangedListener, StanzaProcessor {
 
   RosterManager(Connection connection) {
     _connection = connection;
-    connection.addConnectionStateChangedListener(this);
+    connection.connectionStateStream.listen(onConnectionStateChanged);
   }
 
   @override

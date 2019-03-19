@@ -5,6 +5,7 @@ import 'package:xmpp/src/elements/XmppAttribute.dart';
 import 'package:xmpp/src/elements/XmppElement.dart';
 import 'package:xmpp/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp/xmpp.dart';
 
 class BindingResourceManager implements StanzaProcessor {
 
@@ -13,11 +14,9 @@ class BindingResourceManager implements StanzaProcessor {
     _callback = callback;
   }
 
-  @override
-  processStanza(AbstractStanza stanza) {
+  void processStanza(AbstractStanza stanza) {
     if (stanza is IqStanza) {
-      IqStanza iq = (stanza as IqStanza);
-      XmppElement element = iq.getChild('bind');
+      XmppElement element = stanza.getChild('bind');
       String jidValue = element?.getChild('jid')?.textValue;
       if (jidValue != null) {
         Jid jid = Jid.fromFullJid(jidValue);

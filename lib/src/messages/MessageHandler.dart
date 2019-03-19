@@ -9,18 +9,20 @@ class MessageHandler implements MessageApi, StanzaProcessor {
 
   static Map<Connection, MessageHandler> instances = Map<Connection, MessageHandler>();
 
+  Stream<MessageStanza> get messagesStream {
+    return _connection.stanzasStream.where((abstractStanza)  => abstractStanza is MessageStanza).map((stanza) => stanza as MessageStanza);
+  }
+
   static getInstance(Connection connection) {
     MessageHandler manager = instances[connection];
     if (manager == null) {
       manager = MessageHandler(connection);
       instances[connection] = manager;
-      connection.addStanzaListener(manager);
+      connection.stanzasStream.listen(manager.processStanza);
     }
 
     return manager;
   }
-
-  List<MessagesListener> _messagesListener = List<MessagesListener>();
 
   Connection _connection;
 
@@ -36,7 +38,7 @@ class MessageHandler implements MessageApi, StanzaProcessor {
   @override
   processStanza(AbstractStanza stanza) {
     if (stanza is MessageStanza) {
-      _messagesListener.forEach((listener) => listener.onNewMessage(stanza));
+
     }
     return null;
   }
@@ -47,14 +49,6 @@ class MessageHandler implements MessageApi, StanzaProcessor {
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
     _connection.writeStanza(stanza);
-  }
-
-  void addMessagesListener(MessagesListener listener) {
-    _messagesListener.add(listener);
-  }
-
-  void removeMessagesListener(MessagesListener listener) {
-    _messagesListener.remove(listener);
   }
 
 }
