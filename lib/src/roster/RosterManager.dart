@@ -46,18 +46,6 @@ class RosterManager implements ConnectionStateChangedListener, StanzaProcessor {
 
   @override
   void onConnectionStateChanged(XmppConnectionState state) {
-    if (state == XmppConnectionState.SessionInitialized) {
-      //_getRosters();
-      _sendInitialPresence();
-    }
-  }
-
-  void _sendInitialPresence() {
-    _connection.write(""""<presence from='${_connection.fullJid.fullJid}'
-    xml:lang='en'>
-    <show>chat</show>
-    <status>Yap</status>
-    </presence>""");
   }
 
   RosterManager(Connection connection) {

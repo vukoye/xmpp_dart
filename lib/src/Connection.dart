@@ -12,6 +12,7 @@ import 'package:xmpp/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp/src/features/StreamFeaturesManager.dart';
 import 'package:xmpp/src/parser/StanzaParser.dart';
+import 'package:xmpp/src/presence/PresenceManager.dart';
 import 'package:xmpp/src/roster/RosterManager.dart';
 import 'package:xmpp/xmpp.dart';
 
@@ -69,7 +70,8 @@ class Connection
 
   //BindingResourceManager bindingResourceManager;
   StreamFeaturesManager streamFeaturesManager;
-  RosterManager rosterManager;
+  RosterManager _rosterManager;
+  PresenceManager _presenceManager;
 
   @override
   void fullJidRetrieved(Jid jid) {
@@ -98,7 +100,8 @@ class Connection
 //    bindingResourceManager = new BindingResourceManager(this);
 //    stanzasStream.listen(bindingResourceManager.processStanza);
     streamFeaturesManager = new StreamFeaturesManager(this, password);
-    rosterManager = RosterManager.getInstance(this);
+    _rosterManager = RosterManager.getInstance(this);
+    _presenceManager = PresenceManager.getInstance(this);
     MessageHandler.getInstance(this);
   }
 

@@ -6,6 +6,7 @@ import 'package:xmpp/src/elements/XmppAttribute.dart';
 import 'package:xmpp/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp/src/elements/stanzas/PresenceStanza.dart';
 
 class StanzaParser {
   static AbstractStanza parseStanza(xml.XmlElement element) {
@@ -19,6 +20,8 @@ class StanzaParser {
       stanza = _parseIqStanza(id, element);
     } else if (element.name.local == 'message') {
       stanza = _parseMessageStanza(id, element);
+    } else if (element.name.local == 'presence') {
+      stanza = _parsePresenceStanza(id, element);
     }
     String fromString = element.getAttribute('from');
     if (fromString != null) {
@@ -30,6 +33,9 @@ class StanzaParser {
       Jid to = Jid.fromFullJid(toString);
       stanza.toJid = to;
     }
+    element.attributes.forEach((xmlAtribute) {
+      stanza.addAttribute(new XmppAttribute(xmlAtribute.name.local, xmlAtribute.value));
+    });;
     element.children.forEach((child) {
       if (child is xml.XmlElement) stanza.addChild(parseElement(child));
     });
@@ -96,6 +102,12 @@ class StanzaParser {
     return stanza;
   }
 
+  static PresenceStanza _parsePresenceStanza(String id, xml.XmlElement element) {
+    PresenceStanza presenceStanza = new PresenceStanza();
+    presenceStanza.id = id;
+    return presenceStanza;
+  }
+
   static XmppElement parseElement(xml.XmlElement xmlElement) {
     XmppElement xmppElement = new XmppElement();
     xmppElement.name = xmlElement.name.local;
@@ -111,4 +123,6 @@ class StanzaParser {
     });
     return xmppElement;
   }
+
+
 }

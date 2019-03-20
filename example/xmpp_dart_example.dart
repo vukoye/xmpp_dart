@@ -12,6 +12,13 @@ main(List<String> arguments) {
   connection.open();
   xmpp.MessagesListener messagesListener = ExampleMessagesListener();
   new ExampleConnectionStateChangedListener(connection, messagesListener);
+  xmpp.PresenceManager presenceManager = xmpp.PresenceManager.getInstance(connection);
+  presenceManager.subscriptionStream.listen((streamEvent) {
+    if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
+      print("Accepting presence request");
+      presenceManager.acceptSubscription(streamEvent.jid);
+    }
+  });
 }
 
 class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChangedListener {

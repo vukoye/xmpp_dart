@@ -5,7 +5,7 @@ import 'package:xmpp/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp/src/messages/MessageApi.dart';
 import 'package:xmpp/xmpp.dart';
 
-class MessageHandler implements MessageApi, StanzaProcessor {
+class MessageHandler implements MessageApi {
 
   static Map<Connection, MessageHandler> instances = Map<Connection, MessageHandler>();
 
@@ -18,7 +18,6 @@ class MessageHandler implements MessageApi, StanzaProcessor {
     if (manager == null) {
       manager = MessageHandler(connection);
       instances[connection] = manager;
-      connection.stanzasStream.listen(manager.processStanza);
     }
 
     return manager;
@@ -33,14 +32,6 @@ class MessageHandler implements MessageApi, StanzaProcessor {
   @override
   void sendMessage(Jid to, String text) {
     _sendMessageStanza(to, text);
-  }
-
-  @override
-  processStanza(AbstractStanza stanza) {
-    if (stanza is MessageStanza) {
-
-    }
-    return null;
   }
 
   void _sendMessageStanza(Jid jid, String text) {
