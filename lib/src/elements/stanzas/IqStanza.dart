@@ -50,3 +50,9 @@ enum IqStanzaType{
   INVALID,
   TIMEOUT
 }
+
+class IqStanzaResult {
+  IqStanzaType type;
+  String description;
+  String iqStanzaId;
+}
