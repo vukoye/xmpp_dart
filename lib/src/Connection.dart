@@ -35,6 +35,17 @@ class Connection
     implements BindingResourceCallBack, SessionRequestManagerCallback {
   var lock = new Lock(reentrant: true);
 
+  static Map<String, Connection> instances = Map<String, Connection>();
+
+  static getInstance(String fullJid, String password, int port) {
+    Connection connection = instances[fullJid];
+    if (connection == null) {
+      connection = Connection(fullJid, password, port);
+      instances[fullJid] = connection;
+    }
+    return connection;
+  }
+
   String startTls = """<starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls"/>""";
 
   int _port;
@@ -89,7 +100,6 @@ class Connection
   }
 
   Socket _socket = null;
-  Completer _completer;
   XmppConnectionState _state = XmppConnectionState.Closed;
 
   Connection(String jid, String password, int port) {
@@ -132,24 +142,23 @@ class Connection
     return response;
   }
 
-  Future open() {
-    _completer = new Completer();
-    Socket.connect(_fullJid.domain, _port).then((Socket socket) {
-      _socket = socket;
-      socket
-          .transform(utf8.decoder)
-          .map(prepareStreamResponse)
-          .listen(handleResponse);
-      openStream();
-      setState(XmppConnectionState.ReceivingFeatures);
-    });
-    return _completer.future;
+  void open() {
+    if (_state == XmppConnectionState.Closed) {
+      Socket.connect(_fullJid.domain, _port).then((Socket socket) {
+        _socket = socket;
+        socket
+            .transform(utf8.decoder)
+            .map(prepareStreamResponse)
+            .listen(handleResponse);
+        openStream();
+        setState(XmppConnectionState.ReceivingFeatures);
+      });
+    }
   }
 
   void close() {
     _socket.write('</stream:stream>');
     setState(XmppConnectionState.Closed);
-    _completer.complete();
   }
 
   bool stanzaMatcher(xml.XmlElement element) {
