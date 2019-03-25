@@ -159,7 +159,7 @@ class PresenceManager implements PresenceApi {
   }
 
   void _connectionStateHandler(XmppConnectionState state) {
-    if (state == XmppConnectionState.SessionInitialized) {
+    if (state == XmppConnectionState.DoneServiceDiscovery) {
       //_getRosters();
       _sendInitialPresence();
     }

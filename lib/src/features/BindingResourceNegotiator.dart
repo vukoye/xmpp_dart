@@ -6,14 +6,14 @@ import 'package:xmpp/src/elements/XmppElement.dart';
 import 'package:xmpp/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp/src/features/Feature.dart';
+import 'package:xmpp/src/features/Negotiator.dart';
 import 'package:xmpp/xmpp.dart';
 
-class BindingResourceFeature extends Feature{
+class BindingResourceConnectionNegotiator extends ConnectionNegotiator{
   Connection _connection;
   StreamSubscription<AbstractStanza> subscription;
 
-  BindingResourceFeature(Connection connection) {
+  BindingResourceConnectionNegotiator(Connection connection) {
     _connection = connection;
   }
   @override
@@ -24,7 +24,7 @@ class BindingResourceFeature extends Feature{
   @override
   void negotiate(Nonza nonza) {
     if (nonza.name == "bind") {
-      state = FeatureState.PARSING;
+      state = NegotiatorState.NEGOTIATING;
       subscription = _connection.stanzasStream.listen(parseStanza);
       sendBindRequestStanza();
     }
@@ -37,7 +37,7 @@ class BindingResourceFeature extends Feature{
       if (jidValue != null) {
         Jid jid = Jid.fromFullJid(jidValue);
         _connection.fullJidRetrieved(jid);
-        state = FeatureState.DONE;
+        state = NegotiatorState.DONE;
       }
     }
   }

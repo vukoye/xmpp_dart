@@ -1,9 +1,9 @@
 import 'package:xmpp/src/Connection.dart';
 import 'package:xmpp/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp/src/features/Feature.dart';
+import 'package:xmpp/src/features/Negotiator.dart';
 import 'package:xmpp/src/features/sasl/PlainSaslHandler.dart';
 
-class SaslAuthenticationFeature extends Feature {
+class SaslAuthenticationFeature extends ConnectionNegotiator {
   Connection _connection;
 
   Set<SaslMechanism> _offeredMechanisms = new Set<SaslMechanism>();
@@ -31,7 +31,7 @@ class SaslAuthenticationFeature extends Feature {
   void _process() {
     var mechanism = _supportedMechanisms.firstWhere((mechanism) => _supportedMechanisms.contains(mechanism), orElse: _handleAuthNotSupported);
     if (mechanism == SaslMechanism.PLAIN) {
-      state = FeatureState.PARSING;
+      state = NegotiatorState.NEGOTIATING;
       PlainSaslHandler plainSaslHandler = new PlainSaslHandler(_connection, _password);
       plainSaslHandler.start().then((result ) {
         if (result) {
@@ -40,7 +40,7 @@ class SaslAuthenticationFeature extends Feature {
           _connection.setState(XmppConnectionState.AuthenticationFailure);
           _connection.close();
         }
-        state = FeatureState.DONE;
+        state = NegotiatorState.DONE;
       });
     }
   }
@@ -69,7 +69,7 @@ class SaslAuthenticationFeature extends Feature {
   SaslMechanism _handleAuthNotSupported() {
     _connection.setState(XmppConnectionState.AuthenticationNotSuppored);
     _connection.close();
-    state = FeatureState.DONE;
+    state = NegotiatorState.DONE;
     return SaslMechanism.NOT_SUPPORTED;
   }
 }

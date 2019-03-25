@@ -6,16 +6,16 @@ import 'package:xmpp/src/elements/XmppElement.dart';
 import 'package:xmpp/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp/src/features/Feature.dart';
+import 'package:xmpp/src/features/Negotiator.dart';
 import 'package:xmpp/xmpp.dart';
 
-class SessionInitiationFeature extends Feature{
+class SessionInitiationNegotiator extends ConnectionNegotiator{
   Connection _connection;
   StreamSubscription<AbstractStanza> subscription;
 
   IqStanza sentRequest;
 
-  SessionInitiationFeature(Connection connection) {
+  SessionInitiationNegotiator(Connection connection) {
     _connection = connection;
   }
   @override
@@ -26,7 +26,7 @@ class SessionInitiationFeature extends Feature{
   @override
   void negotiate(Nonza nonza) {
     if (nonza.name == "session") {
-      state = FeatureState.PARSING;
+      state = NegotiatorState.NEGOTIATING;
       subscription = _connection.stanzasStream.listen(parseStanza);
       sendSessionInitiationStanza();
     }
@@ -37,7 +37,7 @@ class SessionInitiationFeature extends Feature{
       var idValue = stanza.getAttribute('id')?.value;
       if (idValue != null && idValue == sentRequest?.getAttribute('id')?.value) {
         _connection.sessionReady();
-        state = FeatureState.DONE;
+        state = NegotiatorState.DONE;
       }
     }
   }

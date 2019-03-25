@@ -7,6 +7,8 @@ import 'package:xmpp/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp/src/features/servicediscovery/Feature.dart';
+import 'package:xmpp/src/features/servicediscovery/Identity.dart';
 
 class StanzaParser {
   static AbstractStanza parseStanza(xml.XmlElement element) {
@@ -109,7 +111,16 @@ class StanzaParser {
   }
 
   static XmppElement parseElement(xml.XmlElement xmlElement) {
-    XmppElement xmppElement = new XmppElement();
+    XmppElement xmppElement;
+    String parentName = (xmlElement.parent as xml.XmlElement)?.name?.local ?? "";
+    String name = xmlElement.name.local;
+    if (parentName == 'query' && name == 'identity') {
+      xmppElement = Identity();
+    } else if (parentName == 'query' && name == 'feature') {
+      xmppElement = Feature();
+    } else {
+      xmppElement = XmppElement();
+    }
     xmppElement.name = xmlElement.name.local;
     xmlElement.attributes.forEach((xmlAtribute) {
       xmppElement.addAttribute(new XmppAttribute(xmlAtribute.name.local, xmlAtribute.value));

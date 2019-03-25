@@ -34,7 +34,7 @@ class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChang
 
   @override
   void onConnectionStateChanged(xmpp.XmppConnectionState state) {
-    if (state == xmpp.XmppConnectionState.SessionInitialized) {
+    if (state == xmpp.XmppConnectionState.DoneServiceDiscovery) {
       print("Connected");
       xmpp.MessageHandler messageHandler =
           xmpp.MessageHandler.getInstance(_connection);

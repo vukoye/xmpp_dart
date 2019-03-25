@@ -107,7 +107,7 @@ class RosterManager {
   }
 
   void _connectionStateProcessor(XmppConnectionState state) {
-    if (state == XmppConnectionState.SessionInitialized) {
+    if (state == XmppConnectionState.DoneServiceDiscovery) {
       _queryForRoster();
     }
   }

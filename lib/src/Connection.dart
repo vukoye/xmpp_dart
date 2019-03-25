@@ -1,16 +1,13 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'package:cryptoutils/utils.dart';
 import 'package:xml/xml.dart' as xml;
-import 'package:xmpp/src/SessionRequestManager.dart';
 import 'package:synchronized/synchronized.dart';
 
-import 'package:xmpp/src/BindingResourceManager.dart';
 import 'package:xmpp/src/data/Jid.dart';
 import 'package:xmpp/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp/src/features/StreamFeaturesManager.dart';
+import 'package:xmpp/src/features/ConnectionNegotatiorManager.dart';
 import 'package:xmpp/src/parser/StanzaParser.dart';
 import 'package:xmpp/src/presence/PresenceManager.dart';
 import 'package:xmpp/src/roster/RosterManager.dart';
@@ -24,15 +21,12 @@ enum XmppConnectionState {
   PlainAuthentication,
   Authenticating,
   Authenticated,
-  InitialStreamUponAuthentication,
   AuthenticationFailure,
-  BindingResources,
-  SessionInitiation,
-  SessionInitialized
+  SessionInitialized,
+  DoneServiceDiscovery
 }
 
-class Connection
-    implements BindingResourceCallBack, SessionRequestManagerCallback {
+class Connection {
   var lock = new Lock(reentrant: true);
 
   static Map<String, Connection> instances = Map<String, Connection>();
@@ -45,8 +39,6 @@ class Connection
     }
     return connection;
   }
-
-  String startTls = """<starttls xmlns="urn:ietf:params:xml:ns:xmpp-tls"/>""";
 
   int _port;
   String _streamId;
@@ -79,20 +71,11 @@ class Connection
 
   Jid get fullJid => _fullJid;
 
-  //BindingResourceManager bindingResourceManager;
-  StreamFeaturesManager streamFeaturesManager;
-  RosterManager _rosterManager;
-  PresenceManager _presenceManager;
+  ConnectionNegotatiorManager streamFeaturesManager;
 
   @override
   void fullJidRetrieved(Jid jid) {
     fullJid = jid;
-//    if (_state == XmppConnectionState.BindingResources &&
-//        waitingForSessionInitiation) {
-//      _state = XmppConnectionState.SessionInitiation;
-//      waitingForSessionInitiation = false;
-      //initiateSession();
- //   }
   }
 
   set fullJid(Jid value) {
@@ -106,12 +89,9 @@ class Connection
     _fullJid = Jid.fromFullJid(jid);
     _password = password;
     _port = port;
-
-//    bindingResourceManager = new BindingResourceManager(this);
-//    stanzasStream.listen(bindingResourceManager.processStanza);
-    streamFeaturesManager = new StreamFeaturesManager(this, password);
-    _rosterManager = RosterManager.getInstance(this);
-    _presenceManager = PresenceManager.getInstance(this);
+    streamFeaturesManager = new ConnectionNegotatiorManager(this, password);
+    RosterManager.getInstance(this);
+    PresenceManager.getInstance(this);
     MessageHandler.getInstance(this);
   }
 
@@ -212,9 +192,6 @@ class Connection
     xmlResponse
         .findElements("stream:stream")
         .forEach((element) => _streamId = element.getAttribute("id"));
-    if (_state == XmppConnectionState.Authenticated) {
-      setState(XmppConnectionState.InitialStreamUponAuthentication);
-    }
   }
 
   void write(message) {
@@ -237,6 +214,10 @@ class Connection
     _fireConnectionStateChangedEvent(state);
     _processState(state);
     print("State: ${_state}");
+  }
+
+  XmppConnectionState get state {
+    return _state;
   }
 
   void _processState(XmppConnectionState state) {

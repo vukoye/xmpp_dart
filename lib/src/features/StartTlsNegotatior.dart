@@ -2,16 +2,16 @@ import 'dart:async';
 
 import 'package:xmpp/src/elements/XmppAttribute.dart';
 import 'package:xmpp/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp/src/features/Feature.dart';
+import 'package:xmpp/src/features/Negotiator.dart';
 import 'package:xmpp/xmpp.dart';
 
-class StartTlsFeature extends Feature {
+class StartTlsNegotatior extends ConnectionNegotiator {
 
   Connection _connection;
 
   StreamSubscription<Nonza> subscription;
 
-  StartTlsFeature(Connection connection) {
+  StartTlsNegotatior(Connection connection) {
     _connection = connection;
     expectedName = "starttls";
     expectedNameSpace = "urn:ietf:params:xml:ns:xmpp-tls";
@@ -22,7 +22,7 @@ class StartTlsFeature extends Feature {
     print('negotiating starttls');
     if (match(nonza)) {
       if (nonza.name == "starttls") {
-        state = FeatureState.PARSING;
+        state = NegotiatorState.NEGOTIATING;
         subscription = _connection.nonzasStream.listen(checkNonzas);
         _connection.writeNonza(new StartTlsResponse());
       }
@@ -31,7 +31,7 @@ class StartTlsFeature extends Feature {
 
   void checkNonzas(Nonza nonza) {
     if (nonza.name == "proceed") {
-      state = FeatureState.DONE;
+      state = NegotiatorState.DONE;
       subscription.cancel();
       _connection.startSecureSocket();
     } else if (nonza.name == "failure") {
