@@ -1,5 +1,5 @@
 
-import 'package:xmpp/src/Connection.dart';
+import 'package:xmppstone/src/Connection.dart';
 
 class ConnectionManager {
   static ConnectionManager _instance;

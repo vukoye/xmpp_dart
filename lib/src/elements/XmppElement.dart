@@ -1,4 +1,4 @@
-import 'package:xmpp/src/elements/XmppAttribute.dart';
+import 'package:xmppstone/src/elements/XmppAttribute.dart';
 import 'package:xml/xml.dart' as xml;
 
 class XmppElement {

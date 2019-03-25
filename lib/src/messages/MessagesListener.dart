@@ -1,4 +1,4 @@
-import 'package:xmpp/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmppstone/src/elements/stanzas/MessageStanza.dart';
 
 abstract class MessagesListener {
   onNewMessage(MessageStanza message);

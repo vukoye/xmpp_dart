@@ -1,13 +1,13 @@
 import 'dart:collection';
 
-import 'package:xmpp/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp/src/features/BindingResourceNegotiator.dart';
-import 'package:xmpp/src/features/Negotiator.dart';
-import 'package:xmpp/src/features/SessionInitiationNegotiator.dart';
-import 'package:xmpp/src/features/StartTlsNegotatior.dart';
-import 'package:xmpp/src/features/sasl/SaslLAuthenticationFeature.dart';
-import 'package:xmpp/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
-import 'package:xmpp/xmpp.dart';
+import 'package:xmppstone/src/Connection.dart';
+import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
+import 'package:xmppstone/src/features/BindingResourceNegotiator.dart';
+import 'package:xmppstone/src/features/Negotiator.dart';
+import 'package:xmppstone/src/features/SessionInitiationNegotiator.dart';
+import 'package:xmppstone/src/features/StartTlsNegotatior.dart';
+import 'package:xmppstone/src/features/sasl/SaslLAuthenticationFeature.dart';
+import 'package:xmppstone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:tuple/tuple.dart';
 
@@ -57,7 +57,7 @@ class ConnectionNegotatiorManager {
 
 
  void _initSupportedFeaturesList() {
-    supportedNegotatiorList.add(new StartTlsNegotatior(_connection));
+    supportedNegotatiorList.add(new StartTlsNegotiator(_connection));
     supportedNegotatiorList.add(new SaslAuthenticationFeature(_connection, _password));
     supportedNegotatiorList.add(new BindingResourceConnectionNegotiator(_connection));
     supportedNegotatiorList.add(new SessionInitiationNegotiator(_connection));

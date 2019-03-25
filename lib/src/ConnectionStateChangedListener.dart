@@ -1,4 +1,4 @@
-import 'package:xmpp/src/Connection.dart';
+import 'package:xmppstone/src/Connection.dart';
 
 abstract class ConnectionStateChangedListener {
   void onConnectionStateChanged(XmppConnectionState state);

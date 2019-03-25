@@ -1,16 +1,16 @@
 import 'dart:async';
 
 import 'package:meta/meta.dart';
-import 'package:xmpp/src/Connection.dart';
-import 'package:xmpp/src/ConnectionStateChangedListener.dart';
-import 'package:xmpp/src/StanzaListener.dart';
-import 'package:xmpp/src/data/Jid.dart';
-import 'package:xmpp/src/elements/XmppAttribute.dart';
-import 'package:xmpp/src/elements/XmppElement.dart';
-import 'package:xmpp/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp/src/roster/Buddy.dart';
-import 'package:xmpp/src/roster/RosterListener.dart';
+import 'package:xmppstone/src/Connection.dart';
+import 'package:xmppstone/src/ConnectionStateChangedListener.dart';
+import 'package:xmppstone/src/StanzaListener.dart';
+import 'package:xmppstone/src/data/Jid.dart';
+import 'package:xmppstone/src/elements/XmppAttribute.dart';
+import 'package:xmppstone/src/elements/XmppElement.dart';
+import 'package:xmppstone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmppstone/src/elements/stanzas/IqStanza.dart';
+import 'package:xmppstone/src/roster/Buddy.dart';
+import 'package:xmppstone/src/roster/RosterListener.dart';
 import 'package:tuple/tuple.dart';
 
 //todo check for rfc6121 2.6.2

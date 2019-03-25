@@ -1,9 +1,9 @@
-import 'package:xmpp/src/StanzaListener.dart';
-import 'package:xmpp/src/data/Jid.dart';
-import 'package:xmpp/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp/src/elements/stanzas/MessageStanza.dart';
-import 'package:xmpp/src/messages/MessageApi.dart';
-import 'package:xmpp/xmpp.dart';
+import 'package:xmppstone/src/Connection.dart';
+import 'package:xmppstone/src/StanzaListener.dart';
+import 'package:xmppstone/src/data/Jid.dart';
+import 'package:xmppstone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmppstone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmppstone/src/messages/MessageApi.dart';
 
 class MessageHandler implements MessageApi {
 

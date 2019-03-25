@@ -4,14 +4,14 @@ import 'dart:io';
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
 
-import 'package:xmpp/src/data/Jid.dart';
-import 'package:xmpp/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp/src/features/ConnectionNegotatiorManager.dart';
-import 'package:xmpp/src/parser/StanzaParser.dart';
-import 'package:xmpp/src/presence/PresenceManager.dart';
-import 'package:xmpp/src/roster/RosterManager.dart';
-import 'package:xmpp/xmpp.dart';
+import 'package:xmppstone/src/data/Jid.dart';
+import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
+import 'package:xmppstone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmppstone/src/features/ConnectionNegotatiorManager.dart';
+import 'package:xmppstone/src/parser/StanzaParser.dart';
+import 'package:xmppstone/src/presence/PresenceManager.dart';
+import 'package:xmppstone/src/roster/RosterManager.dart';
+import 'package:xmppstone/xmppstone.dart';
 
 enum XmppConnectionState {
   Closed,

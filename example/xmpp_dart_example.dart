@@ -1,5 +1,5 @@
 import 'dart:convert';
-import 'package:xmpp/xmpp.dart' as xmpp;
+import 'package:xmppstone/xmppstone.dart' as xmpp;
 import 'dart:io';
 import "package:console/console.dart";
 

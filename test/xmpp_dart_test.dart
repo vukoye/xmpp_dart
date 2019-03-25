@@ -1,4 +1,4 @@
-import 'package:xmpp/xmpp.dart';
+import 'package:xmppstone/xmppstone.dart';
 import 'package:test/test.dart';
 
 void main() {

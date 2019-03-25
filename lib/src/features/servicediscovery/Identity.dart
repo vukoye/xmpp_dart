@@ -1,4 +1,4 @@
-import 'package:xmpp/src/elements/XmppElement.dart';
+import 'package:xmppstone/src/elements/XmppElement.dart';
 
 class Identity extends XmppElement {
   String get category { return this.getAttribute('category')?.value;}

@@ -1,4 +1,4 @@
-import 'package:xmpp/src/data/Jid.dart';
+import 'package:xmppstone/src/data/Jid.dart';
 
 class Buddy {
   SubscriptionType _subscriptionType;

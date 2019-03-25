@@ -1,14 +1,14 @@
 
 import 'package:xml/xml.dart' as xml;
-import 'package:xmpp/src/data/Jid.dart';
-import 'package:xmpp/src/elements/XmppElement.dart';
-import 'package:xmpp/src/elements/XmppAttribute.dart';
-import 'package:xmpp/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp/src/elements/stanzas/MessageStanza.dart';
-import 'package:xmpp/src/elements/stanzas/PresenceStanza.dart';
-import 'package:xmpp/src/features/servicediscovery/Feature.dart';
-import 'package:xmpp/src/features/servicediscovery/Identity.dart';
+import 'package:xmppstone/src/data/Jid.dart';
+import 'package:xmppstone/src/elements/XmppElement.dart';
+import 'package:xmppstone/src/elements/XmppAttribute.dart';
+import 'package:xmppstone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmppstone/src/elements/stanzas/IqStanza.dart';
+import 'package:xmppstone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmppstone/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmppstone/src/features/servicediscovery/Feature.dart';
+import 'package:xmppstone/src/features/servicediscovery/Identity.dart';
 
 class StanzaParser {
   static AbstractStanza parseStanza(xml.XmlElement element) {

@@ -1,4 +1,4 @@
-library xmpp;
+library xmppstone;
 export 'src/Connection.dart';
 export 'src/messages/MessageHandler.dart';
 export 'src/messages/MessageApi.dart';

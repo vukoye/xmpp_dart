@@ -1,7 +1,7 @@
 
 import 'dart:async';
 
-import 'package:xmpp/src/elements/nonzas/Nonza.dart';
+import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
 
 abstract class ConnectionNegotiator {
   String _expectedName;

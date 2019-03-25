@@ -1,8 +1,6 @@
-name: xmpp
-description: A sample command-line application.
-# version: 0.1.0
-# homepage: https://www.example.com
-# author: nemanja <email@example.com>
+name: xmppstone
+description: XmppStone is lightweight XMPP client library written completely in Dart.
+# version: 0.1.1
 
 environment:
   sdk: '>=2.2.0 <3.0.0'

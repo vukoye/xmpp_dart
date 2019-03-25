@@ -1,17 +1,17 @@
 import 'dart:async';
 
-import 'package:xmpp/src/elements/XmppAttribute.dart';
-import 'package:xmpp/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp/src/features/Negotiator.dart';
-import 'package:xmpp/xmpp.dart';
+import 'package:xmppstone/src/Connection.dart';
+import 'package:xmppstone/src/elements/XmppAttribute.dart';
+import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
+import 'package:xmppstone/src/features/Negotiator.dart';
 
-class StartTlsNegotatior extends ConnectionNegotiator {
+class StartTlsNegotiator extends ConnectionNegotiator {
 
   Connection _connection;
 
   StreamSubscription<Nonza> subscription;
 
-  StartTlsNegotatior(Connection connection) {
+  StartTlsNegotiator(Connection connection) {
     _connection = connection;
     expectedName = "starttls";
     expectedNameSpace = "urn:ietf:params:xml:ns:xmpp-tls";

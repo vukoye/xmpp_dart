@@ -1,9 +1,9 @@
 
 import 'dart:math';
 
-import 'package:xmpp/src/data/Jid.dart';
-import 'package:xmpp/src/elements/XmppAttribute.dart';
-import 'package:xmpp/src/elements/XmppElement.dart';
+import 'package:xmppstone/src/data/Jid.dart';
+import 'package:xmppstone/src/elements/XmppAttribute.dart';
+import 'package:xmppstone/src/elements/XmppElement.dart';
 
 abstract class AbstractStanza extends XmppElement{
   String _id;
