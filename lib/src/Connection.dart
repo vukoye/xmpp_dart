@@ -16,6 +16,7 @@ import 'package:xmppstone/xmppstone.dart';
 enum XmppConnectionState {
   Closed,
   ReceivingFeatures,
+  DoneParsingFeatures,
   StartTlsFailed,
   AuthenticationNotSuppored,
   PlainAuthentication,
@@ -82,7 +83,13 @@ class Connection {
     _fullJid = value;
   }
 
-  Socket _socket = null;
+  Socket _socket;
+
+  // for testing purpose
+  set socket(Socket value) {
+    _socket = value;
+  }
+
   XmppConnectionState _state = XmppConnectionState.Closed;
 
   Connection(String jid, String password, int port) {
@@ -95,7 +102,7 @@ class Connection {
     MessageHandler.getInstance(this);
   }
 
-  void openStream() {
+  void _openStream() {
     String streamOpeningString = """
       <stream:stream
   from='${_fullJid.userAtDomain}'
@@ -130,7 +137,7 @@ class Connection {
             .transform(utf8.decoder)
             .map(prepareStreamResponse)
             .listen(handleResponse);
-        openStream();
+        _openStream();
         setState(XmppConnectionState.ReceivingFeatures);
       });
     }
@@ -223,7 +230,7 @@ class Connection {
   void _processState(XmppConnectionState state) {
     if (state == XmppConnectionState.Authenticated) {
       authenticated = true;
-      openStream();
+      _openStream();
     }
   }
 
@@ -239,7 +246,7 @@ class Connection {
           .transform(utf8.decoder)
           .map(prepareStreamResponse)
           .listen(handleResponse);
-      openStream();
+      _openStream();
     });
   }
 
@@ -268,7 +275,7 @@ class Connection {
 
   void doneParsingFeatures() {
     print("DONE PARSING FATURES");
-
+    setState(XmppConnectionState.DoneParsingFeatures);
   }
 
   void startTlsFailed() {

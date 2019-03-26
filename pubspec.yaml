@@ -16,3 +16,4 @@ dependencies:
 
 dev_dependencies:
   test: ^1.0.0
+  mockito: ^4.0.0
