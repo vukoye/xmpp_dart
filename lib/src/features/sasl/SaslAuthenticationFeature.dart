@@ -2,6 +2,7 @@ import 'package:xmppstone/src/Connection.dart';
 import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
 import 'package:xmppstone/src/features/Negotiator.dart';
 import 'package:xmppstone/src/features/sasl/PlainSaslHandler.dart';
+import 'package:xmppstone/src/features/sasl/ScramSha1SaslHandler.dart';
 
 class SaslAuthenticationFeature extends ConnectionNegotiator {
   Connection _connection;
@@ -29,11 +30,24 @@ class SaslAuthenticationFeature extends ConnectionNegotiator {
     _process();
   }
   void _process() {
-    var mechanism = _supportedMechanisms.firstWhere((mechanism) => _supportedMechanisms.contains(mechanism), orElse: _handleAuthNotSupported);
+    //var mechanism = _supportedMechanisms.firstWhere((mechanism) => _supportedMechanisms.contains(mechanism), orElse: _handleAuthNotSupported);
+    var mechanism = SaslMechanism.SCRAM_SHA_1;
     if (mechanism == SaslMechanism.PLAIN) {
       state = NegotiatorState.NEGOTIATING;
       PlainSaslHandler plainSaslHandler = new PlainSaslHandler(_connection, _password);
       plainSaslHandler.start().then((result ) {
+        if (result) {
+          _connection.setState(XmppConnectionState.Authenticated);
+        } else {
+          _connection.setState(XmppConnectionState.AuthenticationFailure);
+          _connection.close();
+        }
+        state = NegotiatorState.DONE;
+      });
+    } else if (mechanism == SaslMechanism.SCRAM_SHA_1) {
+      ScramSha1SaslHandler scramSha1SaslHandler = ScramSha1SaslHandler(_connection, _password, mechanism);
+      state = NegotiatorState.NEGOTIATING;
+      scramSha1SaslHandler.start().then((result ) {
         if (result) {
           _connection.setState(XmppConnectionState.Authenticated);
         } else {

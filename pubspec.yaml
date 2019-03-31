@@ -10,8 +10,10 @@ environment:
 dependencies:
   xml: ^3.4.1
   cryptoutils: ^0.4.0
+  crypto: ^2.0.6
   synchronized: ^2.1.0
   tuple: ^1.0.2
+  unorm_dart: ^0.1.1
   console: ^3.1.0 #for example
 
 dev_dependencies:

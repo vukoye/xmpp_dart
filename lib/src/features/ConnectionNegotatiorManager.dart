@@ -6,7 +6,7 @@ import 'package:xmppstone/src/features/BindingResourceNegotiator.dart';
 import 'package:xmppstone/src/features/Negotiator.dart';
 import 'package:xmppstone/src/features/SessionInitiationNegotiator.dart';
 import 'package:xmppstone/src/features/StartTlsNegotatior.dart';
-import 'package:xmppstone/src/features/sasl/SaslLAuthenticationFeature.dart';
+import 'package:xmppstone/src/features/sasl/SaslAuthenticationFeature.dart';
 import 'package:xmppstone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:tuple/tuple.dart';

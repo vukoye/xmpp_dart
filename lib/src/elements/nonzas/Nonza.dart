@@ -37,7 +37,13 @@ class Nonza extends XmppElement{
       nonza.toJid = to;
     }
     xmlElement.attributes.forEach((attribute) => nonza.addAttribute(new XmppAttribute(attribute.name.local, attribute.value)));
-    xmlElement.children.whereType<xml.XmlElement>().forEach((child) => nonza.addChild(StanzaParser.parseElement(child)));
+    xmlElement.children.forEach((xmlChild) {
+      if (xmlChild is xml.XmlElement) {
+        nonza.addChild(StanzaParser.parseElement(xmlChild));
+      } else if (xmlChild is xml.XmlText) {
+        nonza.textValue = xmlChild.text;
+      }
+    });
     return nonza;
   }
 }
