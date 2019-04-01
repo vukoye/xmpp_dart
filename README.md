@@ -5,12 +5,20 @@ My intention is to write simple to use library for future XMPP client based on F
 
 This is actively developing library.
 Currently supported:
- - RFC6120 - Extensible Messaging and Presence Protocol (XMPP): Core (except for SCRAM SASL mechanisms for authentication)
+ - RFC6120 - Extensible Messaging and Presence Protocol (XMPP): Core 
  - RFC6121 - Extensible Messaging and Presence Protocol (XMPP): Instant Messaging and Presence
 
-Currently actively working on:
+Partly supported:
  - XEP-0030: Service Discovery
 
+Actively working on: 
+ - XEP-0054: vcard-temp
+ - XEP-0153: vCard-Based Avatars
+ - XEP-0085: Chat State Notifications
+
+## Latest news
+
+- 2019-04-01: adedd suport for SHA-1 and SHA-256 authentication alghoritms
 
 ## Usage
 
