@@ -18,7 +18,7 @@ Actively working on:
 
 ## Latest news
 
-- 2019-04-01: adedd suport for SHA-1 and SHA-256 authentication alghoritms
+- 2019-04-01: added support for SHA-1 and SHA-256 authentication algorithm
 
 ## Usage
 
