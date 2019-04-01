@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
+import 'package:xmppstone/src/account/XmppAccount.dart';
 
 import 'package:xmppstone/src/data/Jid.dart';
 import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
@@ -32,19 +33,25 @@ class Connection {
 
   static Map<String, Connection> instances = Map<String, Connection>();
 
-  static getInstance(String fullJid, String password, int port) {
-    Connection connection = instances[fullJid];
+  XmppAccount _account;
+
+  static getInstance(XmppAccount account) {
+    Connection connection = instances[account.fullJid];
     if (connection == null) {
-      connection = Connection(fullJid, password, port);
-      instances[fullJid] = connection;
+      connection = Connection(account);
+      instances[account.fullJid] = connection;
     }
     return connection;
   }
 
-  int _port;
   String _streamId;
-  String _password;
-  Jid _fullJid;
+  String _errorMessage;
+
+  String get errorMessage => _errorMessage;
+
+  set errorMessage(String value) {
+    _errorMessage = value;
+  }
 
   bool authenticated = false;
 
@@ -70,18 +77,15 @@ class Connection {
 
   bool _logXML = true;
 
-  Jid get fullJid => _fullJid;
+  Jid get fullJid => _account.fullJid;
 
   ConnectionNegotatiorManager streamFeaturesManager;
 
   @override
   void fullJidRetrieved(Jid jid) {
-    fullJid = jid;
+    _account.resource = jid.resource;
   }
 
-  set fullJid(Jid value) {
-    _fullJid = value;
-  }
 
   Socket _socket;
 
@@ -92,11 +96,8 @@ class Connection {
 
   XmppConnectionState _state = XmppConnectionState.Closed;
 
-  Connection(String jid, String password, int port) {
-    _fullJid = Jid.fromFullJid(jid);
-    _password = password;
-    _port = port;
-    streamFeaturesManager = new ConnectionNegotatiorManager(this, password);
+  Connection(this._account) {
+    streamFeaturesManager = new ConnectionNegotatiorManager(this, _account.password);
     RosterManager.getInstance(this);
     PresenceManager.getInstance(this);
     MessageHandler.getInstance(this);
@@ -105,8 +106,8 @@ class Connection {
   void _openStream() {
     String streamOpeningString = """
       <stream:stream
-  from='${_fullJid.userAtDomain}'
-  to='${_fullJid.domain}'
+  from='${_account.fullJid.userAtDomain}'
+  to='${fullJid.domain}'
   version='1.0'
   xml:lang='en'
   xmlns='jabber:client'
@@ -117,8 +118,12 @@ class Connection {
   String prepareStreamResponse(String response) {
     if (response.contains("stream:stream") &&
         !(response.contains("</stream>"))) {
-      response = response + "</stream>"; // fix for crashing xml library
+      response = response + "</stream>"; // fix for crashing xml library without ending
     }
+
+    //fix for multiple roots issue
+    response = "<xmppstone>$response</xmppstone>";
+
     if (_logXML) {
       print("response: ${response}");
     }
@@ -131,7 +136,7 @@ class Connection {
 
   void open() {
     if (_state == XmppConnectionState.Closed) {
-      Socket.connect(_fullJid.domain, _port).then((Socket socket) {
+      Socket.connect(_account.domain, _account.port).then((Socket socket) {
         _socket = socket;
         socket
             .transform(utf8.decoder)
@@ -165,10 +170,11 @@ class Connection {
 
   void handleResponse(String response) {
     if (response != null && response.isNotEmpty) {
-      var xmlResponse = xml.parse(response);
-      if (xmlResponse.findElements("stream:stream").isNotEmpty) {
-        processInitialStream(xmlResponse);
-      }
+      var xmlResponse = xml.parse(response).firstChild;
+      xmlResponse.descendants
+          .whereType<xml.XmlElement>()
+          .where((element) => element.name == "stream:stream")
+          .forEach((element) => processInitialStream(element));
 
       xmlResponse.descendants
           .whereType<xml.XmlElement>()
@@ -188,17 +194,18 @@ class Connection {
           .map((xmlElement) => Nonza.parse(xmlElement))
           .forEach((nonza) => _nonzaStreamController.add(nonza));
 
-      if (xmlResponse.findAllElements("stream:error").isNotEmpty) {
-        processError(xmlResponse);
-      }
+//      if (xmlResponse.findAllElements("stream:error").isNotEmpty) {
+//        processError(xmlResponse);
+//      }
     }
   }
 
-  void processInitialStream(xml.XmlDocument xmlResponse) {
+  void processInitialStream(xml.XmlElement initialStream) {
     print("processInitialStream");
-    xmlResponse
-        .findElements("stream:stream")
-        .forEach((element) => _streamId = element.getAttribute("id"));
+    var value = initialStream.getAttribute("id");
+    if (value != null) {
+      _streamId = value;
+    }
   }
 
   void write(message) {
@@ -222,6 +229,8 @@ class Connection {
     _processState(state);
     print("State: ${_state}");
   }
+
+
 
   XmppConnectionState get state {
     return _state;

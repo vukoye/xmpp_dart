@@ -8,7 +8,16 @@ main(List<String> arguments) {
   var userAtDomain = stdin.readLineSync(encoding: utf8);
   print("Type password");
   var password = stdin.readLineSync(encoding: utf8);
-  xmpp.Connection connection = new xmpp.Connection(userAtDomain, password, 5222);
+  print("Type port");
+  int port;
+  try {
+    port = int.parse(stdin.readLineSync(encoding: utf8));
+  } catch (e) {
+    port = 5222;
+  }
+  xmpp.Jid jid = xmpp.Jid.fromFullJid(userAtDomain);
+  xmpp.XmppAccount account = xmpp.XmppAccount(userAtDomain, jid.local, jid.domain, password, port);
+  xmpp.Connection connection = new xmpp.Connection(account);
   connection.open();
   xmpp.MessagesListener messagesListener = ExampleMessagesListener();
   new ExampleConnectionStateChangedListener(connection, messagesListener);

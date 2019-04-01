@@ -19,7 +19,7 @@ void main() {
     StreamController<String> fakeSocketStream = StreamController<String>.broadcast();
     test('test feature negotation', () async {
       final mockSocket = MockSocket();
-      final connection = Connection("test@test.com", "test", 5222);
+      final connection = Connection(XmppAccount.fromJid("test@test.com", "test"));
       connection.connectionStateStream.listen((state) {
         if (state == XmppConnectionState.DoneParsingFeatures) {
           if (!firstCompleter.isCompleted)firstCompleter.complete();

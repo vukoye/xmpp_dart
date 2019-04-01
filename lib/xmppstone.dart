@@ -8,6 +8,7 @@ export 'src/messages/MessagesListener.dart';
 export 'src/elements/stanzas/MessageStanza.dart';
 export 'src/presence/PresenceManager.dart';
 export 'src/presence/PresenceApi.dart';
+export 'src/account/XmppAccount.dart';
 
 
 
