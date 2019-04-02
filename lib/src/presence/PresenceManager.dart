@@ -52,7 +52,7 @@ class PresenceManager implements PresenceApi {
   }
 
   PresenceManager(Connection this._connection) {
-    _connection.stanzasStream
+    _connection.inStanzasStream
         .where((abstractStanza)  => abstractStanza is PresenceStanza)
         .map((stanza) => stanza as PresenceStanza)
         .listen(_processPresenceStanza);

@@ -27,7 +27,7 @@ class SessionInitiationNegotiator extends ConnectionNegotiator{
   void negotiate(Nonza nonza) {
     if (nonza.name == "session") {
       state = NegotiatorState.NEGOTIATING;
-      subscription = _connection.stanzasStream.listen(parseStanza);
+      subscription = _connection.inStanzasStream.listen(parseStanza);
       sendSessionInitiationStanza();
     }
   }

@@ -55,16 +55,17 @@ class Connection {
 
   bool authenticated = false;
 
-  StreamController<AbstractStanza> _stanzaStreamController =
+  StreamController<AbstractStanza> _inStanzaStreamController =
       new StreamController.broadcast();
+
   StreamController<Nonza> _nonzaStreamController =
       new StreamController.broadcast();
 
   StreamController<XmppConnectionState> _connectionStateStreamController =
       new StreamController.broadcast();
 
-  Stream<AbstractStanza> get stanzasStream {
-    return _stanzaStreamController.stream;
+  Stream<AbstractStanza> get inStanzasStream {
+    return _inStanzaStreamController.stream;
   }
 
   Stream<Nonza> get nonzasStream {
@@ -168,9 +169,29 @@ class Connection {
     return (name == "stream:features" || name == "features");
   }
 
+  String _unparsedXmlResponse = "";
+
   void handleResponse(String response) {
-    if (response != null && response.isNotEmpty) {
-      var xmlResponse = xml.parse(response).firstChild;
+
+    String fullResponse;
+    if (_unparsedXmlResponse.isNotEmpty) {
+      fullResponse = _unparsedXmlResponse + response.substring(11);  // remove xmppstone start tag
+      _unparsedXmlResponse = "";
+    } else {
+      fullResponse = response;
+    }
+
+    if (fullResponse != null && fullResponse.isNotEmpty) {
+      var xmlResponse;
+      try {
+         xmlResponse = xml
+            .parse(fullResponse)
+            .firstChild;
+      } catch (e) {
+        _unparsedXmlResponse += response.substring(0, response.length - 12); //remove  xmppstone end tag
+        xmlResponse = xml.XmlElement(xml.XmlName("error"));
+      }
+
       xmlResponse.descendants
           .whereType<xml.XmlElement>()
           .where((element) => element.name == "stream:stream")
@@ -180,7 +201,7 @@ class Connection {
           .whereType<xml.XmlElement>()
           .where((element) => stanzaMatcher(element))
           .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
-          .forEach((stanza) => _stanzaStreamController.add(stanza));
+          .forEach((stanza) => _inStanzaStreamController.add(stanza));
 
       xmlResponse.descendants
           .whereType<xml.XmlElement>()
@@ -260,7 +281,7 @@ class Connection {
   }
 
   void fireNewStanzaEvent(AbstractStanza stanza) {
-    _stanzaStreamController.add(stanza);
+    _inStanzaStreamController.add(stanza);
   }
 
   void _fireConnectionStateChangedEvent(XmppConnectionState state) {

@@ -13,15 +13,19 @@ void main() {
     test('sasl escape test', ()  {
       expect(ScramSaslHandler.saslEscape("test=test,test"), "test=2Ctest=3Dtest");
     });
-    test('additional test', () {
-      var key2 = hmac(utf8.encode("pencil"), base64.decode('QSXCR+Q6sek8bf92') + [0,0,0,1]);
-      print(key2);
-      //var key = pb.generateKey("pencil", utf8.decode(base64.decode('QSXCR+Q6sek8bf92')), 4096, 8);
+    test('S1', () {
+      var salt = "bV5mZvHe+RNoeL537h5RSQ==";
+      var hmacValue = hmac(utf8.encode("urmasica"), "bV5mZvHe+RNoeL537h5RSQ==");
+      var a = CryptoUtils.bytesToBase64(utf8.encode("n,,"), false, false);
+      print("hmac: $hmacValue");
     });
   });
 }
 
-List<int> hmac(List<int> key, List<int> input) {
+
+
+List<int> hmac(List<int> key, String input) {
+
   var hmac = Hmac(sha1, key);
-  return hmac.convert(input).bytes;
+  return hmac.convert(utf8.encode(input) + [0,0,0,1]).bytes;
 }

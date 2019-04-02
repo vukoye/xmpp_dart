@@ -103,7 +103,7 @@ class RosterManager {
   RosterManager(Connection connection) {
     _connection = connection;
     connection.connectionStateStream.listen(_connectionStateProcessor);
-    connection.stanzasStream.listen(_processStanza);
+    connection.inStanzasStream.listen(_processStanza);
   }
 
   void _connectionStateProcessor(XmppConnectionState state) {

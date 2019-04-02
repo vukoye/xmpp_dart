@@ -10,7 +10,7 @@ class MessageHandler implements MessageApi {
   static Map<Connection, MessageHandler> instances = Map<Connection, MessageHandler>();
 
   Stream<MessageStanza> get messagesStream {
-    return _connection.stanzasStream.where((abstractStanza)  => abstractStanza is MessageStanza).map((stanza) => stanza as MessageStanza);
+    return _connection.inStanzasStream.where((abstractStanza)  => abstractStanza is MessageStanza).map((stanza) => stanza as MessageStanza);
   }
 
   static getInstance(Connection connection) {

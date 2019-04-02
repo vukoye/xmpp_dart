@@ -25,7 +25,7 @@ class BindingResourceConnectionNegotiator extends ConnectionNegotiator{
   void negotiate(Nonza nonza) {
     if (nonza.name == "bind") {
       state = NegotiatorState.NEGOTIATING;
-      subscription = _connection.stanzasStream.listen(parseStanza);
+      subscription = _connection.inStanzasStream.listen(parseStanza);
       sendBindRequestStanza();
     }
   }

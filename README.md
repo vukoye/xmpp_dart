@@ -12,11 +12,11 @@ Partly supported:
  - XEP-0030: Service Discovery
 
 Actively working on: 
- - XEP-0054: vcard-temp
- - XEP-0153: vCard-Based Avatars
- - XEP-0085: Chat State Notifications
+   - XEP-0085: Chat State Notifications
 
 ## Latest news
+
+- 2019-04-02: added support for: XEP-0054: vcard-temp
 
 - 2019-04-01: added support for SHA-1 and SHA-256 authentication algorithm
 
