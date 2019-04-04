@@ -1,4 +1,4 @@
-import 'package:xmppstone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
 abstract class StanzaProcessor {
   processStanza(AbstractStanza stanza);

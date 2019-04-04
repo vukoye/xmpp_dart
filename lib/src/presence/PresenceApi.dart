@@ -1,6 +1,6 @@
 
-import 'package:xmppstone/src/data/Jid.dart';
-import 'package:xmppstone/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 
 abstract class PresenceApi {
   void sendPresence(PresenceData presence);

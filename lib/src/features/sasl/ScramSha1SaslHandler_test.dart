@@ -4,7 +4,7 @@ import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:cryptoutils/utils.dart';
-import 'package:xmppstone/src/features/sasl/ScramSha1SaslHandler.dart';
+import 'package:xmpp_stone/src/features/sasl/ScramSha1SaslHandler.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 

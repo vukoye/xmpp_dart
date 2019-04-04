@@ -23,7 +23,7 @@ Actively working on:
 ## Usage
 
 ```dart
-import 'package:xmppstone/xmppstone.dart' as xmpp;
+import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 
 main() {
   xmpp.Connection connection = new xmpp.Connection("user@domain", "password", 5222);

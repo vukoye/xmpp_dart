@@ -1,13 +1,13 @@
 import 'dart:collection';
 
-import 'package:xmppstone/src/Connection.dart';
-import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
-import 'package:xmppstone/src/features/BindingResourceNegotiator.dart';
-import 'package:xmppstone/src/features/Negotiator.dart';
-import 'package:xmppstone/src/features/SessionInitiationNegotiator.dart';
-import 'package:xmppstone/src/features/StartTlsNegotatior.dart';
-import 'package:xmppstone/src/features/sasl/SaslAuthenticationFeature.dart';
-import 'package:xmppstone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/features/BindingResourceNegotiator.dart';
+import 'package:xmpp_stone/src/features/Negotiator.dart';
+import 'package:xmpp_stone/src/features/SessionInitiationNegotiator.dart';
+import 'package:xmpp_stone/src/features/StartTlsNegotatior.dart';
+import 'package:xmpp_stone/src/features/sasl/SaslAuthenticationFeature.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:tuple/tuple.dart';
 

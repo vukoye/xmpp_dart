@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:xmppstone/src/Connection.dart';
-import 'package:xmppstone/src/chat/Message.dart';
-import 'package:xmppstone/src/data/Jid.dart';
-import 'package:xmppstone/src/elements/XmppAttribute.dart';
-import 'package:xmppstone/src/elements/XmppElement.dart';
-import 'package:xmppstone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmppstone/src/elements/stanzas/MessageStanza.dart';
-import 'package:xmppstone/src/messages/MessageHandler.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/chat/Message.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone/src/messages/MessageHandler.dart';
 
 
 

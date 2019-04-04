@@ -1,5 +1,5 @@
 
-import 'package:xmppstone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
 
 class XmppAccount {
   String name;

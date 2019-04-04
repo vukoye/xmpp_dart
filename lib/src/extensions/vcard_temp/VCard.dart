@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:xmppstone/src/elements/XmppAttribute.dart';
-import 'package:xmppstone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:image/image.dart' as img;
 
 class VCard extends XmppElement {

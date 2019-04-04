@@ -1,6 +1,6 @@
-import 'package:xmppstone/src/elements/XmppAttribute.dart';
-import 'package:xmppstone/src/elements/XmppElement.dart';
-import 'package:xmppstone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
 class MessageStanza extends AbstractStanza {
   MessageStanzaType _type;

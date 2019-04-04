@@ -1,9 +1,9 @@
-import 'package:xmppstone/src/Connection.dart';
-import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
-import 'package:xmppstone/src/features/Negotiator.dart';
-import 'package:xmppstone/src/features/sasl/AbstractSaslHandler.dart';
-import 'package:xmppstone/src/features/sasl/PlainSaslHandler.dart';
-import 'package:xmppstone/src/features/sasl/ScramSha1SaslHandler.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/features/Negotiator.dart';
+import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
+import 'package:xmpp_stone/src/features/sasl/PlainSaslHandler.dart';
+import 'package:xmpp_stone/src/features/sasl/ScramSha1SaslHandler.dart';
 
 class SaslAuthenticationFeature extends ConnectionNegotiator {
   Connection _connection;

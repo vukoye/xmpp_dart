@@ -1,5 +1,5 @@
-import 'package:xmppstone/src/data/Jid.dart';
-import 'package:xmppstone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 
 class Message {
   MessageStanza _messageStanza;

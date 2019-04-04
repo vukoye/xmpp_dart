@@ -1,27 +1,29 @@
-
-
 import 'dart:async';
 
-import 'package:xmppstone/src/Connection.dart';
-import 'package:xmppstone/src/data/Jid.dart';
-import 'package:xmppstone/src/elements/XmppAttribute.dart';
-import 'package:xmppstone/src/elements/XmppElement.dart';
-import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
-import 'package:xmppstone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmppstone/src/elements/stanzas/IqStanza.dart';
-import 'package:xmppstone/src/features/Negotiator.dart';
-import 'package:xmppstone/src/features/servicediscovery/Feature.dart';
-import 'package:xmppstone/src/features/servicediscovery/Identity.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp_stone/src/features/Negotiator.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/Identity.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoverySupport.dart';
 
-class ServiceDiscoveryNegotiator extends ConnectionNegotiator{
+class ServiceDiscoveryNegotiator extends ConnectionNegotiator {
+  static const String NAMESPACE_DISCO_INFO =
+      "http://jabber.org/protocol/disco#info";
 
-  static Map<Connection, ServiceDiscoveryNegotiator> _instances = Map<Connection, ServiceDiscoveryNegotiator>();
+  static Map<Connection, ServiceDiscoveryNegotiator> _instances =
+      Map<Connection, ServiceDiscoveryNegotiator>();
 
   static ServiceDiscoveryNegotiator getInstance(Connection connection) {
     ServiceDiscoveryNegotiator instance = _instances[connection];
     if (instance == null) {
       instance = ServiceDiscoveryNegotiator(connection);
-    _instances[connection] = instance;
+      _instances[connection] = instance;
     }
     return instance;
   }
@@ -40,7 +42,8 @@ class ServiceDiscoveryNegotiator extends ConnectionNegotiator{
     });
   }
 
-  StreamController<XmppElement> _errorStreamController = StreamController<XmppElement>();
+  StreamController<XmppElement> _errorStreamController =
+      StreamController<XmppElement>();
 
   List<Feature> _supportedFeatures = List<Feature>();
 
@@ -50,12 +53,14 @@ class ServiceDiscoveryNegotiator extends ConnectionNegotiator{
     return _errorStreamController.stream;
   }
 
-
   void _parseStanza(AbstractStanza stanza) {
     if (stanza is IqStanza) {
       var idValue = stanza.getAttribute('id')?.value;
-      if (idValue != null && idValue == fullRequestStanza?.getAttribute('id')?.value) {
+      if (idValue != null &&
+          idValue == fullRequestStanza?.getAttribute('id')?.value) {
         _parseFullInfoResponse(stanza);
+      } else if (isDiscoInfoQuery(stanza)) {
+        sendDiscoInfoResponse(stanza);
       }
     }
   }
@@ -77,15 +82,16 @@ class ServiceDiscoveryNegotiator extends ConnectionNegotiator{
   void _sendServiceDiscoveryRequest() {
     IqStanza request = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     request.fromJid = _connection.fullJid;
-    request.toJid = Jid.fromFullJid(_connection.fullJid.domain); //todo move to account.domain!
+    request.toJid = Jid.fromFullJid(
+        _connection.fullJid.domain); //todo move to account.domain!
     XmppElement queryElement = XmppElement();
     queryElement.name = 'query';
-    queryElement.addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info'));
+    queryElement.addAttribute(
+        XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info'));
     request.addChild(queryElement);
     fullRequestStanza = request;
     _connection.writeStanza(request);
   }
-
 
   void _parseFullInfoResponse(IqStanza stanza) {
     _supportedFeatures.clear();
@@ -104,7 +110,7 @@ class ServiceDiscoveryNegotiator extends ConnectionNegotiator{
     } else if (stanza.type == IqStanzaType.ERROR) {
       XmppElement errorStanza = stanza.getChild('error');
       if (errorStanza != null) {
-       _errorStreamController.add(errorStanza);
+        _errorStreamController.add(errorStanza);
       }
     }
     state = NegotiatorState.DONE;
@@ -112,6 +118,34 @@ class ServiceDiscoveryNegotiator extends ConnectionNegotiator{
   }
 
   bool isFeatureSupported(String feature) {
-    return _supportedFeatures.firstWhere((element) => element.textValue == feature, orElse: () => null) != null;
+    return _supportedFeatures.firstWhere(
+            (element) => element.textValue == feature,
+            orElse: () => null) !=
+        null;
+  }
+
+  bool isDiscoInfoQuery(IqStanza stanza) {
+    return stanza.type == IqStanzaType.GET &&
+        stanza.toJid.fullJid == _connection.fullJid.fullJid &&
+        stanza.children
+            .where((element) =>
+                element.name == "query" &&
+                element.getAttribute("xmlns")?.value == NAMESPACE_DISCO_INFO)
+            .isNotEmpty;
+  }
+
+  void sendDiscoInfoResponse(IqStanza request) {
+    IqStanza iqStanza = IqStanza(request.id, IqStanzaType.RESULT);
+    iqStanza.fromJid = _connection.fullJid;
+    iqStanza.toJid = request.fromJid;
+    XmppElement query = XmppElement();
+    query.addAttribute(XmppAttribute("xmlns", NAMESPACE_DISCO_INFO));
+    SERVICE_DISCOVERY_SUPPORT_LIST.forEach((featureName) {
+      XmppElement featureElement = XmppElement();
+      featureElement.addAttribute(XmppAttribute("feature", featureName));
+      query.addChild(featureElement);
+    });
+    iqStanza.addChild(query);
+    _connection.writeStanza(iqStanza);
   }
 }

@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:xmppstone/src/Connection.dart';
-import 'package:xmppstone/src/elements/XmppAttribute.dart';
-import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
-import 'package:xmppstone/src/features/Negotiator.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/features/Negotiator.dart';
 
 class StartTlsNegotiator extends ConnectionNegotiator {
 

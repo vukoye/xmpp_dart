@@ -1,6 +1,6 @@
 import 'dart:convert';
-import 'package:xmppstone/src/elements/XmppAttribute.dart';
-import 'package:xmppstone/xmppstone.dart' as xmpp;
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 import 'dart:io';
 import "package:console/console.dart";
 import 'package:image/image.dart' as image;

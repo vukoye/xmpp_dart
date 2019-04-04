@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 
-import 'package:xmppstone/xmppstone.dart';
+import 'package:xmpp_stone/xmpp_stone.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 

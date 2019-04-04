@@ -5,12 +5,12 @@ import 'dart:math';
 import 'package:crypto/crypto.dart';
 import 'package:cryptoutils/utils.dart';
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:xmppstone/src/Connection.dart';
-import 'package:xmppstone/src/elements/XmppAttribute.dart';
-import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:unorm_dart/unorm_dart.dart' as unorm;
-import 'package:xmppstone/src/features/sasl/AbstractSaslHandler.dart';
-import 'package:xmppstone/src/features/sasl/SaslAuthenticationFeature.dart';
+import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
+import 'package:xmpp_stone/src/features/sasl/SaslAuthenticationFeature.dart';
 
 
 //https://stackoverflow.com/questions/29298346/xmpp-sasl-scram-sha1-authentication#comment62495063_29299946

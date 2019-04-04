@@ -3,16 +3,16 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
-import 'package:xmppstone/src/account/XmppAccount.dart';
+import 'package:xmpp_stone/src/account/XmppAccount.dart';
 
-import 'package:xmppstone/src/data/Jid.dart';
-import 'package:xmppstone/src/elements/nonzas/Nonza.dart';
-import 'package:xmppstone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmppstone/src/features/ConnectionNegotatiorManager.dart';
-import 'package:xmppstone/src/parser/StanzaParser.dart';
-import 'package:xmppstone/src/presence/PresenceManager.dart';
-import 'package:xmppstone/src/roster/RosterManager.dart';
-import 'package:xmppstone/xmppstone.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
+import 'package:xmpp_stone/src/parser/StanzaParser.dart';
+import 'package:xmpp_stone/src/presence/PresenceManager.dart';
+import 'package:xmpp_stone/src/roster/RosterManager.dart';
+import 'package:xmpp_stone/xmpp_stone.dart';
 
 enum XmppConnectionState {
   Closed,
@@ -123,7 +123,7 @@ class Connection {
     }
 
     //fix for multiple roots issue
-    response = "<xmppstone>$response</xmppstone>";
+    response = "<xmpp_stone>$response</xmpp_stone>";
 
     if (_logXML) {
       print("response: ${response}");
@@ -175,7 +175,7 @@ class Connection {
 
     String fullResponse;
     if (_unparsedXmlResponse.isNotEmpty) {
-      fullResponse = _unparsedXmlResponse + response.substring(11);  // remove xmppstone start tag
+      fullResponse = _unparsedXmlResponse + response.substring(11);  // remove xmpp_stone start tag
       _unparsedXmlResponse = "";
     } else {
       fullResponse = response;
@@ -188,7 +188,7 @@ class Connection {
             .parse(fullResponse)
             .firstChild;
       } catch (e) {
-        _unparsedXmlResponse += response.substring(0, response.length - 12); //remove  xmppstone end tag
+        _unparsedXmlResponse += response.substring(0, response.length - 12); //remove  xmpp_stone end tag
         xmlResponse = xml.XmlElement(xml.XmlName("error"));
       }
 
