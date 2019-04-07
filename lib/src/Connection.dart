@@ -36,10 +36,10 @@ class Connection {
   XmppAccount _account;
 
   static getInstance(XmppAccount account) {
-    Connection connection = instances[account.fullJid];
+    Connection connection = instances[account.fullJid.fullJid];
     if (connection == null) {
       connection = Connection(account);
-      instances[account.fullJid] = connection;
+      instances[account.fullJid.fullJid] = connection;
     }
     return connection;
   }
@@ -150,8 +150,9 @@ class Connection {
   }
 
   void close() {
-    _socket.write('</stream:stream>');
     setState(XmppConnectionState.Closed);
+    _socket.write('</stream:stream>');
+    _socket.close();
   }
 
   bool stanzaMatcher(xml.XmlElement element) {

@@ -11,7 +11,7 @@ class XmppAccount {
 
   XmppAccount(this.name, this.username, this.domain, this.password, this.port);
 
-  get fullJid => Jid(username, domain, resource);
+  Jid get fullJid => Jid(username, domain, resource);
 
 
   static XmppAccount fromJid(String jid, String password) {
