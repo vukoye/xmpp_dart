@@ -15,6 +15,8 @@ class ChatImpl implements Chat{
 
   Connection _connection;
   Jid _jid;
+
+  Jid get jid => _jid;
   ChatState _myState;
   ChatState get myState => _myState;
 
@@ -89,6 +91,7 @@ class ChatImpl implements Chat{
 }
 
 abstract class Chat {
+  Jid get jid;
   ChatState get myState;
   ChatState get remoteState;
   Stream<Message> get newMessageStream;

@@ -36,10 +36,10 @@ class Connection {
   XmppAccount _account;
 
   static getInstance(XmppAccount account) {
-    Connection connection = instances[account.fullJid.fullJid];
+    Connection connection = instances[account.fullJid.userAtDomain];
     if (connection == null) {
       connection = Connection(account);
-      instances[account.fullJid.fullJid] = connection;
+      instances[account.fullJid.userAtDomain] = connection;
     }
     return connection;
   }

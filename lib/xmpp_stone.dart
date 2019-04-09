@@ -13,6 +13,9 @@ export 'src/extensions/vcard_temp/VCard.dart';
 export 'src/extensions/vcard_temp/VCardManager.dart';
 export 'src/roster/Buddy.dart';
 export 'src/roster/RosterManager.dart';
+export 'src/chat/Chat.dart';
+export 'src/chat/Message.dart';
+export 'src/chat/ChatManager.dart';
 
 
 
