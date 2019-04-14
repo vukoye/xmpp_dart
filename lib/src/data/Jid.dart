@@ -1,3 +1,4 @@
+import 'package:quiver/core.dart';
 
 class Jid {
 
@@ -11,20 +12,32 @@ class Jid {
     _resource = resource;
   }
 
+
+  @override
+  bool operator ==(other) {
+    return other is Jid && local == other.local && domain == other.domain &&
+        resource == other.resource;
+  }
+
   String get local => _local;
+
   String get domain => _domain;
+
   String get resource => _resource;
+
   String get fullJid {
-    if (local != null && domain != null && resource != null && local.isNotEmpty && domain.isNotEmpty && resource.isNotEmpty)
+    if (local != null && domain != null && resource != null &&
+        local.isNotEmpty && domain.isNotEmpty && resource.isNotEmpty)
       return "$_local@$_domain/$_resource";
     if (local == null || local.isEmpty) {
       return _domain;
     }
     if (resource == null || resource.isEmpty) {
-      return"$_local@$_domain";
+      return "$_local@$_domain";
     }
   }
-  String get userAtDomain  {
+
+  String get userAtDomain {
     if (local != null && local.isNotEmpty) return "$_local@$_domain";
     return _domain;
   }
@@ -35,7 +48,13 @@ class Jid {
     var match = matches.first;
     if (match != null) {
       return Jid(match[2], match[3], match[5]);
-    } else return InvalidJid();
+    } else
+      return InvalidJid();
+  }
+
+  @override
+  int get hashCode {
+    return hash3(_local, _domain, _resource);
   }
 }
 

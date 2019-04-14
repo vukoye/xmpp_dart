@@ -109,6 +109,9 @@ class RosterManager {
   void _connectionStateProcessor(XmppConnectionState state) {
     if (state == XmppConnectionState.DoneServiceDiscovery) {
       _queryForRoster();
+    } else if (state == XmppConnectionState.Closed) {
+      _rosterMap.clear();
+      _rosterController.add(List());
     }
   }
 
