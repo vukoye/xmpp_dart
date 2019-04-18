@@ -1,8 +1,8 @@
 import 'dart:convert';
 
+import 'package:image/image.dart' as img;
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
-import 'package:image/image.dart' as img;
 
 class VCard extends XmppElement {
   var _imageData;
@@ -16,15 +16,25 @@ class VCard extends XmppElement {
     name = "vCard";
     addAttribute(XmppAttribute('xmlns', "vcard-temp"));
     _parseImage();
+    print("HAS_IMAGE: ${givenName} : ${_imageData != null}");
   }
 
   String get fullName => getChild("FN")?.textValue;
 
-  String get familyName => getChild("N")?.getChild("FAMILY")?.textValue;
+  String get familyName =>
+      getChild("N")
+          ?.getChild("FAMILY")
+          ?.textValue;
 
-  String get givenName => getChild("N")?.getChild("GIVEN")?.textValue;
+  String get givenName =>
+      getChild("N")
+          ?.getChild("GIVEN")
+          ?.textValue;
 
-  String get prefixName => getChild("N")?.getChild("PREFIX")?.textValue;
+  String get prefixName =>
+      getChild("N")
+          ?.getChild("PREFIX")
+          ?.textValue;
 
   String get nickName => getChild("NICKNAME")?.textValue;
 
@@ -33,10 +43,14 @@ class VCard extends XmppElement {
   String get bDay => getChild("BDAY")?.textValue;
 
   String get organisationName =>
-      getChild("ORG")?.getChild("ORGNAME")?.textValue;
+      getChild("ORG")
+          ?.getChild("ORGNAME")
+          ?.textValue;
 
   String get organizationUnit =>
-      getChild("ORG")?.getChild("ORGUNIT")?.textValue;
+      getChild("ORG")
+          ?.getChild("ORGUNIT")
+          ?.textValue;
 
   String get title => getChild("TITLE")?.textValue;
 
@@ -50,20 +64,25 @@ class VCard extends XmppElement {
 
   img.Image get image => _image;
 
-  get imageType => getChild("PHOTO")?.getChild("TYPE")?.textValue;
+  get imageType =>
+      getChild("PHOTO")
+          ?.getChild("TYPE")
+          ?.textValue;
 
   List<PhoneItem> get phones {
     List<PhoneItem> homePhones = List();
     children
         .where((element) =>
-            (element.name == "TEL" && element.getChild("HOME") != null))
+    (element.name == "TEL" && element.getChild("HOME") != null))
         .forEach((element) {
       var typeString = element.children.firstWhere(
-          (element) => (element.name != "HOME" && element.name != "NUMBER"),
+              (element) => (element.name != "HOME" && element.name != "NUMBER"),
           orElse: () => null);
       if (typeString != null) {
         PhoneType type = getPhoneTypeFromString(typeString.name);
-        String number = element.getChild("NUMBER")?.textValue;
+        String number = element
+            .getChild("NUMBER")
+            ?.textValue;
         if (number != null) {
           homePhones.add(PhoneItem(type, number));
         }
@@ -74,18 +93,22 @@ class VCard extends XmppElement {
 
   String get emailHome {
     var element = children.firstWhere(
-        (element) =>
-            (element.name == "EMAIL" && element.getChild("HOME") != null),
+            (element) =>
+        (element.name == "EMAIL" && element.getChild("HOME") != null),
         orElse: () => null);
-    return element?.getChild("USERID")?.textValue;
+    return element
+        ?.getChild("USERID")
+        ?.textValue;
   }
 
   String get emailWork {
     var element = children.firstWhere(
-        (element) =>
-            (element.name == "EMAIL" && element.getChild("WORK") != null),
+            (element) =>
+        (element.name == "EMAIL" && element.getChild("WORK") != null),
         orElse: () => null);
-    return element?.getChild("USERID")?.textValue;
+    return element
+        ?.getChild("USERID")
+        ?.textValue;
   }
 
   static PhoneType getPhoneTypeFromString(String phoneTypeString) {
@@ -128,8 +151,11 @@ class VCard extends XmppElement {
   }
 
   void _parseImage() {
-    String base64Image = getChild("PHOTO")?.getChild("BINVAL")?.textValue;
+    String base64Image = getChild("PHOTO")
+        ?.getChild("BINVAL")
+        ?.textValue;
     if (base64Image != null) {
+      print("hasImage: ${this.givenName}");
       _imageData = base64.decode(base64Image);
       _image = img.decodeImage(_imageData);
     }

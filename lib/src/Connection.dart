@@ -116,23 +116,32 @@ class Connection {
     write(streamOpeningString);
   }
 
+  String restOfResponse = "";
+
+  String extractWholeChild(String response) {
+    return response;
+  }
+
   String prepareStreamResponse(String response) {
-    if (response.contains("stream:stream") &&
-        !(response.contains("</stream>"))) {
-      response = response + "</stream>"; // fix for crashing xml library without ending
+
+    String response1 = extractWholeChild(restOfResponse + response);
+
+    if (response1.contains("stream:stream") &&
+        !(response1.contains("</stream>"))) {
+      response1 = response1 + "</stream>"; // fix for crashing xml library without ending
     }
 
     //fix for multiple roots issue
-    response = "<xmpp_stone>$response</xmpp_stone>";
+    response1 = "<xmpp_stone>$response1</xmpp_stone>";
 
     if (_logXML) {
-      print("response: ${response}");
+      print("response: ${response1}");
     }
-    if (response.contains("</stream:stream>")) {
+    if (response1.contains("</stream:stream>")) {
       close();
       return "";
     }
-    return response;
+    return response1;
   }
 
   void open() {
@@ -176,7 +185,10 @@ class Connection {
 
     String fullResponse;
     if (_unparsedXmlResponse.isNotEmpty) {
-      fullResponse = _unparsedXmlResponse + response.substring(11);  // remove xmpp_stone start tag
+      print(_unparsedXmlResponse);
+      fullResponse = "$_unparsedXmlResponse${response.substring(12)}";  //
+      // remove xmpp_stone start tag
+      print(_unparsedXmlResponse);
       _unparsedXmlResponse = "";
     } else {
       fullResponse = response;
@@ -185,11 +197,12 @@ class Connection {
     if (fullResponse != null && fullResponse.isNotEmpty) {
       var xmlResponse;
       try {
+        print(fullResponse);
          xmlResponse = xml
             .parse(fullResponse)
             .firstChild;
       } catch (e) {
-        _unparsedXmlResponse += response.substring(0, response.length - 12); //remove  xmpp_stone end tag
+        _unparsedXmlResponse += fullResponse.substring(0, fullResponse.length - 13); //remove  xmpp_stone end tag
         xmlResponse = xml.XmlElement(xml.XmlName("error"));
       }
 
