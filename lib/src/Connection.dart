@@ -98,7 +98,6 @@ class Connection {
   XmppConnectionState _state = XmppConnectionState.Closed;
 
   Connection(this._account) {
-    streamFeaturesManager = new ConnectionNegotatiorManager(this, _account.password);
     RosterManager.getInstance(this);
     PresenceManager.getInstance(this);
     MessageHandler.getInstance(this);
@@ -145,7 +144,10 @@ class Connection {
   }
 
   void open() {
+
     if (_state == XmppConnectionState.Closed) {
+      streamFeaturesManager = new ConnectionNegotatiorManager(this, _account.password);
+
       Socket.connect(_account.domain, _account.port).then((Socket socket) {
         _socket = socket;
         socket
@@ -159,9 +161,11 @@ class Connection {
   }
 
   void close() {
-    setState(XmppConnectionState.Closed);
-    _socket.write('</stream:stream>');
-    _socket.close();
+    if (state != XmppConnectionState.Closed) {
+      setState(XmppConnectionState.Closed);
+      _socket.write('</stream:stream>');
+      _socket.close();
+    }
   }
 
   bool stanzaMatcher(xml.XmlElement element) {
