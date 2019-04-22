@@ -36,12 +36,13 @@ class ChatImpl implements Chat{
 
   void parseMessage(MessageStanza stanza) {
     if (stanza.type == MessageStanzaType.CHAT) {
-      if (stanza.body.isNotEmpty) {
+      if (stanza.body != null && stanza.body.isNotEmpty) {
         Message message = Message.fromStanza(stanza);
         messages.add(message);
         _newMessageController.add(message);
       }
-      var stateElement = stanza.children.firstWhere((element) => element.getAttribute("xmlns").value == "http://jabber.org/protocol/chatstates", orElse: () => null);
+      var stateElement = stanza.children.firstWhere((element) => element
+          .getAttribute("xmlns")?.value == "http://jabber.org/protocol/chatstates", orElse: () => null);
       if (stateElement != null) {
         var state = stateFromString(stateElement.name);
         _remoteState = state;

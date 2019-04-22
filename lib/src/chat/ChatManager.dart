@@ -27,7 +27,7 @@ class ChatManager {
   ChatManager(this._connection) {
     _connection.inStanzasStream.where((abstractStanza)  => abstractStanza is MessageStanza).map((stanza) => stanza as MessageStanza)
         .listen((stanza) {
-          var chat = _getChat(stanza.toJid);
+          var chat = _getChat(stanza.fromJid);
           chat.parseMessage(stanza);
     });
   }
@@ -51,9 +51,9 @@ class ChatManager {
     Chat chat = _chats[jid];
     if (chat == null) {
       chat = ChatImpl(jid, _connection);
-
-      _chats[jid.fullJid] = chat;
+      _chats[jid.userAtDomain] = chat;
       _chatListStreamController.add(chats);
     }
+    return chat;
   }
 }
