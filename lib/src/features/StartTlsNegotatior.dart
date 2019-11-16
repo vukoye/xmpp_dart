@@ -15,6 +15,7 @@ class StartTlsNegotiator extends ConnectionNegotiator {
     _connection = connection;
     expectedName = "starttls";
     expectedNameSpace = "urn:ietf:params:xml:ns:xmpp-tls";
+    priorityLevel = 1;
   }
 
   @override

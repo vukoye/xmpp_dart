@@ -30,8 +30,9 @@ class ConnectionNegotatiorManager {
 
   void negotiateFeatureList(xml.XmlElement element) {
     print("Negotating features");
-    element.descendants.whereType<xml.XmlElement>().map((element) => Nonza.parse(element))
-        .forEach((feature) => _checkFeature(feature));
+    List<Nonza> nonzas = element.descendants.whereType<xml.XmlElement>().map((element) => Nonza.parse(element)).toList();
+    nonzas.sort((a,b) => findNonzaPriority(a).compareTo(findNonzaPriority(b)));
+    nonzas.forEach((feature) => _checkFeature(feature));
     negotiateNextFeature();
   }
 
@@ -72,5 +73,13 @@ class ConnectionNegotatiorManager {
    }
  }
 
+  int findNonzaPriority(Nonza nonza) {
+    var feature = supportedNegotatiorList.firstWhere((feature) => feature.match(nonza), orElse:() => null);
+    if (feature == null) {
+      return ConnectionNegotiator.defaultPriorityLevel;
+    } else {
+      return feature.priorityLevel;
+    }
+  }
 
 }

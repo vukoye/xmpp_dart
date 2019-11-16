@@ -4,9 +4,12 @@ import 'dart:async';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 
 abstract class ConnectionNegotiator {
+  static int defaultPriorityLevel = 1000;
+
   String _expectedName;
   String _expectedNameSpace;
   NegotiatorState _state = NegotiatorState.IDLE;
+  int priorityLevel = defaultPriorityLevel;
 
   NegotiatorState get state => _state;
 
