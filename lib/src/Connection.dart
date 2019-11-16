@@ -29,7 +29,7 @@ enum XmppConnectionState {
 }
 
 class Connection {
-  var lock = new Lock(reentrant: true);
+  var lock = Lock(reentrant: true);
 
   static Map<String, Connection> instances = Map<String, Connection>();
 
@@ -56,7 +56,7 @@ class Connection {
   bool authenticated = false;
 
   StreamController<AbstractStanza> _inStanzaStreamController =
-      new StreamController.broadcast();
+      StreamController.broadcast();
 
   StreamController<Nonza> _nonzaStreamController =
       new StreamController.broadcast();
@@ -146,11 +146,11 @@ class Connection {
   void open() {
 
     if (_state == XmppConnectionState.Closed) {
-      streamFeaturesManager = new ConnectionNegotatiorManager(this, _account.password);
+      streamFeaturesManager = ConnectionNegotatiorManager(this, _account.password);
 
       Socket.connect(_account.domain, _account.port).then((Socket socket) {
         _socket = socket;
-        socket
+        socket.cast<List<int>>()
             .transform(utf8.decoder)
             .map(prepareStreamResponse)
             .listen(handleResponse);
@@ -290,7 +290,7 @@ class Connection {
     print(startSecureSocket);
     SecureSocket.secure(_socket).then((secureSocket) {
       _socket = secureSocket;
-      _socket
+      _socket.cast<List<int>>()
           .transform(utf8.decoder)
           .map(prepareStreamResponse)
           .listen(handleResponse);
