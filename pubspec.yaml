@@ -7,8 +7,7 @@ version: 0.1.3
 authors:
   - Nemanja Vukoje <nemanja.vukoje@gmail.com>
 
-homepage:
-
+homepage: (to be added)
 
 environment:
   sdk: '>=2.2.0 <3.0.0'
