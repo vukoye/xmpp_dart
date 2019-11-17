@@ -93,7 +93,7 @@ class SaslAuthenticationFeature extends ConnectionNegotiator {
   }
 
   SaslMechanism _handleAuthNotSupported() {
-    _connection.setState(XmppConnectionState.AuthenticationNotSuppored);
+    _connection.setState(XmppConnectionState.AuthenticationNotSupported);
     _connection.close();
     state = NegotiatorState.DONE;
     return SaslMechanism.NOT_SUPPORTED;

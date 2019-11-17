@@ -2,15 +2,12 @@ import 'dart:async';
 
 import 'package:meta/meta.dart';
 import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/ConnectionStateChangedListener.dart';
-import 'package:xmpp_stone/src/StanzaListener.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/roster/Buddy.dart';
-import 'package:xmpp_stone/src/roster/RosterListener.dart';
 import 'package:tuple/tuple.dart';
 
 //todo check for rfc6121 2.6.2
@@ -23,7 +20,7 @@ class RosterManager {
   Map<String, Tuple2<IqStanza, Completer>>();
 
   StreamController<List<Buddy>> _rosterController =
-  new StreamController<List<Buddy>>.broadcast();
+  StreamController<List<Buddy>>.broadcast();
 
   Stream<List<Buddy>> get rosterStream {
     return _rosterController.stream;
@@ -48,7 +45,7 @@ class RosterManager {
     IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     XmppElement element = XmppElement();
     element.name = 'query';
-    element.addAttribute(new XmppAttribute('xmlns', 'jabber:iq:roster'));
+    element.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(element);
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, null);
     _connection.writeStanza(iqStanza);
@@ -63,7 +60,7 @@ class RosterManager {
   }
 
   Future<IqStanzaResult> addRosterItem(Buddy rosterItem) {
-    var completer = new Completer();
+    var completer = Completer<IqStanzaResult>();
     IqStanza iqStanza =
     IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     XmppElement queryElement = XmppElement();
@@ -83,7 +80,7 @@ class RosterManager {
   }
 
   Future<IqStanzaResult> removeRosterItem(Buddy rosterItem) {
-    var completer = new Completer();
+    var completer = Completer();
     IqStanza iqStanza =
     IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     XmppElement queryElement = XmppElement();
@@ -194,7 +191,7 @@ class RosterManager {
 
   //todo add error description
   void _handleRosterSetErrorResponse(Tuple2<IqStanza, Completer> request) {
-    request.item2.complete(false);
+    request.item2.complete(IqStanzaResult()..type = IqStanzaType.ERROR..description = "");
     _myUnrespondedIqStanzas.remove(request.item1.id);
   }
 }

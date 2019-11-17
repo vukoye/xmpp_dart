@@ -25,7 +25,7 @@ class StartTlsNegotiator extends ConnectionNegotiator {
       if (nonza.name == "starttls") {
         state = NegotiatorState.NEGOTIATING;
         subscription = _connection.nonzasStream.listen(checkNonzas);
-        _connection.writeNonza(new StartTlsResponse());
+        _connection.writeNonza(StartTlsResponse());
       }
     }
   }
@@ -51,6 +51,6 @@ class StartTlsNegotiator extends ConnectionNegotiator {
 class StartTlsResponse extends Nonza {
   StartTlsResponse() {
     name = "starttls";
-    addAttribute(new XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-tls'));
+    addAttribute(XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-tls'));
   }
 }

@@ -19,7 +19,7 @@ enum XmppConnectionState {
   ReceivingFeatures,
   DoneParsingFeatures,
   StartTlsFailed,
-  AuthenticationNotSuppored,
+  AuthenticationNotSupported,
   PlainAuthentication,
   Authenticating,
   Authenticated,

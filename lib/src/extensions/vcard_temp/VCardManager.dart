@@ -87,7 +87,7 @@ class VCardManager {
             unrespondedStanza.item2.complete(vCard);
           }
         } else if (stanza.type == IqStanzaType.ERROR) {
-          unrespondedStanza.item2.complete(InvalidVCard);
+          unrespondedStanza.item2.complete(InvalidVCard(stanza.getChild("vCard")));
         }
       }
     }
