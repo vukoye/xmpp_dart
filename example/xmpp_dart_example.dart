@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 import 'dart:io';
 import "package:console/console.dart";
@@ -7,22 +6,23 @@ import 'package:image/image.dart' as image;
 
 main(List<String> arguments) {
   print("Type user@domain:");
-  var userAtDomain = stdin.readLineSync(encoding: utf8);
+//  var userAtDomain = stdin.readLineSync(encoding: utf8);
+  var userAtDomain = 'a1@is-a-furry.org';
   print("Type password");
-  var password = stdin.readLineSync(encoding: utf8);
-  print("Type port");
-  int port;
-  try {
-    port = int.parse(stdin.readLineSync(encoding: utf8));
-  } catch (e) {
-    port = 5222;
-  }
+  var password = '8027';
+//  print("Type port");
+//  int port;
+//  try {
+//    port = int.parse(stdin.readLineSync(encoding: utf8));
+//  } catch (e) {
+//    port = 5222;
+//  }
   xmpp.Jid jid = xmpp.Jid.fromFullJid(userAtDomain);
-  xmpp.XmppAccount account = xmpp.XmppAccount(userAtDomain, jid.local, jid.domain, password, port);
-  xmpp.Connection connection = new xmpp.Connection(account);
+  xmpp.XmppAccount account = xmpp.XmppAccount(userAtDomain, jid.local, jid.domain, password, 5222);
+  xmpp.Connection connection = xmpp.Connection(account);
   connection.open();
   xmpp.MessagesListener messagesListener = ExampleMessagesListener();
-  new ExampleConnectionStateChangedListener(connection, messagesListener);
+  ExampleConnectionStateChangedListener(connection, messagesListener);
   xmpp.PresenceManager presenceManager = xmpp.PresenceManager.getInstance(connection);
   presenceManager.subscriptionStream.listen((streamEvent) {
     if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
@@ -55,17 +55,25 @@ class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChang
       });
       xmpp.MessageHandler messageHandler =
           xmpp.MessageHandler.getInstance(_connection);
+      xmpp.RosterManager rosterManager = xmpp.RosterManager.getInstance(_connection);
       messageHandler.messagesStream.listen(_messagesListener.onNewMessage);
       sleep(const Duration(seconds: 1));
-      print("Enter receiver jid: ");
-      var receiver = stdin.readLineSync(encoding: utf8);
+      //print("Enter receiver jid: ");
+      //var receiver = stdin.readLineSync(encoding: utf8);
+      var receiver = "a2@is-a-furry.org";
       xmpp.Jid receiverJid = xmpp.Jid.fromFullJid(receiver);
+      rosterManager.addRosterItem(xmpp.Buddy(receiverJid)).then((result) {
+        if (result.description != null) {
+          print("add roster" + result.description);
+        }
+      });
+      sleep(const Duration(seconds: 1));
       vCardManager.getVCardFor(receiverJid).then((vCard) {
         if (vCard != null) {
           print("Receiver info" + vCard.buildXmlString());
           if (vCard != null && vCard.image != null) {
-            var file = new File('test456789.jpg')
-              ..writeAsBytesSync(image.encodeJpg(vCard.image));
+            var file = File('test456789.jpg')
+                ..writeAsBytesSync(image.encodeJpg(vCard.image));
             print("IMAGE SAVED TO: ${file.path}");
           }
         }

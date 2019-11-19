@@ -39,7 +39,7 @@ class ConnectionNegotatiorManager {
   void _checkFeature(Nonza nonza) {
     supportedNegotatiorList.forEach((feature) {
       if (feature.match(nonza)) {
-        waitingNegotators.add(new Tuple2<ConnectionNegotiator, Nonza>(feature, nonza));
+        waitingNegotators.add(Tuple2<ConnectionNegotiator, Nonza>(feature, nonza));
       }
     });
   }
@@ -58,11 +58,11 @@ class ConnectionNegotatiorManager {
 
 
  void _initSupportedFeaturesList() {
-    supportedNegotatiorList.add(new StartTlsNegotiator(_connection));
-    supportedNegotatiorList.add(new SaslAuthenticationFeature(_connection, _password));
-    supportedNegotatiorList.add(new BindingResourceConnectionNegotiator(_connection));
-    supportedNegotatiorList.add(new SessionInitiationNegotiator(_connection));
-    supportedNegotatiorList.add(new ServiceDiscoveryNegotiator(_connection));
+    supportedNegotatiorList.add(StartTlsNegotiator(_connection));
+    supportedNegotatiorList.add(SaslAuthenticationFeature(_connection, _password));
+    supportedNegotatiorList.add(BindingResourceConnectionNegotiator(_connection));
+    supportedNegotatiorList.add(SessionInitiationNegotiator(_connection));
+    supportedNegotatiorList.add(ServiceDiscoveryNegotiator(_connection));
  }
  
  void stateListener(NegotiatorState state) {

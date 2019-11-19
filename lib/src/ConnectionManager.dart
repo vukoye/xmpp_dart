@@ -6,7 +6,7 @@ class ConnectionManager {
 
   static ConnectionManager getInstance() {
     if (_instance == null) {
-      _instance = new ConnectionManager();
+      _instance = ConnectionManager();
     }
     return _instance;
   }
