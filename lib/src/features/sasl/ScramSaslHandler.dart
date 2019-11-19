@@ -18,7 +18,7 @@ class ScramSaslHandler implements AbstractSaslHandler{
   static const CLIENT_NONCE_LENGTH = 48;
   Connection _connection;
   StreamSubscription<Nonza> subscription;
-  var _completer = new Completer<AuthenticationResult>();
+  var _completer = Completer<AuthenticationResult>();
   ScramStates _scramState = ScramStates.INITIAL;
   String _password;
   String _username;
@@ -69,11 +69,10 @@ class ScramSaslHandler implements AbstractSaslHandler{
     _initialMessage = "n=${saslEscape(normalize(_username))},r=${_clientNonce}";
     var bytes = utf8.encode("n,,$_initialMessage");
     var message = CryptoUtils.bytesToBase64(bytes, false, false);
-    Nonza nonza = new Nonza();
+    Nonza nonza = Nonza();
     nonza.name = "auth";
-    nonza.addAttribute(
-        new XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
-    nonza.addAttribute(new XmppAttribute('mechanism', _mechanismString));
+    nonza.addAttribute(XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
+    nonza.addAttribute(XmppAttribute('mechanism', _mechanismString));
     nonza.textValue = message;
     _scramState = ScramStates.AUTH_SENT;
     _connection.writeNonza(nonza);

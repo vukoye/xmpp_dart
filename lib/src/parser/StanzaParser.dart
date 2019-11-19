@@ -36,7 +36,7 @@ class StanzaParser {
       stanza.toJid = to;
     }
     element.attributes.forEach((xmlAtribute) {
-      stanza.addAttribute(new XmppAttribute(xmlAtribute.name.local, xmlAtribute.value));
+      stanza.addAttribute(XmppAttribute(xmlAtribute.name.local, xmlAtribute.value));
     });;
     element.children.forEach((child) {
       if (child is xml.XmlElement) stanza.addChild(parseElement(child));
@@ -72,7 +72,7 @@ class StanzaParser {
           break;
       }
     }
-    return new IqStanza(id, type);
+    return IqStanza(id, type);
   }
 
   static MessageStanza _parseMessageStanza(String id, xml.XmlElement element) {
@@ -99,13 +99,13 @@ class StanzaParser {
           break;
       }
     }
-    MessageStanza stanza = new MessageStanza(id, type);
+    MessageStanza stanza = MessageStanza(id, type);
 
     return stanza;
   }
 
   static PresenceStanza _parsePresenceStanza(String id, xml.XmlElement element) {
-    PresenceStanza presenceStanza = new PresenceStanza();
+    PresenceStanza presenceStanza = PresenceStanza();
     presenceStanza.id = id;
     return presenceStanza;
   }
@@ -123,7 +123,7 @@ class StanzaParser {
     }
     xmppElement.name = xmlElement.name.local;
     xmlElement.attributes.forEach((xmlAtribute) {
-      xmppElement.addAttribute(new XmppAttribute(xmlAtribute.name.local, xmlAtribute.value));
+      xmppElement.addAttribute(XmppAttribute(xmlAtribute.name.local, xmlAtribute.value));
     });
     xmlElement.children.forEach((xmlChild) {
       if (xmlChild is xml.XmlElement) {

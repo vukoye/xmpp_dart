@@ -12,10 +12,10 @@ class PresenceManager implements PresenceApi {
 
   List<PresenceStanza> requests = List<PresenceStanza>();
 
-  StreamController<PresenceData> _presenceStreamController = new StreamController<PresenceData>.broadcast();
+  StreamController<PresenceData> _presenceStreamController = StreamController<PresenceData>.broadcast();
 
-  StreamController<SubscriptionEvent> _subscribeStreamController = new StreamController<SubscriptionEvent>.broadcast();
-  StreamController<PresenceErrorEvent> _errorStreamController = new StreamController<PresenceErrorEvent>.broadcast();
+  StreamController<SubscriptionEvent> _subscribeStreamController = StreamController<SubscriptionEvent>.broadcast();
+  StreamController<PresenceErrorEvent> _errorStreamController = StreamController<PresenceErrorEvent>.broadcast();
 
   PresenceData _selfPresence = PresenceData(PresenceShowElement.CHAT, "", null);
 

@@ -43,10 +43,10 @@ class BindingResourceConnectionNegotiator extends ConnectionNegotiator{
   }
 
   void sendBindRequestStanza() {
-    IqStanza stanza = new IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    XmppElement bindElement = new XmppElement();
+    IqStanza stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    XmppElement bindElement = XmppElement();
     bindElement.name = 'bind';
-    XmppAttribute attribute = new XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-bind');
+    XmppAttribute attribute = XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-bind');
     bindElement.addAttribute(attribute);
     stanza.addChild(bindElement);
     _connection.writeStanza(stanza);

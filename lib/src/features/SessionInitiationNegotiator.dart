@@ -43,10 +43,10 @@ class SessionInitiationNegotiator extends ConnectionNegotiator{
   }
 
   void sendSessionInitiationStanza() {
-    IqStanza stanza = new IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    XmppElement sessionElement = new XmppElement();
+    IqStanza stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    XmppElement sessionElement = XmppElement();
     sessionElement.name = 'session';
-    XmppAttribute attribute = new XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-session');
+    XmppAttribute attribute = XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-session');
     sessionElement.addAttribute(attribute);
     stanza.toJid = Jid("", _connection.fullJid.domain, "");
     stanza.addChild(sessionElement);

@@ -3,13 +3,13 @@ import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/PlainSaslHandler.dart';
-import 'package:xmpp_stone/src/features/sasl/ScramSha1SaslHandler.dart';
+import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
 
 class SaslAuthenticationFeature extends ConnectionNegotiator {
   Connection _connection;
 
-  Set<SaslMechanism> _offeredMechanisms = new Set<SaslMechanism>();
-  Set<SaslMechanism> _supportedMechanisms = new Set<SaslMechanism>();
+  Set<SaslMechanism> _offeredMechanisms = Set<SaslMechanism>();
+  Set<SaslMechanism> _supportedMechanisms = Set<SaslMechanism>();
 
   String _password;
 

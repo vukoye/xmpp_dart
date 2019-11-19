@@ -1,5 +1,4 @@
 import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/StanzaListener.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
@@ -35,7 +34,7 @@ class MessageHandler implements MessageApi {
   }
 
   void _sendMessageStanza(Jid jid, String text) {
-    MessageStanza stanza = new MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+    MessageStanza stanza = MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = jid;
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
