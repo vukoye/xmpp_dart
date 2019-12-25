@@ -12,18 +12,18 @@ class Nonza extends XmppElement{
 
   set fromJid(Jid value) {
     _fromJid = value;
-    this.addAttribute(new XmppAttribute('from', _fromJid.fullJid));
+    this.addAttribute(XmppAttribute('from', _fromJid.fullJid));
   }
 
   Jid get toJid => _toJid;
 
   set toJid(Jid value) {
     _toJid = value;
-    this.addAttribute(new XmppAttribute('to', _toJid.userAtDomain));
+    this.addAttribute(XmppAttribute('to', _toJid.userAtDomain));
   }
 
   static Nonza parse(xml.XmlElement xmlElement) {
-    Nonza nonza = new Nonza();
+    Nonza nonza = Nonza();
     nonza.name = xmlElement.name.local;
 
     String fromString = xmlElement.getAttribute('from');
@@ -36,7 +36,7 @@ class Nonza extends XmppElement{
       Jid to = Jid.fromFullJid(toString);
       nonza.toJid = to;
     }
-    xmlElement.attributes.forEach((attribute) => nonza.addAttribute(new XmppAttribute(attribute.name.local, attribute.value)));
+    xmlElement.attributes.forEach((attribute) => nonza.addAttribute(XmppAttribute(attribute.name.local, attribute.value)));
     xmlElement.children.forEach((xmlChild) {
       if (xmlChild is xml.XmlElement) {
         nonza.addChild(StanzaParser.parseElement(xmlChild));

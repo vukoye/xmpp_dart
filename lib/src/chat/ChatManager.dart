@@ -1,11 +1,8 @@
 import 'dart:async';
 
-import 'package:tuple/tuple.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/chat/Chat.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
 class ChatManager {
@@ -32,7 +29,7 @@ class ChatManager {
     });
   }
 
-  StreamController<List<Chat>> _chatListStreamController = new StreamController.broadcast();
+  StreamController<List<Chat>> _chatListStreamController = StreamController.broadcast();
 
   Stream<List<Chat>> get chatListStream => _chatListStreamController.stream;
 

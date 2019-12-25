@@ -26,15 +26,16 @@ class Jid {
   String get resource => _resource;
 
   String get fullJid {
-    if (local != null && domain != null && resource != null &&
-        local.isNotEmpty && domain.isNotEmpty && resource.isNotEmpty)
+    if (local != null && domain != null && resource != null && local.isNotEmpty && domain.isNotEmpty && resource.isNotEmpty) {
       return "$_local@$_domain/$_resource";
+    }
     if (local == null || local.isEmpty) {
       return _domain;
     }
     if (resource == null || resource.isEmpty) {
       return "$_local@$_domain";
     }
+    return "";
   }
 
   String get userAtDomain {
@@ -43,13 +44,14 @@ class Jid {
   }
 
   static Jid fromFullJid(String fullJid) {
-    RegExp exp = new RegExp(r"^((.*?)@)?([^/@]+)(/(.*))?$");
+    RegExp exp = RegExp(r"^((.*?)@)?([^/@]+)(/(.*))?$");
     Iterable<Match> matches = exp.allMatches(fullJid);
     var match = matches.first;
     if (match != null) {
       return Jid(match[2], match[3], match[5]);
-    } else
+    } else {
       return InvalidJid();
+    }
   }
 
   @override
@@ -59,7 +61,5 @@ class Jid {
 }
 
 class InvalidJid extends Jid {
-  InvalidJid() : super('', '', '') {
-
-  }
+  InvalidJid() : super('', '', '');
 }

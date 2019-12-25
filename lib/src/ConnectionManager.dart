@@ -1,6 +1,4 @@
 
-import 'package:xmpp_stone/src/Connection.dart';
-
 class ConnectionManager {
   static ConnectionManager _instance;
 
@@ -9,10 +7,6 @@ class ConnectionManager {
       _instance = ConnectionManager();
     }
     return _instance;
-  }
-
-  Connection getConnectionByJid() {
-
   }
 
 }

@@ -15,7 +15,7 @@ class MessageStanza extends AbstractStanza {
     name = 'message';
     this.id = id;
     _type = type;
-    this.addAttribute(new XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
+    this.addAttribute(XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
   }
 
   String get body => this.children.firstWhere((child) => (child.name == 'body' && child.attributes.isEmpty), orElse: () => null)?.textValue;

@@ -1,5 +1,4 @@
 
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
@@ -38,7 +37,7 @@ class PresenceStanza extends AbstractStanza {
   set status(String value) {
     var childElement = children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty, orElse: () => null);
     if (childElement == null) {
-      var element = new XmppElement();
+      var element = XmppElement();
       element.name = 'status';
       element.textValue = value;
       addChild(element);
@@ -103,7 +102,7 @@ class PresenceStanza extends AbstractStanza {
   void _setChildValue(String childName, String value) {
     var childElement = children.firstWhere((element) => element.name == childName && element.attributes.isEmpty, orElse: () => null);
     if (childElement == null) {
-      var element = new XmppElement();
+      var element = XmppElement();
       element.name = childName;
       element.textValue = value;
       addChild(element);
@@ -115,7 +114,7 @@ class PresenceStanza extends AbstractStanza {
   void _setAttributeValue(String attrName, String value) {
     var attr = attributes.firstWhere((attribute) => attribute.name == name, orElse: () => null);
     if (attr == null) {
-      var element = new XmppElement();
+      var element = XmppElement();
       element.name = attrName;
       element.textValue = value;
       addChild(element);

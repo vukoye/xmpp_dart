@@ -44,7 +44,6 @@ class Connection {
     return connection;
   }
 
-  String _streamId;
   String _errorMessage;
 
   String get errorMessage => _errorMessage;
@@ -59,10 +58,10 @@ class Connection {
       StreamController.broadcast();
 
   StreamController<Nonza> _nonzaStreamController =
-      new StreamController.broadcast();
+      StreamController.broadcast();
 
   StreamController<XmppConnectionState> _connectionStateStreamController =
-      new StreamController.broadcast();
+      StreamController.broadcast();
 
   Stream<AbstractStanza> get inStanzasStream {
     return _inStanzaStreamController.stream;
@@ -82,7 +81,6 @@ class Connection {
 
   ConnectionNegotatiorManager streamFeaturesManager;
 
-  @override
   void fullJidRetrieved(Jid jid) {
     _account.resource = jid.resource;
   }
@@ -241,10 +239,6 @@ class Connection {
 
   void processInitialStream(xml.XmlElement initialStream) {
     print("processInitialStream");
-    var value = initialStream.getAttribute("id");
-    if (value != null) {
-      _streamId = value;
-    }
   }
 
   void write(message) {
@@ -315,7 +309,6 @@ class Connection {
     return list != null;
   }
 
-  @override
   void sessionReady() {
     setState(XmppConnectionState.SessionInitialized);
     //now we should send presence

@@ -37,7 +37,7 @@ class VCardManager {
   Map<String, VCard> _vCards = Map<String, VCard>();
 
   Future<VCard> getSelfVCard() {
-    var completer = new Completer<VCard>();
+    var completer = Completer<VCard>();
     IqStanza iqStanza = IqStanza(
         AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
@@ -51,7 +51,7 @@ class VCardManager {
   }
 
   Future<VCard> getVCardFor(Jid jid) {
-    var completer = new Completer<VCard>();
+    var completer = Completer<VCard>();
     IqStanza iqStanza = IqStanza(
         AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;

@@ -1,8 +1,6 @@
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
 import 'AbstractStanza.dart';
-import '../../data/Jid.dart';
 
 class IqStanza extends AbstractStanza {
   IqStanzaType _type  = IqStanzaType.SET;
@@ -19,11 +17,11 @@ class IqStanza extends AbstractStanza {
     name = 'iq';
     this.id = id;
     _type = type;
-    this.addAttribute(new XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
+    this.addAttribute(XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
   }
 
 //  String buildXml() {
-//    //todo (maybe in AbstactStanza)
+//    //todo (maybe in AbstractStanza)
 //
 //    var attributeType = xml.XmlAttribute(xml.XmlName('type'), _type.toString().split('.').last.toLowerCase());
 //    var attributeId = xml.XmlAttribute(xml.XmlName('id'), this.id);

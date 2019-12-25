@@ -7,8 +7,6 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
-import 'package:xmpp_stone/src/messages/MessageHandler.dart';
-
 
 
 class ChatImpl implements Chat{
@@ -25,8 +23,8 @@ class ChatImpl implements Chat{
 
   List<Message> messages  = List();
 
-  StreamController<Message> _newMessageController = new StreamController.broadcast();
-  StreamController<ChatState> _remoteStateController = new StreamController.broadcast();
+  StreamController<Message> _newMessageController = StreamController.broadcast();
+  StreamController<ChatState> _remoteStateController = StreamController.broadcast();
 
   Stream<Message> get newMessageStream => _newMessageController.stream;
   Stream<ChatState> get remoteStateStream => _remoteStateController.stream;
@@ -52,7 +50,7 @@ class ChatImpl implements Chat{
   }
 
   void sendMessage(String text) {
-    MessageStanza stanza = new MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+    MessageStanza stanza = MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
@@ -62,8 +60,8 @@ class ChatImpl implements Chat{
     _connection.writeStanza(stanza);
   }
 
-  void set myState(ChatState state) {
-    MessageStanza stanza = new MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+  set myState(ChatState state) {
+    MessageStanza stanza = MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
     XmppElement stateElement = XmppElement();
@@ -98,7 +96,7 @@ abstract class Chat {
   Stream<Message> get newMessageStream;
   Stream<ChatState> get remoteStateStream;
   void sendMessage(String text);
-  void set myState(ChatState state);
+  set myState(ChatState state);
 }
 
 enum ChatState {

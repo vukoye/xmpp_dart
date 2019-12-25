@@ -51,16 +51,16 @@ class XmppElement {
   xml.XmlElement buildXml() {
     List<xml.XmlAttribute> xmlAttributes = List<xml.XmlAttribute>();
     List<xml.XmlNode> xmlNodes = List<xml.XmlNode>();
-    _attributes.forEach((xmppAtribute) {
-      xmlAttributes.add(new xml.XmlAttribute(new xml.XmlName(xmppAtribute.name), xmppAtribute.value));
+    _attributes.forEach((xmppAttribute) {
+      xmlAttributes.add(xml.XmlAttribute(xml.XmlName(xmppAttribute.name), xmppAttribute.value));
     });
     _children.forEach((xmppChild) {
       xmlNodes.add(xmppChild.buildXml());
     });
     if (textValue != null) {
-      xmlNodes.add(new xml.XmlText(textValue));
+      xmlNodes.add(xml.XmlText(textValue));
     }
-    xml.XmlElement xmlElement = new xml.XmlElement(xml.XmlName(this.name), xmlAttributes, xmlNodes);
+    xml.XmlElement xmlElement = xml.XmlElement(xml.XmlName(this.name), xmlAttributes, xmlNodes);
     return xmlElement;
   }
   

@@ -13,13 +13,13 @@ class VCard extends XmppElement {
     if (element != null) {
       element.children.forEach((child) => addChild(child));
     }
-    name = "vCard";
-    addAttribute(XmppAttribute('xmlns', "vcard-temp"));
+    name = 'vCard';
+    addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     _parseImage();
-    print("HAS_IMAGE: ${givenName} : ${_imageData != null}");
+    print('HAS_IMAGE: ${givenName} : ${_imageData != null}');
   }
 
-  String get fullName => getChild("FN")?.textValue;
+  String get fullName => getChild('FN')?.textValue;
 
   String get familyName =>
       getChild("N")

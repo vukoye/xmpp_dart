@@ -51,7 +51,7 @@ class PresenceManager implements PresenceApi {
     return manager;
   }
 
-  PresenceManager(Connection this._connection) {
+  PresenceManager(this._connection) {
     _connection.inStanzasStream
         .where((abstractStanza)  => abstractStanza is PresenceStanza)
         .map((stanza) => stanza as PresenceStanza)
@@ -61,7 +61,7 @@ class PresenceManager implements PresenceApi {
 
   @override
   void acceptSubscription(Jid to) {
-    PresenceStanza presenceStanza = new PresenceStanza();
+    PresenceStanza presenceStanza = PresenceStanza();
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     presenceStanza.type = PresenceType.SUBSCRIBED;
@@ -71,7 +71,7 @@ class PresenceManager implements PresenceApi {
 
   @override
   void declineSubscription(Jid to) {
-    PresenceStanza presenceStanza = new PresenceStanza();
+    PresenceStanza presenceStanza = PresenceStanza();
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     presenceStanza.type = PresenceType.UNSUBSCRIBED;
@@ -81,7 +81,7 @@ class PresenceManager implements PresenceApi {
 
   @override
   void sendDirectPresence(PresenceData presence, Jid to) {
-    PresenceStanza presenceStanza = new PresenceStanza();
+    PresenceStanza presenceStanza = PresenceStanza();
     presenceStanza.toJid = to;
     presenceStanza.show = presence.showElement;
     presenceStanza.status = presence.status;
@@ -90,7 +90,7 @@ class PresenceManager implements PresenceApi {
 
   @override
   void sendPresence(PresenceData presence) {
-    PresenceStanza presenceStanza = new PresenceStanza();
+    PresenceStanza presenceStanza = PresenceStanza();
     presenceStanza.show = presence.showElement;
     presenceStanza.status = presence.status;
     _connection.writeStanza(presenceStanza);
@@ -98,7 +98,7 @@ class PresenceManager implements PresenceApi {
 
   @override
   void subscribe(Jid to) {
-    PresenceStanza presenceStanza = new PresenceStanza();
+    PresenceStanza presenceStanza = PresenceStanza();
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     presenceStanza.type = PresenceType.SUBSCRIBE;
@@ -108,7 +108,7 @@ class PresenceManager implements PresenceApi {
 
   @override
   void unsubscribe(Jid to) {
-    PresenceStanza presenceStanza = new PresenceStanza();
+    PresenceStanza presenceStanza = PresenceStanza();
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     presenceStanza.type = PresenceType.UNSUBSCRIBE;
@@ -119,12 +119,12 @@ class PresenceManager implements PresenceApi {
   void _processPresenceStanza(PresenceStanza presenceStanza) {
     if (presenceStanza.type == null) {
       //presence event
-      _presenceStreamController.add(new PresenceData(presenceStanza.show, presenceStanza.status, presenceStanza.fromJid));
+      _presenceStreamController.add(PresenceData(presenceStanza.show, presenceStanza.status, presenceStanza.fromJid));
     } else {
 
       switch(presenceStanza.type) {
         case PresenceType.SUBSCRIBE:
-          SubscriptionEvent subscriptionEvent = new SubscriptionEvent();
+          SubscriptionEvent subscriptionEvent = SubscriptionEvent();
           subscriptionEvent.type = SubscriptionEventType.REQUEST;
           subscriptionEvent.jid = presenceStanza.fromJid;
           _subscribeStreamController.add(subscriptionEvent);
@@ -137,13 +137,13 @@ class PresenceManager implements PresenceApi {
         case PresenceType.PROBE:
           break;
         case PresenceType.SUBSCRIBED:
-          SubscriptionEvent subscriptionEvent = new SubscriptionEvent();
+          SubscriptionEvent subscriptionEvent = SubscriptionEvent();
           subscriptionEvent.type = SubscriptionEventType.ACCEPTED;
           subscriptionEvent.jid = presenceStanza.fromJid;
           _subscribeStreamController.add(subscriptionEvent);
           break;
         case PresenceType.UNSUBSCRIBED:
-          SubscriptionEvent subscriptionEvent = new SubscriptionEvent();
+          SubscriptionEvent subscriptionEvent = SubscriptionEvent();
           subscriptionEvent.type = SubscriptionEventType.DECLINED;
           subscriptionEvent.jid = presenceStanza.fromJid;
           _subscribeStreamController.add(subscriptionEvent);
@@ -166,13 +166,13 @@ class PresenceManager implements PresenceApi {
   }
 
   void _sendInitialPresence() {
-    PresenceStanza initialPresence = new PresenceStanza();
+    PresenceStanza initialPresence = PresenceStanza();
     _connection.writeStanza(initialPresence);
   }
 
   void _handleErrorEvent(PresenceStanza presenceStanza) {
     //TODO Add more handling
-    PresenceErrorEvent errorEvent = new PresenceErrorEvent();
+    PresenceErrorEvent errorEvent = PresenceErrorEvent();
     errorEvent.presenceStanza = presenceStanza;
     var errorTypeString = presenceStanza.getChild('error')?.getAttribute('type')?.value;
     if (errorTypeString != null && errorTypeString == 'modify') {
