@@ -4,30 +4,25 @@ import 'package:xml/xml.dart' as xml;
 class XmppElement {
 
   String _name;
-
-  String _textValue;
-
-  List<XmppElement> _children = List<XmppElement>();
-
-  List<XmppElement> get children => _children;
-  List<XmppAttribute> _attributes = List<XmppAttribute>();
-
   get name => _name;
-
   set name(String value) {
     _name = value;
   }
 
+  String _textValue;
   String get textValue => _textValue;
 
   set textValue(String value) {
     _textValue = value;
   }
 
-  void addChild(XmppElement element) {
-    _children.add(element);
-  }
+  List<XmppElement> _children = List<XmppElement>();
+  List<XmppElement> get children => _children;
 
+  List<XmppAttribute> _attributes = List<XmppAttribute>();
+  XmppAttribute getAttribute(String name) {
+    return _attributes.firstWhere((attr) => attr.name == name, orElse: () => null);
+  }
   void addAttribute(XmppAttribute attribute) {
     var existing = getAttribute(attribute.name);
     if (existing != null) {
@@ -36,12 +31,12 @@ class XmppElement {
     _attributes.add(attribute);
   }
 
-  XmppElement getChild(String name) {
-    return _children.firstWhere((element) => element.name == name, orElse: () => null);
+  void addChild(XmppElement element) {
+    _children.add(element);
   }
 
-  XmppAttribute getAttribute(String name) {
-    return _attributes.firstWhere((attr) => attr.name == name, orElse: () => null);
+  XmppElement getChild(String name) {
+    return _children.firstWhere((element) => element.name == name, orElse: () => null);
   }
 
   String buildXmlString() {
@@ -66,7 +61,6 @@ class XmppElement {
   
   String getNameSpace() {
     return getAttribute('xmlns')?.value;
-
   }
 
   List<XmppAttribute> get attributes => _attributes;

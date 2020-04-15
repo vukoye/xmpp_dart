@@ -103,13 +103,12 @@ class Connection {
 
   void _openStream() {
     String streamOpeningString = """
-      <stream:stream
-  from='${_account.fullJid.userAtDomain}'
-  to='${fullJid.domain}'
-  version='1.0'
-  xml:lang='en'
-  xmlns='jabber:client'
-  xmlns:stream='http://etherx.jabber.org/streams'>""";
+<?xml version='1.0'?>
+<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams'
+to='${fullJid.domain}'
+xml:lang='en'
+>""";
+
     write(streamOpeningString);
   }
 
@@ -281,8 +280,9 @@ class Connection {
   }
 
   void startSecureSocket() {
-    print(startSecureSocket);
-    SecureSocket.secure(_socket).then((secureSocket) {
+    print("startSecureSocket");
+    print(state);
+    SecureSocket.secure(_socket, onBadCertificate: _validateBadCertificate).then((secureSocket) {
       _socket = secureSocket;
       _socket.cast<List<int>>()
           .transform(utf8.decoder)
@@ -327,5 +327,9 @@ class Connection {
 
   void authenticating() {
     setState(XmppConnectionState.Authenticating);
+  }
+
+  bool _validateBadCertificate(X509Certificate certificate) {
+    return true;
   }
 }

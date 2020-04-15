@@ -45,5 +45,5 @@ abstract class ConnectionNegotiator {
 }
 
 enum NegotiatorState {
-  IDLE, NEGOTIATING, DONE
+  IDLE, NEGOTIATING, DONE, DONE_CLEAN_OTHERS
 }

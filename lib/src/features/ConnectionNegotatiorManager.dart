@@ -44,6 +44,10 @@ class ConnectionNegotatiorManager {
     });
   }
 
+  void cleanNegotiators() {
+    waitingNegotators.clear();
+  }
+
   void negotiateNextFeature() {
     if (waitingNegotators.isNotEmpty) {
       Tuple2<ConnectionNegotiator, Nonza> tuple = waitingNegotators.removeFirst();
@@ -68,7 +72,10 @@ class ConnectionNegotatiorManager {
  void stateListener(NegotiatorState state) {
    if (state == NegotiatorState.NEGOTIATING) {
      print("Feature Started Parsing");
-   } else if (state == NegotiatorState.DONE) {
+   } else if (state == NegotiatorState.DONE_CLEAN_OTHERS) {
+     cleanNegotiators();
+   }
+   else if (state == NegotiatorState.DONE) {
      negotiateNextFeature();
    }
  }

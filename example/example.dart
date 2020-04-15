@@ -6,10 +6,14 @@ import 'package:image/image.dart' as image;
 
 main(List<String> arguments) {
   print("Type user@domain:");
-//  var userAtDomain = stdin.readLineSync(encoding: utf8);
-  var userAtDomain = 'a1@is-a-furry.org';
+  //var userAtDomain = stdin.readLineSync(encoding: utf8);
+  var userAtDomain = 'nemanja@localhost';
+  ///var userAtDomain = 'a1@is-a-furry.org';
+  ///
   print("Type password");
-  var password = '8027';
+  var password = '1';
+  //var password = stdin.readLineSync(encoding: utf8);
+  //var password = '8027';
 //  print("Type port");
 //  int port;
 //  try {

@@ -32,9 +32,9 @@ class StartTlsNegotiator extends ConnectionNegotiator {
 
   void checkNonzas(Nonza nonza) {
     if (nonza.name == "proceed") {
-      state = NegotiatorState.DONE;
-      subscription.cancel();
       _connection.startSecureSocket();
+      state = NegotiatorState.DONE_CLEAN_OTHERS;
+      subscription.cancel();
     } else if (nonza.name == "failure") {
       _connection.startTlsFailed();
     }

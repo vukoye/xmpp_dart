@@ -18,14 +18,14 @@ class ScramSaslHandler implements AbstractSaslHandler{
   static const CLIENT_NONCE_LENGTH = 48;
   Connection _connection;
   StreamSubscription<Nonza> subscription;
-  var _completer = Completer<AuthenticationResult>();
+  final _completer = Completer<AuthenticationResult>();
   ScramStates _scramState = ScramStates.INITIAL;
   String _password;
   String _username;
   String _clientNonce;
   String _initialMessage;
 
-  SaslMechanism _mechanism;
+  final SaslMechanism _mechanism;
   Hash _hash;
 
   String _mechanismString;
