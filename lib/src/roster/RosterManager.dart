@@ -68,13 +68,13 @@ class RosterManager {
     queryElement.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(queryElement);
     XmppElement itemElement = XmppElement();
+    itemElement.name = "item";
     itemElement.addChild(itemElement);
     itemElement.addAttribute(XmppAttribute('jid', rosterItem.jid.userAtDomain));
     if (rosterItem.name != null) {
       itemElement.addAttribute(XmppAttribute('name', rosterItem.name));
     }
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
-    ;
     _connection.writeStanza(iqStanza);
     return completer.future;
   }
@@ -88,6 +88,7 @@ class RosterManager {
     queryElement.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(queryElement);
     XmppElement itemElement = XmppElement();
+    itemElement.name = "item";
     itemElement.addChild(itemElement);
     itemElement.addAttribute(XmppAttribute('jid', rosterItem.jid.userAtDomain));
     itemElement.addAttribute(XmppAttribute('subscription', 'remove'));
