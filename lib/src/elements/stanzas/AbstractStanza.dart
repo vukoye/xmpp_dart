@@ -1,11 +1,10 @@
-
 import 'dart:math';
 
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
-abstract class AbstractStanza extends XmppElement{
+abstract class AbstractStanza extends XmppElement {
   String _id;
   Jid _fromJid;
   Jid _toJid;
@@ -39,5 +38,4 @@ abstract class AbstractStanza extends XmppElement{
     });
     return String.fromCharCodes(codeUnits);
   }
-
 }

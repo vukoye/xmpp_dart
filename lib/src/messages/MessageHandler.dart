@@ -5,11 +5,13 @@ import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/messages/MessageApi.dart';
 
 class MessageHandler implements MessageApi {
-
-  static Map<Connection, MessageHandler> instances = Map<Connection, MessageHandler>();
+  static Map<Connection, MessageHandler> instances =
+      Map<Connection, MessageHandler>();
 
   Stream<MessageStanza> get messagesStream {
-    return _connection.inStanzasStream.where((abstractStanza)  => abstractStanza is MessageStanza).map((stanza) => stanza as MessageStanza);
+    return _connection.inStanzasStream
+        .where((abstractStanza) => abstractStanza is MessageStanza)
+        .map((stanza) => stanza as MessageStanza);
   }
 
   static getInstance(Connection connection) {
@@ -34,11 +36,11 @@ class MessageHandler implements MessageApi {
   }
 
   void _sendMessageStanza(Jid jid, String text) {
-    MessageStanza stanza = MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+    MessageStanza stanza =
+        MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = jid;
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
     _connection.writeStanza(stanza);
   }
-
 }

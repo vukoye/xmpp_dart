@@ -9,7 +9,7 @@ import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 
-class SessionInitiationNegotiator extends ConnectionNegotiator{
+class SessionInitiationNegotiator extends ConnectionNegotiator {
   Connection _connection;
   StreamSubscription<AbstractStanza> subscription;
 
@@ -35,7 +35,8 @@ class SessionInitiationNegotiator extends ConnectionNegotiator{
   void parseStanza(AbstractStanza stanza) {
     if (stanza is IqStanza) {
       var idValue = stanza.getAttribute('id')?.value;
-      if (idValue != null && idValue == sentRequest?.getAttribute('id')?.value) {
+      if (idValue != null &&
+          idValue == sentRequest?.getAttribute('id')?.value) {
         _connection.sessionReady();
         state = NegotiatorState.DONE;
       }
@@ -46,12 +47,12 @@ class SessionInitiationNegotiator extends ConnectionNegotiator{
     IqStanza stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     XmppElement sessionElement = XmppElement();
     sessionElement.name = 'session';
-    XmppAttribute attribute = XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-session');
+    XmppAttribute attribute =
+        XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-session');
     sessionElement.addAttribute(attribute);
-    stanza.toJid = Jid("", _connection.fullJid.domain, "");
+    stanza.toJid = _connection.serverName;
     stanza.addChild(sessionElement);
     sentRequest = stanza;
     _connection.writeStanza(stanza);
   }
-
 }

@@ -1,7 +1,6 @@
 import 'package:quiver/core.dart';
 
 class Jid {
-
   String _local = "";
   String _domain = "";
   String _resource = "";
@@ -12,10 +11,11 @@ class Jid {
     _resource = resource;
   }
 
-
   @override
   bool operator ==(other) {
-    return other is Jid && local == other.local && domain == other.domain &&
+    return other is Jid &&
+        local == other.local &&
+        domain == other.domain &&
         resource == other.resource;
   }
 
@@ -26,7 +26,12 @@ class Jid {
   String get resource => _resource;
 
   String get fullJid {
-    if (local != null && domain != null && resource != null && local.isNotEmpty && domain.isNotEmpty && resource.isNotEmpty) {
+    if (local != null &&
+        domain != null &&
+        resource != null &&
+        local.isNotEmpty &&
+        domain.isNotEmpty &&
+        resource.isNotEmpty) {
       return "$_local@$_domain/$_resource";
     }
     if (local == null || local.isEmpty) {

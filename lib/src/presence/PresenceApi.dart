@@ -1,4 +1,3 @@
-
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 
@@ -23,9 +22,7 @@ class PresenceData {
   PresenceData(this.showElement, this.status, this.jid);
 }
 
-enum SubscriptionEventType {
-  REQUEST, ACCEPTED, DECLINED
-}
+enum SubscriptionEventType { REQUEST, ACCEPTED, DECLINED }
 
 class SubscriptionEvent {
   SubscriptionEventType type;
@@ -37,6 +34,4 @@ class PresenceErrorEvent {
   PresenceErrorType type;
 }
 
-enum PresenceErrorType {
-  MODIFY
-}
+enum PresenceErrorType { MODIFY }

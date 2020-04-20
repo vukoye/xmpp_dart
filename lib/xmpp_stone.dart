@@ -1,4 +1,5 @@
 library xmpp_stone;
+
 export 'src/Connection.dart';
 export 'src/messages/MessageHandler.dart';
 export 'src/messages/MessageApi.dart';
@@ -16,7 +17,3 @@ export 'src/roster/RosterManager.dart';
 export 'src/chat/Chat.dart';
 export 'src/chat/Message.dart';
 export 'src/chat/ChatManager.dart';
-
-
-
-

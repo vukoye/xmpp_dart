@@ -4,7 +4,7 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xml/xml.dart' as xml;
 
-class Nonza extends XmppElement{
+class Nonza extends XmppElement {
   Jid _fromJid;
   Jid _toJid;
 
@@ -36,7 +36,8 @@ class Nonza extends XmppElement{
       Jid to = Jid.fromFullJid(toString);
       nonza.toJid = to;
     }
-    xmlElement.attributes.forEach((attribute) => nonza.addAttribute(XmppAttribute(attribute.name.local, attribute.value)));
+    xmlElement.attributes.forEach((attribute) => nonza
+        .addAttribute(XmppAttribute(attribute.name.local, attribute.value)));
     xmlElement.children.forEach((xmlChild) {
       if (xmlChild is xml.XmlElement) {
         nonza.addChild(StanzaParser.parseElement(xmlChild));

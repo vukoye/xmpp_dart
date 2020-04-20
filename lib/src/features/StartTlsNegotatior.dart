@@ -6,7 +6,6 @@ import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 
 class StartTlsNegotiator extends ConnectionNegotiator {
-
   Connection _connection;
 
   StreamSubscription<Nonza> subscription;
@@ -24,7 +23,7 @@ class StartTlsNegotiator extends ConnectionNegotiator {
     if (match(nonza)) {
       if (nonza.name == "starttls") {
         state = NegotiatorState.NEGOTIATING;
-        subscription = _connection.nonzasStream.listen(checkNonzas);
+        subscription = _connection.inNonzasStream.listen(checkNonzas);
         _connection.writeNonza(StartTlsResponse());
       }
     }
@@ -42,10 +41,9 @@ class StartTlsNegotiator extends ConnectionNegotiator {
 
   @override
   bool match(Nonza request) {
-    return (request.name == "starttls") && request.getAttribute('xmlns')?.value == expectedNameSpace;
+    return (request.name == "starttls") &&
+        request.getAttribute('xmlns')?.value == expectedNameSpace;
   }
-
-
 }
 
 class StartTlsResponse extends Nonza {

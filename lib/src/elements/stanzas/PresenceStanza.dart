@@ -1,9 +1,7 @@
-
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
 class PresenceStanza extends AbstractStanza {
-
   PresenceStanza() {
     name = 'presence';
   }
@@ -30,12 +28,16 @@ class PresenceStanza extends AbstractStanza {
 
   //status with no language prefs
   String get status {
-    var statusElement = children.firstWhere((element) => element.name == name && element.attributes.isEmpty, orElse: () => null);
+    var statusElement = children.firstWhere(
+        (element) => element.name == name && element.attributes.isEmpty,
+        orElse: () => null);
     return statusElement?.textValue;
   }
 
   set status(String value) {
-    var childElement = children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty, orElse: () => null);
+    var childElement = children.firstWhere(
+        (element) => element.name == 'status' && element.attributes.isEmpty,
+        orElse: () => null);
     if (childElement == null) {
       var element = XmppElement();
       element.name = 'status';
@@ -56,7 +58,7 @@ class PresenceStanza extends AbstractStanza {
 
   PresenceShowElement showFromString(String showString) {
     //AWAY, CHAT, DND, XA
-    switch(showString) {
+    switch (showString) {
       case 'away':
         return PresenceShowElement.AWAY;
         break;
@@ -74,7 +76,7 @@ class PresenceStanza extends AbstractStanza {
   }
 
   PresenceType typeFromString(String typeString) {
-    switch(typeString) {
+    switch (typeString) {
       case 'error':
         return PresenceType.ERROR;
         break;
@@ -99,8 +101,11 @@ class PresenceStanza extends AbstractStanza {
     }
     return null;
   }
+
   void _setChildValue(String childName, String value) {
-    var childElement = children.firstWhere((element) => element.name == childName && element.attributes.isEmpty, orElse: () => null);
+    var childElement = children.firstWhere(
+        (element) => element.name == childName && element.attributes.isEmpty,
+        orElse: () => null);
     if (childElement == null) {
       var element = XmppElement();
       element.name = childName;
@@ -112,7 +117,8 @@ class PresenceStanza extends AbstractStanza {
   }
 
   void _setAttributeValue(String attrName, String value) {
-    var attr = attributes.firstWhere((attribute) => attribute.name == name, orElse: () => null);
+    var attr = attributes.firstWhere((attribute) => attribute.name == name,
+        orElse: () => null);
     if (attr == null) {
       var element = XmppElement();
       element.name = attrName;
@@ -122,13 +128,16 @@ class PresenceStanza extends AbstractStanza {
       attr.value = value;
     }
   }
-
 }
 
 enum PresenceType {
-  ERROR, PROBE, SUBSCRIBE, SUBSCRIBED, UNAVAILABLE, UNSUBSCRIBE, UNSUBSCRIBED
+  ERROR,
+  PROBE,
+  SUBSCRIBE,
+  SUBSCRIBED,
+  UNAVAILABLE,
+  UNSUBSCRIBE,
+  UNSUBSCRIBED
 }
 
-enum PresenceShowElement {
-  AWAY, CHAT, DND, XA
-}
+enum PresenceShowElement { AWAY, CHAT, DND, XA }

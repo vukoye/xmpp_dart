@@ -3,7 +3,6 @@ abstract class AbstractSaslHandler {
 }
 
 class AuthenticationResult {
-
   bool successful;
   String message;
 

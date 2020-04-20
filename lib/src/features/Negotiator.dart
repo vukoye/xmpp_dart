@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
@@ -13,7 +12,8 @@ abstract class ConnectionNegotiator {
 
   NegotiatorState get state => _state;
 
-  StreamController<NegotiatorState> negotiatorStateStreamController = StreamController();
+  StreamController<NegotiatorState> negotiatorStateStreamController =
+      StreamController();
 
   Stream<NegotiatorState> get featureStateStream {
     return negotiatorStateStreamController.stream;
@@ -42,8 +42,10 @@ abstract class ConnectionNegotiator {
   bool match(Nonza request);
 
   void negotiate(Nonza nonza);
+
+  void backToIdle() {
+    state = NegotiatorState.IDLE;
+  }
 }
 
-enum NegotiatorState {
-  IDLE, NEGOTIATING, DONE, DONE_CLEAN_OTHERS
-}
+enum NegotiatorState { IDLE, NEGOTIATING, DONE, DONE_CLEAN_OTHERS }

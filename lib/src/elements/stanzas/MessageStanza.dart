@@ -15,11 +15,15 @@ class MessageStanza extends AbstractStanza {
     name = 'message';
     this.id = id;
     _type = type;
-    this.addAttribute(XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
+    this.addAttribute(
+        XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
   }
 
-  String get body => this.children.firstWhere((child) => (child.name == 'body' && child.attributes.isEmpty), orElse: () => null)?.textValue;
-
+  String get body => this
+      .children
+      .firstWhere((child) => (child.name == 'body' && child.attributes.isEmpty),
+          orElse: () => null)
+      ?.textValue;
 
   set body(String value) {
     XmppElement element = XmppElement();
@@ -28,7 +32,10 @@ class MessageStanza extends AbstractStanza {
     this.addChild(element);
   }
 
-  String get subject => this.children.firstWhere((child) => (child.name == 'subject'), orElse: () => null)?.textValue;
+  String get subject => this
+      .children
+      .firstWhere((child) => (child.name == 'subject'), orElse: () => null)
+      ?.textValue;
 
   set subject(String value) {
     XmppElement element = XmppElement();
@@ -37,7 +44,10 @@ class MessageStanza extends AbstractStanza {
     this.addChild(element);
   }
 
-  String get thread => this.children.firstWhere((child) => (child.name == 'thread'), orElse: () => null)?.textValue;
+  String get thread => this
+      .children
+      .firstWhere((child) => (child.name == 'thread'), orElse: () => null)
+      ?.textValue;
 
   set thread(String value) {
     XmppElement element = XmppElement();
@@ -45,13 +55,6 @@ class MessageStanza extends AbstractStanza {
     element.textValue = value;
     this.addChild(element);
   }
-
 }
 
-enum MessageStanzaType {
-  CHAT,
-  ERROR,
-  GROUPCHAT,
-  HEADLINE,
-  NORMAL
-}
+enum MessageStanzaType { CHAT, ERROR, GROUPCHAT, HEADLINE, NORMAL }

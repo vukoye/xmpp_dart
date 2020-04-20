@@ -8,9 +8,7 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 
-
-class ChatImpl implements Chat{
-
+class ChatImpl implements Chat {
   Connection _connection;
   Jid _jid;
 
@@ -21,16 +19,17 @@ class ChatImpl implements Chat{
   ChatState _remoteState;
   ChatState get remoteState => _remoteState;
 
-  List<Message> messages  = List();
+  List<Message> messages = List();
 
-  StreamController<Message> _newMessageController = StreamController.broadcast();
-  StreamController<ChatState> _remoteStateController = StreamController.broadcast();
+  StreamController<Message> _newMessageController =
+      StreamController.broadcast();
+  StreamController<ChatState> _remoteStateController =
+      StreamController.broadcast();
 
   Stream<Message> get newMessageStream => _newMessageController.stream;
   Stream<ChatState> get remoteStateStream => _remoteStateController.stream;
 
   ChatImpl(this._jid, this._connection);
-
 
   void parseMessage(MessageStanza stanza) {
     if (stanza.type == MessageStanzaType.CHAT) {
@@ -39,8 +38,11 @@ class ChatImpl implements Chat{
         messages.add(message);
         _newMessageController.add(message);
       }
-      var stateElement = stanza.children.firstWhere((element) => element
-          .getAttribute("xmlns")?.value == "http://jabber.org/protocol/chatstates", orElse: () => null);
+      var stateElement = stanza.children.firstWhere(
+          (element) =>
+              element.getAttribute("xmlns")?.value ==
+              "http://jabber.org/protocol/chatstates",
+          orElse: () => null);
       if (stateElement != null) {
         var state = stateFromString(stateElement.name);
         _remoteState = state;
@@ -50,7 +52,8 @@ class ChatImpl implements Chat{
   }
 
   void sendMessage(String text) {
-    MessageStanza stanza = MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+    MessageStanza stanza =
+        MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
@@ -61,19 +64,21 @@ class ChatImpl implements Chat{
   }
 
   set myState(ChatState state) {
-    MessageStanza stanza = MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+    MessageStanza stanza =
+        MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
     XmppElement stateElement = XmppElement();
     stateElement.name = state.toString().split('.').last.toLowerCase();
-    stateElement.addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates'));
+    stateElement.addAttribute(
+        XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates'));
     stanza.addChild(stateElement);
     _connection.writeStanza(stanza);
     _myState = state;
   }
 
   static ChatState stateFromString(String chatStateString) {
-    switch(chatStateString) {
+    switch (chatStateString) {
       case "inactive":
         return ChatState.INACTIVE;
       case "active":
@@ -99,7 +104,4 @@ abstract class Chat {
   set myState(ChatState state);
 }
 
-enum ChatState {
-  INACTIVE, ACTIVE, GONE, COMPOSING, PAUSED
-}
-
+enum ChatState { INACTIVE, ACTIVE, GONE, COMPOSING, PAUSED }

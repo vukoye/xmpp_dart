@@ -12,9 +12,8 @@ import 'package:unorm_dart/unorm_dart.dart' as unorm;
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/SaslAuthenticationFeature.dart';
 
-
 //https://stackoverflow.com/questions/29298346/xmpp-sasl-scram-sha1-authentication#comment62495063_29299946
-class ScramSaslHandler implements AbstractSaslHandler{
+class ScramSaslHandler implements AbstractSaslHandler {
   static const CLIENT_NONCE_LENGTH = 48;
   Connection _connection;
   StreamSubscription<Nonza> subscription;
@@ -32,8 +31,7 @@ class ScramSaslHandler implements AbstractSaslHandler{
 
   var serverSignature;
 
-  ScramSaslHandler(
-      Connection connection, String password, this._mechanism) {
+  ScramSaslHandler(Connection connection, String password, this._mechanism) {
     _username = connection.fullJid.local;
     _password = password;
     _connection = connection;
@@ -42,7 +40,7 @@ class ScramSaslHandler implements AbstractSaslHandler{
   }
 
   Future<AuthenticationResult> start() {
-    subscription = _connection.nonzasStream.listen(_parseAnswer);
+    subscription = _connection.inNonzasStream.listen(_parseAnswer);
     sendInitialMessage();
     return _completer.future;
   }
@@ -59,7 +57,7 @@ class ScramSaslHandler implements AbstractSaslHandler{
 
   void generateRandomClientNonce() {
     List<int> bytes = List<int>(CLIENT_NONCE_LENGTH);
-    for (int i = 0; i < CLIENT_NONCE_LENGTH;i++) {
+    for (int i = 0; i < CLIENT_NONCE_LENGTH; i++) {
       bytes[i] = Random.secure().nextInt(256);
     }
     _clientNonce = base64.encode(bytes);
@@ -71,7 +69,8 @@ class ScramSaslHandler implements AbstractSaslHandler{
     var message = CryptoUtils.bytesToBase64(bytes, false, false);
     Nonza nonza = Nonza();
     nonza.name = "auth";
-    nonza.addAttribute(XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
+    nonza.addAttribute(
+        XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
     nonza.addAttribute(XmppAttribute('mechanism', _mechanismString));
     nonza.textValue = message;
     _scramState = ScramStates.AUTH_SENT;
@@ -92,7 +91,6 @@ class ScramSaslHandler implements AbstractSaslHandler{
       } else if (nonza.name == 'success') {
         verifyServerHasKey(nonza.textValue);
       }
-
     }
   }
 
@@ -159,7 +157,8 @@ class ScramSaslHandler implements AbstractSaslHandler{
     }
     String clientFinalMessageBare = "c=biws,r=$serverNonce";
     //ok
-    List<int> authMessage = utf8.encode("$_initialMessage,${utf8.decode(serverFirstMessage)},$clientFinalMessageBare");
+    List<int> authMessage = utf8.encode(
+        "$_initialMessage,${utf8.decode(serverFirstMessage)},$clientFinalMessageBare");
     var saltB = base64.decode(salt);
     var saltedPassword = PBKDF2(utf8.encode(_password), saltB, iterationsNo);
     var serverKey = hmac(saltedPassword, utf8.encode('Server Key'));
@@ -176,10 +175,12 @@ class ScramSaslHandler implements AbstractSaslHandler{
     for (int i = 0; i < clientKey.length; i++) {
       clientProof[i] = clientKey[i] ^ clientSignature[i];
     }
-    var clientFinalMessage = "$clientFinalMessageBare,p=${base64.encode(clientProof)}";
+    var clientFinalMessage =
+        "$clientFinalMessageBare,p=${base64.encode(clientProof)}";
     var response = Nonza();
     response.name = "response";
-    response.addAttribute(XmppAttribute("xmlns", "urn:ietf:params:xml:ns:xmpp-sasl"));
+    response.addAttribute(
+        XmppAttribute("xmlns", "urn:ietf:params:xml:ns:xmpp-sasl"));
     response.textValue = base64.encode(utf8.encode(clientFinalMessage));
     _scramState = ScramStates.RESPONSE_SENT;
     _connection.writeNonza(response);
@@ -191,7 +192,7 @@ class ScramSaslHandler implements AbstractSaslHandler{
   }
 
   List<int> PBKDF2(List<int> password, List<int> salt, int c) {
-    var u = hmac(password, salt + [0,0,0,1]);
+    var u = hmac(password, salt + [0, 0, 0, 1]);
     var out = List<int>.from(u);
     for (int i = 1; i < c; i++) {
       u = hmac(password, u);
@@ -200,12 +201,12 @@ class ScramSaslHandler implements AbstractSaslHandler{
       }
     }
     return out;
-
   }
 
   void verifyServerHasKey(String serverResponse) {
     String expectedServerFinalMessage = "v=${base64.encode(serverSignature)}";
-    if (utf8.decode(base64.decode(serverResponse)) != expectedServerFinalMessage) {
+    if (utf8.decode(base64.decode(serverResponse)) !=
+        expectedServerFinalMessage) {
       _fireAuthFailed("Server final message does not match expected one");
     } else {
       subscription.cancel();

@@ -15,11 +15,11 @@ class Message {
   String _text;
   DateTime _time;
 
-
   Message(this._messageStanza, this._to, this._from, this._text, this._time);
 
   static Message fromStanza(MessageStanza stanza) {
-    return Message(stanza, stanza.toJid, stanza.fromJid, stanza.body, DateTime.now());
+    return Message(
+        stanza, stanza.toJid, stanza.fromJid, stanza.body, DateTime.now());
   }
 
   Jid get to => _to;

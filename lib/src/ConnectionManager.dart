@@ -1,4 +1,3 @@
-
 class ConnectionManager {
   static ConnectionManager _instance;
 
@@ -8,5 +7,4 @@ class ConnectionManager {
     }
     return _instance;
   }
-
 }

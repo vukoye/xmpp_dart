@@ -72,7 +72,7 @@ class ServiceDiscoveryNegotiator extends ConnectionNegotiator {
 
   @override
   void negotiate(Nonza nonza) {
-    if (state != NegotiatorState.NEGOTIATING) {
+    if (state == NegotiatorState.IDLE) {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inStanzasStream.listen(_parseStanza);
       _sendServiceDiscoveryRequest();
@@ -82,8 +82,7 @@ class ServiceDiscoveryNegotiator extends ConnectionNegotiator {
   void _sendServiceDiscoveryRequest() {
     IqStanza request = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     request.fromJid = _connection.fullJid;
-    request.toJid = Jid.fromFullJid(
-        _connection.fullJid.domain); //todo move to account.domain!
+    request.toJid = _connection.serverName;
     XmppElement queryElement = XmppElement();
     queryElement.name = 'query';
     queryElement.addAttribute(
@@ -114,7 +113,9 @@ class ServiceDiscoveryNegotiator extends ConnectionNegotiator {
       }
     }
     state = NegotiatorState.DONE;
+    subscription.cancel();
     _connection.setState(XmppConnectionState.DoneServiceDiscovery);
+
   }
 
   bool isFeatureSupported(String feature) {
@@ -136,7 +137,7 @@ class ServiceDiscoveryNegotiator extends ConnectionNegotiator {
 
   void sendDiscoInfoResponse(IqStanza request) {
     IqStanza iqStanza = IqStanza(request.id, IqStanzaType.RESULT);
-    iqStanza.fromJid = _connection.fullJid;
+    //iqStanza.fromJid = _connection.fullJid; //do not send for now
     iqStanza.toJid = request.fromJid;
     XmppElement query = XmppElement();
     query.addAttribute(XmppAttribute("xmlns", NAMESPACE_DISCO_INFO));

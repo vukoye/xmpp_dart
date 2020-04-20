@@ -6,7 +6,9 @@ import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/account/XmppAccount.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
 import 'package:xml/xml.dart' as xml;
+
 class MockConnection extends Mock implements Connection {}
+
 class MockSocket extends Mock implements Socket {}
 
 void main() {
@@ -31,11 +33,9 @@ void main() {
     </compression>
 </stream:features>
 """;
-    final xmlResponse = xml
-        .parse(featuresTest);
+    final xmlResponse = xml.parse(featuresTest);
     xmlResponse.descendants
         .whereType<xml.XmlElement>()
         .forEach((feature) => manager.negotiateFeatureList(feature));
-  }
-  );
+  });
 }

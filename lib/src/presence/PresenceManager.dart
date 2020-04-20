@@ -1,4 +1,3 @@
-
 import 'dart:async';
 
 import 'package:xmpp_stone/src/Connection.dart';
@@ -12,10 +11,13 @@ class PresenceManager implements PresenceApi {
 
   List<PresenceStanza> requests = List<PresenceStanza>();
 
-  StreamController<PresenceData> _presenceStreamController = StreamController<PresenceData>.broadcast();
+  StreamController<PresenceData> _presenceStreamController =
+      StreamController<PresenceData>.broadcast();
 
-  StreamController<SubscriptionEvent> _subscribeStreamController = StreamController<SubscriptionEvent>.broadcast();
-  StreamController<PresenceErrorEvent> _errorStreamController = StreamController<PresenceErrorEvent>.broadcast();
+  StreamController<SubscriptionEvent> _subscribeStreamController =
+      StreamController<SubscriptionEvent>.broadcast();
+  StreamController<PresenceErrorEvent> _errorStreamController =
+      StreamController<PresenceErrorEvent>.broadcast();
 
   PresenceData _selfPresence = PresenceData(PresenceShowElement.CHAT, "", null);
 
@@ -40,7 +42,8 @@ class PresenceManager implements PresenceApi {
     return _errorStreamController.stream;
   }
 
-  static Map<Connection, PresenceManager> instances = Map<Connection, PresenceManager>();
+  static Map<Connection, PresenceManager> instances =
+      Map<Connection, PresenceManager>();
 
   static getInstance(Connection connection) {
     PresenceManager manager = instances[connection];
@@ -53,7 +56,7 @@ class PresenceManager implements PresenceApi {
 
   PresenceManager(this._connection) {
     _connection.inStanzasStream
-        .where((abstractStanza)  => abstractStanza is PresenceStanza)
+        .where((abstractStanza) => abstractStanza is PresenceStanza)
         .map((stanza) => stanza as PresenceStanza)
         .listen(_processPresenceStanza);
     _connection.connectionStateStream.listen(_connectionStateHandler);
@@ -119,10 +122,10 @@ class PresenceManager implements PresenceApi {
   void _processPresenceStanza(PresenceStanza presenceStanza) {
     if (presenceStanza.type == null) {
       //presence event
-      _presenceStreamController.add(PresenceData(presenceStanza.show, presenceStanza.status, presenceStanza.fromJid));
+      _presenceStreamController.add(PresenceData(
+          presenceStanza.show, presenceStanza.status, presenceStanza.fromJid));
     } else {
-
-      switch(presenceStanza.type) {
+      switch (presenceStanza.type) {
         case PresenceType.SUBSCRIBE:
           SubscriptionEvent subscriptionEvent = SubscriptionEvent();
           subscriptionEvent.type = SubscriptionEventType.REQUEST;
@@ -159,7 +162,7 @@ class PresenceManager implements PresenceApi {
   }
 
   void _connectionStateHandler(XmppConnectionState state) {
-    if (state == XmppConnectionState.DoneServiceDiscovery) {
+    if (state == XmppConnectionState.Ready) {
       //_getRosters();
       _sendInitialPresence();
     }
@@ -174,7 +177,8 @@ class PresenceManager implements PresenceApi {
     //TODO Add more handling
     PresenceErrorEvent errorEvent = PresenceErrorEvent();
     errorEvent.presenceStanza = presenceStanza;
-    var errorTypeString = presenceStanza.getChild('error')?.getAttribute('type')?.value;
+    var errorTypeString =
+        presenceStanza.getChild('error')?.getAttribute('type')?.value;
     if (errorTypeString != null && errorTypeString == 'modify') {
       errorEvent.type = PresenceErrorType.MODIFY;
     }

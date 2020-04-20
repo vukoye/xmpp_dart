@@ -1,4 +1,3 @@
-
 import 'package:xmpp_stone/src/data/Jid.dart';
 
 class XmppAccount {
@@ -12,7 +11,6 @@ class XmppAccount {
   XmppAccount(this.name, this.username, this.domain, this.password, this.port);
 
   Jid get fullJid => Jid(username, domain, resource);
-
 
   static XmppAccount fromJid(String jid, String password) {
     Jid fullJid = Jid.fromFullJid(jid);

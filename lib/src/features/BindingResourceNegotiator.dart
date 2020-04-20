@@ -9,12 +9,13 @@ import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 
-class BindingResourceConnectionNegotiator extends ConnectionNegotiator{
+class BindingResourceConnectionNegotiator extends ConnectionNegotiator {
   Connection _connection;
   StreamSubscription<AbstractStanza> subscription;
 
   BindingResourceConnectionNegotiator(Connection connection) {
     _connection = connection;
+    priorityLevel = 100;
   }
   @override
   bool match(Nonza request) {
@@ -38,6 +39,7 @@ class BindingResourceConnectionNegotiator extends ConnectionNegotiator{
         Jid jid = Jid.fromFullJid(jidValue);
         _connection.fullJidRetrieved(jid);
         state = NegotiatorState.DONE;
+        subscription.cancel();
       }
     }
   }
@@ -46,10 +48,10 @@ class BindingResourceConnectionNegotiator extends ConnectionNegotiator{
     IqStanza stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     XmppElement bindElement = XmppElement();
     bindElement.name = 'bind';
-    XmppAttribute attribute = XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-bind');
+    XmppAttribute attribute =
+        XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-bind');
     bindElement.addAttribute(attribute);
     stanza.addChild(bindElement);
     _connection.writeStanza(stanza);
   }
-
 }

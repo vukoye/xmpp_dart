@@ -1,4 +1,1 @@
-abstract class Mechanism {
-
-
-}
+abstract class Mechanism {}

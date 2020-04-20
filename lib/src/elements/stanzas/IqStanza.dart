@@ -3,7 +3,7 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'AbstractStanza.dart';
 
 class IqStanza extends AbstractStanza {
-  IqStanzaType _type  = IqStanzaType.SET;
+  IqStanzaType _type = IqStanzaType.SET;
 
   IqStanzaType get type => _type;
 
@@ -11,13 +11,12 @@ class IqStanza extends AbstractStanza {
     _type = value;
   }
 
-
-
   IqStanza(String id, IqStanzaType type) {
     name = 'iq';
     this.id = id;
     _type = type;
-    this.addAttribute(XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
+    this.addAttribute(
+        XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
   }
 
 //  String buildXml() {
@@ -40,14 +39,7 @@ class IqStanza extends AbstractStanza {
 //  }
 }
 
-enum IqStanzaType{
-  ERROR,
-  SET,
-  RESULT,
-  GET,
-  INVALID,
-  TIMEOUT
-}
+enum IqStanzaType { ERROR, SET, RESULT, GET, INVALID, TIMEOUT }
 
 class IqStanzaResult {
   IqStanzaType type;
