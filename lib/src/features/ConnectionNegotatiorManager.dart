@@ -105,7 +105,7 @@ class ConnectionNegotatiorManager {
     supportedNegotiatorList
         .add(streamManagementModule); //doesn't care if success it will be done
     supportedNegotiatorList.add(SessionInitiationNegotiator(_connection));
-    supportedNegotiatorList.add(ServiceDiscoveryNegotiator(_connection));
+    supportedNegotiatorList.add(ServiceDiscoveryNegotiator.getInstance(_connection));
   }
 
   void stateListener(NegotiatorState state) {

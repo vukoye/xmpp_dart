@@ -7,7 +7,7 @@ class ReconnectionManager {
   Connection _connection;
   bool isActive = false;
   static const int INITIAL_TIMEOUT = 1000;
-  static const int TOTAL_RECONNECTING = 5;
+  static const int TOTAL_RECONNECTING = 3;
   int timeOutInMs = INITIAL_TIMEOUT;
   int counter = 0;
   Timer timer;

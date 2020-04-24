@@ -24,8 +24,8 @@ main(List<String> arguments) {
 //    port = 5222;
 //  }
   xmpp.Jid jid = xmpp.Jid.fromFullJid(userAtDomain);
-  xmpp.XmppAccount account =
-      xmpp.XmppAccount(userAtDomain, jid.local, jid.domain, password, 5222);
+  xmpp.XmppAccountSettings account =
+      xmpp.XmppAccountSettings(userAtDomain, jid.local, jid.domain, password, 5222);
   xmpp.Connection connection = xmpp.Connection(account);
   connection.connect();
   xmpp.MessagesListener messagesListener = ExampleMessagesListener();

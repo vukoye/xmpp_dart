@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:mockito/mockito.dart';
 import 'package:test/test.dart';
 import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/account/XmppAccount.dart';
+import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
 import 'package:xml/xml.dart' as xml;
 
@@ -14,7 +14,7 @@ class MockSocket extends Mock implements Socket {}
 void main() {
   group('connection tests plain authentication', () {
     final mockSocket = MockSocket();
-    final connection = Connection(XmppAccount.fromJid("test@test.com", "test"));
+    final connection = Connection(XmppAccountSettings.fromJid("test@test.com", "test"));
     connection.socket = mockSocket;
     final manager = ConnectionNegotatiorManager(connection, "");
     final featuresTest = """

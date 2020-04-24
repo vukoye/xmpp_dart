@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
 import 'package:xmpp_stone/src/ReconnectionManager.dart';
-import 'package:xmpp_stone/src/account/XmppAccount.dart';
+import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
@@ -40,7 +40,7 @@ class Connection {
 
   static Map<String, Connection> instances = Map<String, Connection>();
 
-  XmppAccount _account;
+  XmppAccountSettings _account;
 
   StreamManagementModule streamManagementModule;
 
@@ -54,7 +54,7 @@ class Connection {
 
   String _serverName;
 
-  static getInstance(XmppAccount account) {
+  static getInstance(XmppAccountSettings account) {
     Connection connection = instances[account.fullJid.userAtDomain];
     if (connection == null) {
       connection = Connection(account);

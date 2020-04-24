@@ -24,7 +24,7 @@ void main() {
     test('test feature negotation', () async {
       final mockSocket = MockSocket();
       final connection =
-          Connection(XmppAccount.fromJid("test@test.com", "test"));
+          Connection(XmppAccountSettings.fromJid("test@test.com", "test"));
       connection.connectionStateStream.listen((state) {
         if (state == XmppConnectionState.DoneParsingFeatures) {
           if (!firstCompleter.isCompleted) firstCompleter.complete();
