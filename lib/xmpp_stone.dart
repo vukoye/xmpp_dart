@@ -16,6 +16,7 @@ export 'src/roster/RosterManager.dart';
 export 'src/chat/Chat.dart';
 export 'src/chat/Message.dart';
 export 'src/chat/ChatManager.dart';
+export 'src/extensions/ping/PingManager.dart';
 
 
 
