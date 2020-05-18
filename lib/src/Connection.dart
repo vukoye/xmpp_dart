@@ -40,7 +40,7 @@ class Connection {
 
   static Map<String, Connection> instances = Map<String, Connection>();
 
-  XmppAccountSettings _account;
+  XmppAccountSettings account;
 
   StreamManagementModule streamManagementModule;
 
@@ -110,12 +110,12 @@ class Connection {
 
   bool _logXML = true;
 
-  Jid get fullJid => _account.fullJid;
+  Jid get fullJid => account.fullJid;
 
   ConnectionNegotatiorManager connectionNegotatiorManager;
 
   void fullJidRetrieved(Jid jid) {
-    _account.resource = jid.resource;
+    account.resource = jid.resource;
   }
 
   Socket _socket;
@@ -129,7 +129,7 @@ class Connection {
 
   ReconnectionManager reconnectionManager;
 
-  Connection(this._account) {
+  Connection(this.account) {
     RosterManager.getInstance(this);
     PresenceManager.getInstance(this);
     MessageHandler.getInstance(this);
@@ -195,9 +195,9 @@ xml:lang='en'
 
   Future<void> openSocket() async {
     connectionNegotatiorManager =
-        ConnectionNegotatiorManager(this, _account.password);
+        ConnectionNegotatiorManager(this, account.password);
     try {
-      return await Socket.connect(_account.domain, _account.port).then((Socket socket) {
+      return await Socket.connect(account.domain, account.port).then((Socket socket) {
         _socket = socket;
         socket
             .cast<List<int>>()

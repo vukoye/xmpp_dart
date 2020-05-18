@@ -39,7 +39,6 @@ class StreamManagementModule extends ConnectionNegotiator {
   StreamSubscription<Nonza> inNonzaSubscription;
 
   bool ackTurnedOn = true;
-  bool forceResending = true;
   Timer timer;
 
   StreamController<AbstractStanza> _deliveredStanzasStreamController =
@@ -50,7 +49,9 @@ class StreamManagementModule extends ConnectionNegotiator {
   }
 
   void sendAckRequest() {
-    _connection.writeNonza(RNonza());
+    if (ackTurnedOn) {
+      _connection.writeNonza(RNonza());
+    }
   }
 
   void parseAckResponse(String rawValue) {
@@ -59,7 +60,9 @@ class StreamManagementModule extends ConnectionNegotiator {
     if (shouldStay < 0) shouldStay = 0;
     while (streamState.nonConfirmedSentStanzas.length > shouldStay) {
       var stanza = streamState.nonConfirmedSentStanzas.removeFirst() as AbstractStanza;
-      _deliveredStanzasStreamController.add(stanza);
+      if (ackTurnedOn) {
+        _deliveredStanzasStreamController.add(stanza);
+      }
       if (stanza.id != null) {
         print("Delivered: " + stanza.id);
       } else {
@@ -71,6 +74,7 @@ class StreamManagementModule extends ConnectionNegotiator {
   StreamManagementModule(Connection connection) {
     _connection = connection;
     _connection.streamManagementModule = this;
+    ackTurnedOn = connection.account.ackEnabled;
     _connection.connectionStateStream.listen((state) =>
     {
       if (state == XmppConnectionState.Reconnecting) {

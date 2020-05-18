@@ -7,6 +7,9 @@ class XmppAccountSettings {
   String resource = "";
   String password;
   int port;
+  int totalReconnections = 3;
+  int reconnectionTimeout = 1000;
+  bool ackEnabled = true;
 
   XmppAccountSettings(this.name, this.username, this.domain, this.password, this.port);
 
