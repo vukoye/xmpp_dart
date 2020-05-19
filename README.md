@@ -8,15 +8,19 @@ Currently supported:
  - RFC6120 - Extensible Messaging and Presence Protocol (XMPP): Core 
  - RFC6121 - Extensible Messaging and Presence Protocol (XMPP): Instant Messaging and Presence
  - XEP-0198 : Stream Management
+ - XEP-0085: Chat State Notifications
 Partly supported:
  - XEP-0030: Service Discovery
 
 Actively working on: 
-   - XEP-0085: Chat State Notifications
+
 
 ## Latest news
 
+
 - 2020-05-02: Added Initial Support for XEP-0198 : Stream Management
+
+- 2020-05-02: Added Initial Support for XEP-0085 : Chat State Notifications
 
 - 2019-04-02: added support for: XEP-0054: vcard-temp
 
