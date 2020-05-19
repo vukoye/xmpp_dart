@@ -2,10 +2,7 @@ name: xmpp_stone
 
 description: "Xmpp Stone is lightweight XMPP client library written completely in Dart."
 
-version: 0.1.5
-
-authors:
-  - Nemanja Vukoje <nemanja.vukoje@gmail.com>
+version: 0.2.0
 
 homepage: http://www.vukoye.com
 
