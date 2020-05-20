@@ -199,7 +199,7 @@ xml:lang='en'
     connectionNegotatiorManager =
         ConnectionNegotatiorManager(this, account.password);
     try {
-      return await Socket.connect(account.domain, account.port).then((Socket socket) {
+      return await Socket.connect(account.host ?? account.domain, account.port).then((Socket socket) {
         _socket = socket;
         socket
             .cast<List<int>>()
