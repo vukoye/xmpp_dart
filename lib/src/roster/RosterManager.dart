@@ -1,6 +1,4 @@
 import 'dart:async';
-
-import 'package:meta/meta.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
@@ -114,7 +112,6 @@ class RosterManager {
     }
   }
 
-  @protected
   _processStanza(AbstractStanza stanza) {
     if (stanza is IqStanza) {
       var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];

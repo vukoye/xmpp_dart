@@ -1,3 +1,7 @@
+## 0.2.1
+
+Introducing optional parameter for domain name in account settings 
+
 ## 0.2.0
 
 - Added support for

@@ -1,8 +1,6 @@
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 
-import '../stanzas/AbstractStanza.dart';
-
 class EnableNonza extends Nonza {
   static String NAME = 'enable';
   static String XMLNS = 'urn:xmpp:sm:3';

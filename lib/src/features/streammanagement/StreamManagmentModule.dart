@@ -1,27 +1,23 @@
 import 'dart:async';
-import 'dart:collection';
 
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/nonzas/ANonza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/EnableNonza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/EnabledNonza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/FailedNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/RNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/ResumeNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/ResumedNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/SMNonza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/nonzas/EnableNonza.dart';
-import 'package:xmpp_stone/src/elements/nonzas/EnabledNonza.dart';
-import 'package:xmpp_stone/src/elements/nonzas/FailedNonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamState.dart';
 
 import '../../../xmpp_stone.dart';
 import '../Negotiator.dart';
 
 class StreamManagementModule extends ConnectionNegotiator {
-
   static Map<Connection, StreamManagementModule> instances =
-  Map<Connection, StreamManagementModule>();
+      Map<Connection, StreamManagementModule>();
 
   static StreamManagementModule getInstance(Connection connection) {
     StreamManagementModule module = instances[connection];
@@ -42,7 +38,7 @@ class StreamManagementModule extends ConnectionNegotiator {
   Timer timer;
 
   StreamController<AbstractStanza> _deliveredStanzasStreamController =
-  StreamController.broadcast();
+      StreamController.broadcast();
 
   Stream<AbstractStanza> get deliveredStanzasStream {
     return _deliveredStanzasStreamController.stream;
@@ -59,7 +55,8 @@ class StreamManagementModule extends ConnectionNegotiator {
     var shouldStay = streamState.lastSentStanza - lastDeliveredStanza;
     if (shouldStay < 0) shouldStay = 0;
     while (streamState.nonConfirmedSentStanzas.length > shouldStay) {
-      var stanza = streamState.nonConfirmedSentStanzas.removeFirst() as AbstractStanza;
+      var stanza =
+          streamState.nonConfirmedSentStanzas.removeFirst() as AbstractStanza;
       if (ackTurnedOn) {
         _deliveredStanzasStreamController.add(stanza);
       }
@@ -75,17 +72,12 @@ class StreamManagementModule extends ConnectionNegotiator {
     _connection = connection;
     _connection.streamManagementModule = this;
     ackTurnedOn = connection.account.ackEnabled;
-    _connection.connectionStateStream.listen((state) =>
-    {
-      if (state == XmppConnectionState.Reconnecting) {
-        negotiatorStateStreamController =StreamController()
-      },
-      if (!_connection.isOpened() && timer != null)
-        {timer.cancel()},
-      if (state == XmppConnectionState.Closed) {
-        streamState = StreamState()
-      }
-    });
+    _connection.connectionStateStream.listen((state) => {
+          if (state == XmppConnectionState.Reconnecting)
+            {negotiatorStateStreamController = StreamController()},
+          if (!_connection.isOpened() && timer != null) {timer.cancel()},
+          if (state == XmppConnectionState.Closed) {streamState = StreamState()}
+        });
   }
 
   @override
@@ -110,9 +102,9 @@ class StreamManagementModule extends ConnectionNegotiator {
     if (state == NegotiatorState.NEGOTIATING) {
       if (EnabledNonza.match(nonza)) {
         handleEnabled(nonza);
-      } else if (ResumedNonza.match(nonza)){
+      } else if (ResumedNonza.match(nonza)) {
         resumeState(nonza);
-      }else if (FailedNonza.match(nonza)) {
+      } else if (FailedNonza.match(nonza)) {
         if (streamState.tryingToResume) {
           print("Resuming failed");
           streamState = StreamState();
@@ -123,13 +115,10 @@ class StreamManagementModule extends ConnectionNegotiator {
           print("StreamManagmentFailed"); //try to send an error down to client
           state = NegotiatorState.DONE;
         }
-
       }
     } else if (state == NegotiatorState.DONE) {
       if (ANonza.match(nonza)) {
-        parseAckResponse(nonza
-            .getAttribute('h')
-            .value);
+        parseAckResponse(nonza.getAttribute('h').value);
       } else if (RNonza.match(nonza)) {
         sendAckResponse();
       }
@@ -162,11 +151,15 @@ class StreamManagementModule extends ConnectionNegotiator {
     inStanzaSubscription = _connection.inStanzasStream.listen(parseInStanza);
   }
 
-  void sendEnableStreamManagement() => _connection.writeNonza(EnableNonza(true));
-  void sendAckResponse() => _connection.writeNonza(ANonza(streamState.lastReceivedStanza));
+  void sendEnableStreamManagement() =>
+      _connection.writeNonza(EnableNonza(true));
+
+  void sendAckResponse() =>
+      _connection.writeNonza(ANonza(streamState.lastReceivedStanza));
 
   void tryToResumeStream() {
-    _connection.writeNonza(ResumeNonza(streamState.id, streamState.lastReceivedStanza));
+    _connection.writeNonza(
+        ResumeNonza(streamState.id, streamState.lastReceivedStanza));
     streamState.tryingToResume = true;
   }
 
