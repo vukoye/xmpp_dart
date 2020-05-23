@@ -4,7 +4,7 @@ description: "Xmpp Stone is lightweight XMPP client library written completely i
 
 version: 0.2.0
 
-homepage: http://www.vukoye.com
+homepage: https://vukoye.github.io
 
 environment:
   sdk: '>=2.7.0 <3.0.0'
