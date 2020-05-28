@@ -43,14 +43,14 @@ class ConnectionNegotatiorManager {
         .map((element) => Nonza.parse(element))
         .toList();
     //supportedNegotiatorList.sort((a,b) => a.priorityLevel.compareTo(b.priorityLevel));
-    supportedNegotiatorList.forEach((negotiator) => {
-          nonzas.forEach((nonza) => {
+    supportedNegotiatorList.forEach((negotiator)  {
+          nonzas.forEach((nonza) {
                 if (negotiator.match(nonza))
                   {
                     waitingNegotiators.add(
-                        Tuple2<ConnectionNegotiator, Nonza>(negotiator, nonza))
-                  }
-              })
+                        Tuple2<ConnectionNegotiator, Nonza>(negotiator, nonza));
+                  };
+              });
         });
     //nonzas.sort((a, b) => findNonzaPriority(a).compareTo(findNonzaPriority(b)));
     //nonzas.forEach((feature) => _checkFeature(feature));
@@ -78,9 +78,8 @@ class ConnectionNegotatiorManager {
   }
 
   void negotiateNextFeature() {
-    if (waitingNegotiators.isNotEmpty) {
-      Tuple2<ConnectionNegotiator, Nonza> tuple =
-          waitingNegotiators.removeFirst();
+    Tuple2<ConnectionNegotiator, Nonza> tuple = pickNextNegotatiator();
+    if (tuple != null) {
       activeFeature = tuple.item1;
       activeFeature.negotiate(tuple.item2);
       activeSubscribtion =
@@ -126,5 +125,19 @@ class ConnectionNegotatiorManager {
     } else {
       return feature.priorityLevel;
     }
+  }
+
+  Tuple2<ConnectionNegotiator, Nonza> pickNextNegotatiator() {
+    if (waitingNegotiators.isEmpty) return null;
+    waitingNegotiators.forEach((it) => it.toString());
+    Tuple2<ConnectionNegotiator, Nonza> element = waitingNegotiators.firstWhere((element) {
+      print("ELEMENT " + element.item1.isReady().toString());
+      return element.item1.isReady();
+    }, orElse: ()  {
+      print("No elements");
+      waitingNegotiators.forEach((it) => it.toString());
+    });
+    waitingNegotiators.remove(element);
+    return element;
   }
 }

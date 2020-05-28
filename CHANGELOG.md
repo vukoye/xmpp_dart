@@ -1,3 +1,7 @@
+## 0.2.3
+
+- Bug fixing
+
 ## 0.2.1
 
 Introducing optional parameter for domain name in account settings 

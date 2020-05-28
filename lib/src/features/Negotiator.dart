@@ -46,6 +46,10 @@ abstract class ConnectionNegotiator {
   void backToIdle() {
     state = NegotiatorState.IDLE;
   }
+
+  bool isReady() {
+    return _state != NegotiatorState.DONE && state != NegotiatorState.DONE_CLEAN_OTHERS;
+  }
 }
 
 enum NegotiatorState { IDLE, NEGOTIATING, DONE, DONE_CLEAN_OTHERS }
