@@ -188,7 +188,7 @@ xml:lang='en'
 
   void connect() {
     if (_state == XmppConnectionState.Closed) {
-      _state == XmppConnectionState.Idle;
+      _state = XmppConnectionState.Idle;
     }
     if (_state == XmppConnectionState.Idle) {
       openSocket();
@@ -219,8 +219,14 @@ xml:lang='en'
   void close() {
     if (state != XmppConnectionState.Closed) {
       if (state != XmppConnectionState.ForcelyClosed) {
-        _socket.write('</stream:stream>');
-        _socket.close();
+        if (_socket != null) {
+          try {
+            _socket.write('</stream:stream>');
+            _socket.close();
+          } on Exception {
+            print("Socket already closed");
+          }
+        }
       }
       setState(XmppConnectionState.Closed);
       authenticated = false;

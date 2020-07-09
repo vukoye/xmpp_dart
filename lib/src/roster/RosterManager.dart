@@ -68,7 +68,7 @@ class RosterManager {
     iqStanza.addChild(queryElement);
     XmppElement itemElement = XmppElement();
     itemElement.name = "item";
-    itemElement.addChild(itemElement);
+    queryElement.addChild(itemElement);
     itemElement.addAttribute(XmppAttribute('jid', rosterItem.jid.userAtDomain));
     if (rosterItem.name != null) {
       itemElement.addAttribute(XmppAttribute('name', rosterItem.name));
