@@ -82,6 +82,8 @@ class ConnectionNegotatiorManager {
     if (tuple != null) {
       activeFeature = tuple.item1;
       activeFeature.negotiate(tuple.item2);
+      //TODO: this should be refactored
+      if (activeSubscribtion != null) activeSubscribtion.cancel();
       activeSubscribtion =
           activeFeature.featureStateStream.listen(stateListener);
     } else {
