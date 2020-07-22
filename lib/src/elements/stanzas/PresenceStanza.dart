@@ -1,3 +1,4 @@
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
@@ -6,8 +7,13 @@ class PresenceStanza extends AbstractStanza {
     name = 'presence';
   }
 
+  PresenceStanza.withType(PresenceType type) {
+    name = 'presence';
+    addAttribute(XmppAttribute('type', type.toString().split('.').last.toLowerCase()));
+  }
+
   set type(PresenceType value) {
-    String typeValue = value.toString().split('.').last.toLowerCase();
+    var typeValue = value.toString().split('.').last.toLowerCase();
     _setAttributeValue('type', typeValue);
   }
 
@@ -17,27 +23,25 @@ class PresenceStanza extends AbstractStanza {
   }
 
   set show(PresenceShowElement value) {
-    String showValue = value.toString().split('.').last.toLowerCase();
+    var showValue = value.toString().split('.').last.toLowerCase();
     _setChildValue('show', showValue);
   }
 
   PresenceShowElement get show {
-    String showValue = getChild('show')?.textValue;
+    var showValue = getChild('show')?.textValue;
     return showFromString(showValue);
   }
 
   //status with no language prefs
   String get status {
-    var statusElement = children.firstWhere(
-        (element) => element.name == name && element.attributes.isEmpty,
-        orElse: () => null);
+    var statusElement =
+        children.firstWhere((element) => element.name == name && element.attributes.isEmpty, orElse: () => null);
     return statusElement?.textValue;
   }
 
   set status(String value) {
-    var childElement = children.firstWhere(
-        (element) => element.name == 'status' && element.attributes.isEmpty,
-        orElse: () => null);
+    var childElement =
+        children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty, orElse: () => null);
     if (childElement == null) {
       var element = XmppElement();
       element.name = 'status';
@@ -61,17 +65,14 @@ class PresenceStanza extends AbstractStanza {
     switch (showString) {
       case 'away':
         return PresenceShowElement.AWAY;
-        break;
       case 'chat':
         return PresenceShowElement.CHAT;
-        break;
       case 'dnd':
         return PresenceShowElement.DND;
-        break;
       case 'xa':
         return PresenceShowElement.XA;
-        break;
     }
+
     return null;
   }
 
@@ -79,33 +80,26 @@ class PresenceStanza extends AbstractStanza {
     switch (typeString) {
       case 'error':
         return PresenceType.ERROR;
-        break;
       case 'probe':
         return PresenceType.PROBE;
-        break;
       case 'subscribe':
         return PresenceType.SUBSCRIBE;
-        break;
       case 'subscribed':
         return PresenceType.SUBSCRIBED;
-        break;
       case 'unavailable':
         return PresenceType.UNAVAILABLE;
-        break;
       case 'unsubscribe':
         return PresenceType.UNSUBSCRIBE;
-        break;
       case 'unsubscribed':
         return PresenceType.UNSUBSCRIBED;
-        break;
     }
+
     return null;
   }
 
   void _setChildValue(String childName, String value) {
-    var childElement = children.firstWhere(
-        (element) => element.name == childName && element.attributes.isEmpty,
-        orElse: () => null);
+    var childElement =
+        children.firstWhere((element) => element.name == childName && element.attributes.isEmpty, orElse: () => null);
     if (childElement == null) {
       var element = XmppElement();
       element.name = childName;
@@ -117,8 +111,7 @@ class PresenceStanza extends AbstractStanza {
   }
 
   void _setAttributeValue(String attrName, String value) {
-    var attr = attributes.firstWhere((attribute) => attribute.name == name,
-        orElse: () => null);
+    var attr = attributes.firstWhere((attribute) => attribute.name == name, orElse: () => null);
     if (attr == null) {
       var element = XmppElement();
       element.name = attrName;
@@ -137,7 +130,12 @@ enum PresenceType {
   SUBSCRIBED,
   UNAVAILABLE,
   UNSUBSCRIBE,
-  UNSUBSCRIBED
+  UNSUBSCRIBED,
 }
 
-enum PresenceShowElement { AWAY, CHAT, DND, XA }
+enum PresenceShowElement {
+  AWAY,
+  CHAT,
+  DND,
+  XA,
+}

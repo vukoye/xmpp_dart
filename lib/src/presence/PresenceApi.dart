@@ -13,6 +13,8 @@ abstract class PresenceApi {
   void declineSubscription(Jid to);
 
   void sendDirectPresence(PresenceData presence, Jid to);
+
+  void askDirectPresence(Jid to);
 }
 
 class PresenceData {

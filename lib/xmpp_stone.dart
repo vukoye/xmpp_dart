@@ -7,6 +7,7 @@ export 'src/ConnectionStateChangedListener.dart';
 export 'src/data/Jid.dart';
 export 'src/messages/MessagesListener.dart';
 export 'src/elements/stanzas/MessageStanza.dart';
+export 'src/elements/stanzas/PresenceStanza.dart';
 export 'src/presence/PresenceManager.dart';
 export 'src/presence/PresenceApi.dart';
 export 'src/account/XmppAccountSettings.dart';
