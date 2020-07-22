@@ -1,9 +1,9 @@
 import 'package:quiver/core.dart';
 
 class Jid {
-  String _local = "";
-  String _domain = "";
-  String _resource = "";
+  String _local = '';
+  String _domain = '';
+  String _resource = '';
 
   Jid(String local, String domain, String resource) {
     _local = local;
@@ -13,10 +13,7 @@ class Jid {
 
   @override
   bool operator ==(other) {
-    return other is Jid &&
-        local == other.local &&
-        domain == other.domain &&
-        resource == other.resource;
+    return other is Jid && local == other.local && domain == other.domain && resource == other.resource;
   }
 
   String get local => _local;
@@ -32,24 +29,24 @@ class Jid {
         local.isNotEmpty &&
         domain.isNotEmpty &&
         resource.isNotEmpty) {
-      return "$_local@$_domain/$_resource";
+      return '$_local@$_domain/$_resource';
     }
     if (local == null || local.isEmpty) {
       return _domain;
     }
     if (resource == null || resource.isEmpty) {
-      return "$_local@$_domain";
+      return '$_local@$_domain';
     }
-    return "";
+    return '';
   }
 
   String get userAtDomain {
-    if (local != null && local.isNotEmpty) return "$_local@$_domain";
+    if (local != null && local.isNotEmpty) return '$_local@$_domain';
     return _domain;
   }
 
   static Jid fromFullJid(String fullJid) {
-    RegExp exp = RegExp(r"^((.*?)@)?([^/@]+)(/(.*))?$");
+    var exp = RegExp(r'^((.*?)@)?([^/@]+)(/(.*))?$');
     Iterable<Match> matches = exp.allMatches(fullJid);
     var match = matches.first;
     if (match != null) {

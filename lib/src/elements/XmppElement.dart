@@ -3,7 +3,7 @@ import 'package:xml/xml.dart' as xml;
 
 class XmppElement {
   String _name;
-  get name => _name;
+  String get name => _name;
   set name(String value) {
     _name = value;
   }
@@ -20,8 +20,7 @@ class XmppElement {
 
   List<XmppAttribute> _attributes = List<XmppAttribute>();
   XmppAttribute getAttribute(String name) {
-    return _attributes.firstWhere((attr) => attr.name == name,
-        orElse: () => null);
+    return _attributes.firstWhere((attr) => attr.name == name, orElse: () => null);
   }
 
   void addAttribute(XmppAttribute attribute) {
@@ -37,8 +36,7 @@ class XmppElement {
   }
 
   XmppElement getChild(String name) {
-    return _children.firstWhere((element) => element.name == name,
-        orElse: () => null);
+    return _children.firstWhere((element) => element.name == name, orElse: () => null);
   }
 
   String buildXmlString() {
@@ -50,8 +48,7 @@ class XmppElement {
     List<xml.XmlNode> xmlNodes = List<xml.XmlNode>();
     _attributes.forEach((xmppAttribute) {
       if (xmppAttribute.value != null) {
-        xmlAttributes.add(xml.XmlAttribute(
-            xml.XmlName(xmppAttribute.name), xmppAttribute.value));
+        xmlAttributes.add(xml.XmlAttribute(xml.XmlName(xmppAttribute.name), xmppAttribute.value));
       }
     });
     _children.forEach((xmppChild) {
@@ -60,8 +57,7 @@ class XmppElement {
     if (textValue != null) {
       xmlNodes.add(xml.XmlText(textValue));
     }
-    xml.XmlElement xmlElement =
-        xml.XmlElement(xml.XmlName(this.name), xmlAttributes, xmlNodes);
+    var xmlElement = xml.XmlElement(xml.XmlName(this.name), xmlAttributes, xmlNodes);
     return xmlElement;
   }
 
