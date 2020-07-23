@@ -4,7 +4,7 @@ class XmppAccountSettings {
   String name;
   String username;
   String domain;
-  String resource = "";
+  String resource = '';
   String password;
   String host;
   int port;
@@ -17,7 +17,7 @@ class XmppAccountSettings {
   Jid get fullJid => Jid(username, domain, resource);
 
   static XmppAccountSettings fromJid(String jid, String password) {
-    Jid fullJid = Jid.fromFullJid(jid);
+    var fullJid = Jid.fromFullJid(jid);
     return XmppAccountSettings(jid, fullJid.local, fullJid.domain, password, 5222);
   }
 }
