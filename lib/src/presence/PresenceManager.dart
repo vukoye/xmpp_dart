@@ -7,7 +7,7 @@ import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone/src/presence/PresenceApi.dart';
 
 class PresenceManager implements PresenceApi {
-  Connection _connection;
+  final Connection _connection;
 
   List<PresenceStanza> requests = List<PresenceStanza>();
 
@@ -42,8 +42,8 @@ class PresenceManager implements PresenceApi {
 
   static Map<Connection, PresenceManager> instances = Map<Connection, PresenceManager>();
 
-  static getInstance(Connection connection) {
-    PresenceManager manager = instances[connection];
+  static PresenceManager getInstance(Connection connection) {
+    var manager = instances[connection];
     if (manager == null) {
       manager = PresenceManager(connection);
       instances[connection] = manager;
@@ -61,20 +61,18 @@ class PresenceManager implements PresenceApi {
 
   @override
   void acceptSubscription(Jid to) {
-    PresenceStanza presenceStanza = PresenceStanza();
+    var presenceStanza = PresenceStanza.withType(PresenceType.SUBSCRIBED);
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
-    presenceStanza.type = PresenceType.SUBSCRIBED;
     requests.add(presenceStanza);
     _connection.writeStanza(presenceStanza);
   }
 
   @override
   void declineSubscription(Jid to) {
-    var presenceStanza = PresenceStanza();
+    var presenceStanza = PresenceStanza.withType(PresenceType.UNSUBSCRIBED);
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
-    presenceStanza.type = PresenceType.UNSUBSCRIBED;
     requests.add(presenceStanza);
     _connection.writeStanza(presenceStanza);
   }
@@ -106,20 +104,18 @@ class PresenceManager implements PresenceApi {
 
   @override
   void subscribe(Jid to) {
-    var presenceStanza = PresenceStanza();
+    var presenceStanza = PresenceStanza.withType(PresenceType.SUBSCRIBE);
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
-    presenceStanza.type = PresenceType.SUBSCRIBE;
     requests.add(presenceStanza);
     _connection.writeStanza(presenceStanza);
   }
 
   @override
   void unsubscribe(Jid to) {
-    var presenceStanza = PresenceStanza();
+    var presenceStanza = PresenceStanza.withType(PresenceType.UNSUBSCRIBE);
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
-    presenceStanza.type = PresenceType.UNSUBSCRIBE;
     requests.add(presenceStanza);
     _connection.writeStanza(presenceStanza);
   }
