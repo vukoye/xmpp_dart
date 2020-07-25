@@ -24,7 +24,7 @@ void main(List<String> arguments) {
 //    port = 5222;
 //  }
   var jid = xmpp.Jid.fromFullJid(userAtDomain);
-  var account = xmpp.XmppAccountSettings(userAtDomain, jid.local, jid.domain, password, 5222);
+  var account = xmpp.XmppAccountSettings(userAtDomain, jid.local, jid.domain, password, 5222, resource: 'xmppstone');
   var connection = xmpp.Connection(account);
   connection.connect();
   xmpp.MessagesListener messagesListener = ExampleMessagesListener();

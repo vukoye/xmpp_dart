@@ -12,6 +12,8 @@ import 'package:xmpp_stone/src/features/Negotiator.dart';
 class BindingResourceConnectionNegotiator extends ConnectionNegotiator {
   Connection _connection;
   StreamSubscription<AbstractStanza> subscription;
+  static const String BIND_NAME = 'bind';
+  static const String BIND_ATTRIBUTE = 'urn:ietf:params:xml:ns:xmpp-bind';
 
   BindingResourceConnectionNegotiator(Connection connection) {
     _connection = connection;
@@ -19,24 +21,24 @@ class BindingResourceConnectionNegotiator extends ConnectionNegotiator {
   }
   @override
   bool match(Nonza request) {
-    return request.name == "bind";
+    return request.name == BIND_NAME;
   }
 
   @override
   void negotiate(Nonza nonza) {
-    if (nonza.name == "bind") {
+    if (nonza.name == BIND_NAME) {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inStanzasStream.listen(parseStanza);
-      sendBindRequestStanza();
+      sendBindRequestStanza(_connection.account.resource);
     }
   }
 
   void parseStanza(AbstractStanza stanza) {
     if (stanza is IqStanza) {
-      XmppElement element = stanza.getChild('bind');
-      String jidValue = element?.getChild('jid')?.textValue;
+      var element = stanza.getChild(BIND_NAME);
+      var jidValue = element?.getChild('jid')?.textValue;
       if (jidValue != null) {
-        Jid jid = Jid.fromFullJid(jidValue);
+        var jid = Jid.fromFullJid(jidValue);
         _connection.fullJidRetrieved(jid);
         state = NegotiatorState.DONE;
         subscription.cancel();
@@ -44,12 +46,15 @@ class BindingResourceConnectionNegotiator extends ConnectionNegotiator {
     }
   }
 
-  void sendBindRequestStanza() {
-    IqStanza stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    XmppElement bindElement = XmppElement();
-    bindElement.name = 'bind';
-    XmppAttribute attribute =
-        XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-bind');
+  void sendBindRequestStanza(String resource) {
+    var stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    var bindElement = XmppElement();
+    bindElement.name = BIND_NAME;
+    var resourceElement = XmppElement();
+    resourceElement.name = 'resource';
+    resourceElement.textValue = resource;
+    bindElement.addChild(resourceElement);
+    var attribute = XmppAttribute('xmlns', BIND_ATTRIBUTE);
     bindElement.addAttribute(attribute);
     stanza.addChild(bindElement);
     _connection.writeStanza(stanza);

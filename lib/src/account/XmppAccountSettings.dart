@@ -12,7 +12,7 @@ class XmppAccountSettings {
   int reconnectionTimeout = 1000;
   bool ackEnabled = true;
 
-  XmppAccountSettings(this.name, this.username, this.domain, this.password, this.port, {this.host});
+  XmppAccountSettings(this.name, this.username, this.domain, this.password, this.port, {this.host, this.resource} );
 
   Jid get fullJid => Jid(username, domain, resource);
 
