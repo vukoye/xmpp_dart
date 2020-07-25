@@ -18,7 +18,7 @@ Actively working on:
 
 ## Latest news
 
--2020-07-23: Added Support for XEP-0318: Best Practices for Client Initiated Presence Probes
+ -2020-07-23: Added Support for XEP-0318: Best Practices for Client Initiated Presence Probes
 
 - 2020-05-02: Added Initial Support for XEP-0198 : Stream Management
 

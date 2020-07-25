@@ -1,3 +1,5 @@
+## 0.2.5
+- bug fixing
 ## 0.2.4
 
 - Added Support for
