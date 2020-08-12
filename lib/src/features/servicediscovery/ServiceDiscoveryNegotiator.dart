@@ -76,6 +76,8 @@ class ServiceDiscoveryNegotiator extends ConnectionNegotiator {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inStanzasStream.listen(_parseStanza);
       _sendServiceDiscoveryRequest();
+    } else if (state == NegotiatorState.DONE){
+      _connection.setState(XmppConnectionState.DoneServiceDiscovery);
     }
   }
 
