@@ -50,6 +50,11 @@ abstract class ConnectionNegotiator {
   bool isReady() {
     return _state != NegotiatorState.DONE && state != NegotiatorState.DONE_CLEAN_OTHERS;
   }
+
+  @override
+  String toString() {
+    return '{name: ${expectedName}, name_space: ${expectedNameSpace}, priority: ${priorityLevel}, state: ${state}}, isReady: ${isReady()}';
+  }
 }
 
 enum NegotiatorState { IDLE, NEGOTIATING, DONE, DONE_CLEAN_OTHERS }

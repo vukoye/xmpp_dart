@@ -152,7 +152,7 @@ class StreamManagementModule extends ConnectionNegotiator {
     }
     timer = Timer.periodic(
         Duration(milliseconds: 5000), (Timer t) => sendAckRequest());
-    inStanzaSubscription = _connection.outStanzasStream.listen(parseOutStanza);
+    outStanzaSubscription = _connection.outStanzasStream.listen(parseOutStanza);
     inStanzaSubscription = _connection.inStanzasStream.listen(parseInStanza);
   }
 
