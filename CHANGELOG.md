@@ -1,3 +1,9 @@
+## 0.2.7
+- bug fixing
+
+## 0.2.6
+- bug fixing
+
 ## 0.2.5
 - bug fixing
 ## 0.2.4
