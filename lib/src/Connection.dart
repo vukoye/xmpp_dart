@@ -21,6 +21,7 @@ enum XmppConnectionState {
   Idle,
   Closed,
   SocketOpening,
+  SocketOpened,
   DoneParsingFeatures,
   StartTlsFailed,
   AuthenticationNotSupported,
@@ -32,8 +33,11 @@ enum XmppConnectionState {
   SessionInitialized,
   DoneServiceDiscovery,
   Ready,
+  Closing,
   ForcelyClosed,
-  Reconnecting
+  Reconnecting,
+  WouldLikeToOpen,
+  WouldLikeToClose,
 }
 
 class Connection {
@@ -74,19 +78,19 @@ class Connection {
 
   bool authenticated = false;
 
-  StreamController<AbstractStanza> _inStanzaStreamController =
+  final StreamController<AbstractStanza> _inStanzaStreamController =
       StreamController.broadcast();
 
-  StreamController<AbstractStanza> _outStanzaStreamController =
+  final StreamController<AbstractStanza> _outStanzaStreamController =
       StreamController.broadcast();
 
-  StreamController<Nonza> _inNonzaStreamController =
+  final StreamController<Nonza> _inNonzaStreamController =
       StreamController.broadcast();
 
-  StreamController<Nonza> _outNonzaStreamController =
+  final StreamController<Nonza> _outNonzaStreamController =
       StreamController.broadcast();
 
-  StreamController<XmppConnectionState> _connectionStateStreamController =
+  final StreamController<XmppConnectionState> _connectionStateStreamController =
       StreamController.broadcast();
 
   Stream<AbstractStanza> get inStanzasStream {
@@ -113,7 +117,7 @@ class Connection {
 
   Jid get fullJid => account.fullJid;
 
-  ConnectionNegotatiorManager connectionNegotatiorManager;
+  ConnectionNegotiatorManager connectionNegotatiorManager;
 
   void fullJidRetrieved(Jid jid) {
     account.resource = jid.resource;
@@ -135,6 +139,7 @@ class Connection {
     PresenceManager.getInstance(this);
     MessageHandler.getInstance(this);
     PingManager.getInstance(this);
+    connectionNegotatiorManager = ConnectionNegotiatorManager(this, account);
     reconnectionManager = ReconnectionManager(this);
   }
 
@@ -146,7 +151,6 @@ to='${fullJid.domain}'
 xml:lang='en'
 >
 """;
-
     write(streamOpeningString);
   }
 
@@ -179,7 +183,6 @@ xml:lang='en'
   }
 
   void reconnect() {
-    print("Reconnect!!!");
     if (_state == XmppConnectionState.ForcelyClosed) {
       setState(XmppConnectionState.Reconnecting);
       openSocket();
@@ -187,6 +190,9 @@ xml:lang='en'
   }
 
   void connect() {
+    if (_state == XmppConnectionState.Closing) {
+      _state == XmppConnectionState.WouldLikeToOpen;
+    }
     if (_state == XmppConnectionState.Closed) {
       _state = XmppConnectionState.Idle;
     }
@@ -196,19 +202,25 @@ xml:lang='en'
   }
 
   Future<void> openSocket() async {
-    connectionNegotatiorManager =
-        ConnectionNegotatiorManager(this, account.password);
+    connectionNegotatiorManager.init();
+    setState(XmppConnectionState.SocketOpening);
     try {
       return await Socket.connect(account.host ?? account.domain, account.port).then((Socket socket) {
-        _socket = socket;
-        socket
-            .cast<List<int>>()
-            .transform(utf8.decoder)
-            .map(prepareStreamResponse)
-            .listen(handleResponse,
-            onDone: handleConnectionDone);
-        _openStream();
-        setState(XmppConnectionState.SocketOpening);
+        // if not closed in meantime
+        if (_state != XmppConnectionState.Closed) {
+          setState(XmppConnectionState.SocketOpened);
+          _socket = socket;
+          socket
+              .cast<List<int>>()
+              .transform(utf8.decoder)
+              .map(prepareStreamResponse)
+              .listen(handleResponse,
+              onDone: handleConnectionDone);
+          _openStream();
+        } else {
+          print("Closed in meantime");
+          socket.close();
+        }
       });
     } on SocketException catch(error) {
       print("Socket Exception" + error.toString());
@@ -217,10 +229,14 @@ xml:lang='en'
   }
 
   void close() {
+    if (isAsyncSocketState()) {
+      throw Exception("Closing is not possible during this state");
+    }
     if (state != XmppConnectionState.Closed) {
       if (state != XmppConnectionState.ForcelyClosed) {
         if (_socket != null) {
           try {
+            setState(XmppConnectionState.Closing);
             _socket.write('</stream:stream>');
             _socket.close();
           } on Exception {
@@ -228,7 +244,6 @@ xml:lang='en'
           }
         }
       }
-      setState(XmppConnectionState.Closed);
       authenticated = false;
     }
   }
@@ -320,7 +335,9 @@ xml:lang='en'
 
   bool isOpened() {
     return state != XmppConnectionState.Closed &&
-        state != XmppConnectionState.ForcelyClosed;
+        state != XmppConnectionState.ForcelyClosed &&
+        state != XmppConnectionState.Closing &&
+        state != XmppConnectionState.SocketOpening;
   }
 
   void write(message) {
@@ -421,30 +438,37 @@ xml:lang='en'
   }
 
   void handleConnectionDone() {
-    print("!!!!!!!!!!!Handle connection done");
-    if (state != XmppConnectionState.Closed) {
-      setState(XmppConnectionState.ForcelyClosed);
-    }
+    print("Handle connection done");
+    handleCloseState();
   }
 
   void handleSecuredConnectionDone() {
-    print("!!!!!!!!!!!Handle secured connection done");
-    if (state != XmppConnectionState.Closed) {
-      setState(XmppConnectionState.ForcelyClosed);
-    }
+    print("Handle secured connection done");
+    handleCloseState();
   }
 
   handleConnectionError(String error) {
     print("!!!!!!Handle ERROR " + error);
-    if (state != XmppConnectionState.Closed) {
+    handleCloseState();
+  }
+
+  void handleCloseState() {
+    if (state == XmppConnectionState.WouldLikeToOpen) {
+      setState(XmppConnectionState.Closed);
+      connect();
+    } else if (state != XmppConnectionState.Closing) {
       setState(XmppConnectionState.ForcelyClosed);
+    } else {
+      setState(XmppConnectionState.Closed);
     }
   }
 
   handleSecuredConnectionError(String error) {
-    print("!!!!!!Handle Secured ERROR " + error);
-    if (state != XmppConnectionState.Closed) {
-      setState(XmppConnectionState.ForcelyClosed);
-    }
+    print("Handle Secured ERROR " + error);
+    handleCloseState();
+  }
+
+  bool isAsyncSocketState() {
+    return state == XmppConnectionState.SocketOpening || state == XmppConnectionState.Closing;
   }
 }

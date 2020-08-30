@@ -13,7 +13,7 @@ abstract class ConnectionNegotiator {
   NegotiatorState get state => _state;
 
   StreamController<NegotiatorState> negotiatorStateStreamController =
-      StreamController();
+      StreamController<NegotiatorState>.broadcast();
 
   Stream<NegotiatorState> get featureStateStream {
     return negotiatorStateStreamController.stream;
