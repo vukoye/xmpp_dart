@@ -229,20 +229,19 @@ xml:lang='en'
   }
 
   void close() {
-    if (isAsyncSocketState()) {
+    if (state == XmppConnectionState.SocketOpening) {
       throw Exception("Closing is not possible during this state");
     }
-    if (state != XmppConnectionState.Closed) {
-      if (state != XmppConnectionState.ForcelyClosed) {
+    if (state != XmppConnectionState.Closed
+        && state != XmppConnectionState.ForcelyClosed
+        && state != XmppConnectionState.Closing) {
         if (_socket != null) {
           try {
             setState(XmppConnectionState.Closing);
             _socket.write('</stream:stream>');
-            _socket.close();
           } on Exception {
             print("Socket already closed");
           }
-        }
       }
       authenticated = false;
     }

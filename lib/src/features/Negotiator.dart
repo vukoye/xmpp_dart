@@ -44,6 +44,9 @@ abstract class ConnectionNegotiator {
   void negotiate(Nonza nonza);
 
   void backToIdle() {
+    if (negotiatorStateStreamController.isClosed) {
+      negotiatorStateStreamController = StreamController();
+    }
     state = NegotiatorState.IDLE;
   }
 

@@ -72,11 +72,15 @@ class StreamManagementModule extends ConnectionNegotiator {
     _connection = connection;
     _connection.streamManagementModule = this;
     ackTurnedOn = connection.account.ackEnabled;
-    _connection.connectionStateStream.listen((state) => {
-          if (state == XmppConnectionState.Reconnecting)
-            {negotiatorStateStreamController = StreamController()},
-          if (!_connection.isOpened() && timer != null) {timer.cancel()},
-          if (state == XmppConnectionState.Closed) {streamState = StreamState()}
+    _connection.connectionStateStream.listen((state) {
+          if (state == XmppConnectionState.Reconnecting) {
+            backToIdle();
+          }
+          if (!_connection.isOpened() && timer != null) {timer.cancel();};
+          if (state == XmppConnectionState.Closed) {
+            streamState = StreamState();
+            //state = XmppConnectionState.Idle;
+          }
         });
   }
 
@@ -175,4 +179,9 @@ class StreamManagementModule extends ConnectionNegotiator {
   }
 
   bool isResumeAvailable() => streamState.isResumeAvailable();
+
+  void reset() {
+    negotiatorStateStreamController = StreamController();
+    backToIdle();
+  }
 }

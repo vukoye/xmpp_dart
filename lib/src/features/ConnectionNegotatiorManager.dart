@@ -35,6 +35,7 @@ class ConnectionNegotiatorManager {
   }
 
   void init() {
+    supportedNegotiatorList.clear();
     _initSupportedFeaturesList();
     waitingNegotiators.clear();
   }
@@ -98,6 +99,7 @@ class ConnectionNegotiatorManager {
 
   void _initSupportedFeaturesList() {
     var streamManagement = StreamManagementModule.getInstance(_connection);
+    streamManagement.reset();
     supportedNegotiatorList.add(StartTlsNegotiator(_connection)); //priority 1
     supportedNegotiatorList
         .add(SaslAuthenticationFeature(_connection, _accountSettings.password));
@@ -109,7 +111,7 @@ class ConnectionNegotiatorManager {
     supportedNegotiatorList
         .add(streamManagement); //doesn't care if success it will be done
     supportedNegotiatorList.add(SessionInitiationNegotiator(_connection));
-    supportedNegotiatorList.add(ServiceDiscoveryNegotiator(_connection));
+    supportedNegotiatorList.add(ServiceDiscoveryNegotiator.getInstance(_connection));
   }
 
   void stateListener(NegotiatorState state) {
