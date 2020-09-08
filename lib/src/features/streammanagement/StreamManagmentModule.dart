@@ -104,7 +104,7 @@ class StreamManagementModule extends ConnectionNegotiator {
 
   @override
   bool isReady() {
-    return super.isReady() && (isResumeAvailable() || _connection.fullJid.resource.isNotEmpty);
+    return super.isReady() && (isResumeAvailable() || (_connection.fullJid.resource != null && _connection.fullJid.resource.isNotEmpty));
   }
 
   void parseNonza(Nonza nonza) {

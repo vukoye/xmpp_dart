@@ -9,7 +9,7 @@ import 'package:xmpp_stone/src/presence/PresenceApi.dart';
 class PresenceManager implements PresenceApi {
   final Connection _connection;
 
-  List<PresenceStanza> requests = List<PresenceStanza>();
+  List<PresenceStanza> requests = <PresenceStanza>[];
 
   final StreamController<PresenceData> _presenceStreamController = StreamController<PresenceData>.broadcast();
 
@@ -40,7 +40,7 @@ class PresenceManager implements PresenceApi {
     return _errorStreamController.stream;
   }
 
-  static Map<Connection, PresenceManager> instances = Map<Connection, PresenceManager>();
+  static Map<Connection, PresenceManager> instances = <Connection, PresenceManager>{};
 
   static PresenceManager getInstance(Connection connection) {
     var manager = instances[connection];

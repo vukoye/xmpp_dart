@@ -11,7 +11,7 @@ import 'package:tuple/tuple.dart';
 //todo check for rfc6121 2.6.2
 //todo add support for jid groups
 class RosterManager {
-  static Map<Connection, RosterManager> instances = Map<Connection, RosterManager>();
+  static Map<Connection, RosterManager> instances = <Connection, RosterManager>{};
 
   static RosterManager getInstance(Connection connection) {
     var manager = instances[connection];
@@ -22,7 +22,7 @@ class RosterManager {
     return manager;
   }
 
-  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas = Map<String, Tuple2<IqStanza, Completer>>();
+  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas = <String, Tuple2<IqStanza, Completer>>{};
 
   final StreamController<List<Buddy>> _rosterController = StreamController<List<Buddy>>.broadcast();
 
@@ -30,7 +30,7 @@ class RosterManager {
     return _rosterController.stream;
   }
 
-  Map<Jid, Buddy> _rosterMap = Map<Jid, Buddy>();
+  final Map<Jid, Buddy> _rosterMap = <Jid, Buddy>{};
 
   Connection _connection;
 
@@ -100,7 +100,7 @@ class RosterManager {
       _queryForRoster();
     } else if (state == XmppConnectionState.Closed) {
       _rosterMap.clear();
-      _rosterController.add(List());
+      _rosterController.add([]);
     }
   }
 

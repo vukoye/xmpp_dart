@@ -45,6 +45,10 @@ class Jid {
     return _domain;
   }
 
+  bool isValid() {
+    return local != null && local.isNotEmpty && domain != null && domain.isNotEmpty;
+  }
+
   static Jid fromFullJid(String fullJid) {
     var exp = RegExp(r'^((.*?)@)?([^/@]+)(/(.*))?$');
     Iterable<Match> matches = exp.allMatches(fullJid);

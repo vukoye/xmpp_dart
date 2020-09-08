@@ -27,6 +27,7 @@ class Buddy {
     _jid = jid;
   }
 
+  @override
   String toString() {
     return _jid.fullJid;
   }

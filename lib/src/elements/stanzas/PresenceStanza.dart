@@ -35,7 +35,7 @@ class PresenceStanza extends AbstractStanza {
   //status with no language prefs
   String get status {
     var statusElement =
-        children.firstWhere((element) => element.name == name && element.attributes.isEmpty, orElse: () => null);
+        children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty, orElse: () => null);
     return statusElement?.textValue;
   }
 
