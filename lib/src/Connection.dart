@@ -282,10 +282,10 @@ xml:lang='en'
     }
 
     if (fullResponse != null && fullResponse.isNotEmpty) {
-      var xmlResponse;
+      xml.XmlNode xmlResponse;
       try {
         //print(fullResponse);
-        xmlResponse = xml.parse(fullResponse).firstChild;
+        xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
       } catch (e) {
         _unparsedXmlResponse += fullResponse.substring(
             0, fullResponse.length - 13); //remove  xmpp_stone end tag

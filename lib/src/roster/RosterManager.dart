@@ -34,7 +34,7 @@ class RosterManager {
 
   Connection _connection;
 
-  void _queryForRoster() {
+  void queryForRoster() {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     var element = XmppElement();
     element.name = 'query';
@@ -72,7 +72,7 @@ class RosterManager {
   }
 
   Future<IqStanzaResult> removeRosterItem(Buddy rosterItem) {
-    var completer = Completer();
+    var completer = Completer<IqStanzaResult>();
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     var queryElement = XmppElement();
     queryElement.name = 'query';
@@ -97,7 +97,7 @@ class RosterManager {
 
   void _connectionStateProcessor(XmppConnectionState state) {
     if (state == XmppConnectionState.Ready) {
-      _queryForRoster();
+      queryForRoster();
     } else if (state == XmppConnectionState.Closed) {
       _rosterMap.clear();
       _rosterController.add([]);
