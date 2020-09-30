@@ -162,16 +162,6 @@ xml:lang='en'
 
   String prepareStreamResponse(String response) {
     String response1 = extractWholeChild(restOfResponse + response);
-
-    if (response1.contains("stream:stream") &&
-        !(response1.contains("</stream>"))) {
-      response1 = response1 +
-          "</stream>"; // fix for crashing xml library without ending
-    }
-
-    //fix for multiple roots issue
-    response1 = "<xmpp_stone>$response1</xmpp_stone>";
-
     if (_logXML) {
       print("response: ${response1}");
     }
@@ -179,6 +169,14 @@ xml:lang='en'
       close();
       return "";
     }
+    if (response1.contains("stream:stream") &&
+        !(response1.contains("</stream:stream>"))) {
+      response1 = response1 +
+          "</stream:stream>"; // fix for crashing xml library without ending
+    }
+
+    //fix for multiple roots issue
+    response1 = "<xmpp_stone>$response1</xmpp_stone>";
     return response1;
   }
 
@@ -270,12 +268,18 @@ xml:lang='en'
   String _unparsedXmlResponse = "";
 
   void handleResponse(String response) {
+    print("!!!!handle response ${response}");
     String fullResponse;
     if (_unparsedXmlResponse.isNotEmpty) {
-      print(_unparsedXmlResponse);
-      fullResponse = "$_unparsedXmlResponse${response.substring(12)}"; //
+      print("!!!!!!! previos" + _unparsedXmlResponse);
+      if (response.length > 12) {
+        fullResponse = "$_unparsedXmlResponse${response.substring(12)}"; //
+      } else {
+        fullResponse = _unparsedXmlResponse;
+      }
       // remove xmpp_stone start tag
-      print(_unparsedXmlResponse);
+      //print("!!!!!!!" + _unparsedXmlResponse);
+      print ("full response = ${fullResponse}");
       _unparsedXmlResponse = "";
     } else {
       fullResponse = response;
@@ -286,7 +290,9 @@ xml:lang='en'
       try {
         //print(fullResponse);
         xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
+        print("!!!!!!! PARSED${xmlResponse.toString()}");
       } catch (e) {
+        print("ERROR IS ${e.toString()}");
         _unparsedXmlResponse += fullResponse.substring(
             0, fullResponse.length - 13); //remove  xmpp_stone end tag
         xmlResponse = xml.XmlElement(xml.XmlName("error"));

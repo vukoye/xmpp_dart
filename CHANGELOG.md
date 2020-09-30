@@ -1,3 +1,6 @@
+## 0.2.9
+- bug fixing
+
 ## 0.2.8
 - updating xml lib version
 
