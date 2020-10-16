@@ -271,14 +271,11 @@ xml:lang='en'
     print("!!!!handle response ${response}");
     String fullResponse;
     if (_unparsedXmlResponse.isNotEmpty) {
-      print("!!!!!!! previos" + _unparsedXmlResponse);
       if (response.length > 12) {
         fullResponse = "$_unparsedXmlResponse${response.substring(12)}"; //
       } else {
         fullResponse = _unparsedXmlResponse;
       }
-      // remove xmpp_stone start tag
-      //print("!!!!!!!" + _unparsedXmlResponse);
       print ("full response = ${fullResponse}");
       _unparsedXmlResponse = "";
     } else {
@@ -290,9 +287,7 @@ xml:lang='en'
       try {
         //print(fullResponse);
         xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
-        print("!!!!!!! PARSED${xmlResponse.toString()}");
       } catch (e) {
-        print("ERROR IS ${e.toString()}");
         _unparsedXmlResponse += fullResponse.substring(
             0, fullResponse.length - 13); //remove  xmpp_stone end tag
         xmlResponse = xml.XmlElement(xml.XmlName("error"));
@@ -453,7 +448,6 @@ xml:lang='en'
   }
 
   handleConnectionError(String error) {
-    print("!!!!!!Handle ERROR " + error);
     handleCloseState();
   }
 

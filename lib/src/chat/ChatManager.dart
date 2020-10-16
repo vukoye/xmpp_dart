@@ -48,10 +48,11 @@ class ChatManager {
   }
 
   ChatImpl _getChat(Jid jid) {
-    Chat chat = _chats[jid];
+    Chat chat = _chats[jid.userAtDomain];
     if (chat == null) {
       chat = ChatImpl(jid, _connection);
       _chats[jid.userAtDomain] = chat;
+      print("!!! Chat List changed: size ${_chats.length}");
       _chatListStreamController.add(chats);
     }
     return chat;

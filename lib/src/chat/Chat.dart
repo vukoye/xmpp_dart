@@ -100,6 +100,7 @@ abstract class Chat {
   ChatState get remoteState;
   Stream<Message> get newMessageStream;
   Stream<ChatState> get remoteStateStream;
+  List<Message> messages;
   void sendMessage(String text);
   set myState(ChatState state);
 }
