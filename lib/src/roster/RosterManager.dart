@@ -137,7 +137,6 @@ class RosterManager {
   void _fireOnRosterListChanged() {
     var rosterList = _rosterMap.values.toList();
     _rosterController.add(rosterList);
-    print('RosterListChanged: ${rosterList}');
   }
 
   void _handleFullRosterResponse(IqStanza stanza) {

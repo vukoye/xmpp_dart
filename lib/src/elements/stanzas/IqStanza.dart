@@ -15,28 +15,9 @@ class IqStanza extends AbstractStanza {
     name = 'iq';
     this.id = id;
     _type = type;
-    this.addAttribute(
+    addAttribute(
         XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
   }
-
-//  String buildXml() {
-//    //todo (maybe in AbstractStanza)
-//
-//    var attributeType = xml.XmlAttribute(xml.XmlName('type'), _type.toString().split('.').last.toLowerCase());
-//    var attributeId = xml.XmlAttribute(xml.XmlName('id'), this.id);
-//    var listOfAttributes = [attributeId, attributeType];
-//    if (fromJid != null) {
-//      var attr = xml.XmlAttribute(xml.XmlName('from'), fromJid.fullJid);
-//      listOfAttributes.add(attr);
-//    }
-//    if (toJid != null) {
-//      var attr = xml.XmlAttribute(xml.XmlName('to'), toJid.domain);
-//      listOfAttributes.add(attr);
-//    }
-//    var stanza = xml.XmlElement(xml.XmlName('iq'), listOfAttributes);
-//    //stanza.children.add(_content);
-//    return stanza.toXmlString();
-//  }
 }
 
 enum IqStanzaType { ERROR, SET, RESULT, GET, INVALID, TIMEOUT }

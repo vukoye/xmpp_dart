@@ -38,10 +38,7 @@ void main() {
       });
       fakeSocketStream.stream.listen(connection.handleResponse);
       fakeSocketStream.add(firstResponse);
-      connection.setState(XmppConnectionState.SocketOpening);
-      print("hej 0");
       await firstCompleter.future;
-      print("hej 1");
       fakeSocketStream.add(authenticating);
       await secondCompleter.future;
     });

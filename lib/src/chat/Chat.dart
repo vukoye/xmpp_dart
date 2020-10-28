@@ -7,8 +7,12 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'Message.dart';
 
 class ChatImpl implements Chat {
+
+  static String TAG = "Chat";
+
   Connection _connection;
   Jid _jid;
 
@@ -31,22 +35,16 @@ class ChatImpl implements Chat {
 
   ChatImpl(this._jid, this._connection);
 
-  void parseMessage(MessageStanza stanza) {
-    if (stanza.type == MessageStanzaType.CHAT) {
-      if (stanza.body != null && stanza.body.isNotEmpty) {
-        Message message = Message.fromStanza(stanza);
+  void parseMessage(Message message) {
+    if (message.type == MessageStanzaType.CHAT) {
+      if (message.text != null && message.text.isNotEmpty) {
         messages.add(message);
         _newMessageController.add(message);
       }
-      var stateElement = stanza.children.firstWhere(
-          (element) =>
-              element.getAttribute("xmlns")?.value ==
-              "http://jabber.org/protocol/chatstates",
-          orElse: () => null);
-      if (stateElement != null) {
-        var state = stateFromString(stateElement.name);
-        _remoteState = state;
-        _remoteStateController.add(state);
+
+      if (message.chatState != null && !message.isDelayed) {
+        _remoteState = message.chatState;
+        _remoteStateController.add(message.chatState);
       }
     }
   }
@@ -75,22 +73,6 @@ class ChatImpl implements Chat {
     stanza.addChild(stateElement);
     _connection.writeStanza(stanza);
     _myState = state;
-  }
-
-  static ChatState stateFromString(String chatStateString) {
-    switch (chatStateString) {
-      case "inactive":
-        return ChatState.INACTIVE;
-      case "active":
-        return ChatState.ACTIVE;
-      case "gone":
-        return ChatState.GONE;
-      case "composing":
-        return ChatState.COMPOSING;
-      case "paused":
-        return ChatState.PAUSED;
-    }
-    return ChatState.INACTIVE;
   }
 }
 

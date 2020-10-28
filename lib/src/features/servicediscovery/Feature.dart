@@ -1,7 +1,13 @@
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
-class Feature extends XmppElement {
+import '../../elements/nonzas/Nonza.dart';
+
+class Feature extends Nonza {
+
+  Feature() {
+    name = 'feature';
+  }
   String get xmppVar {
-    return this.getAttribute('var')?.value;
+    return getAttribute('var')?.value;
   }
 }

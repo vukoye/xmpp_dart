@@ -57,4 +57,4 @@ class MessageStanza extends AbstractStanza {
   }
 }
 
-enum MessageStanzaType { CHAT, ERROR, GROUPCHAT, HEADLINE, NORMAL }
+enum MessageStanzaType { CHAT, ERROR, GROUPCHAT, HEADLINE, NORMAL, UNKOWN }

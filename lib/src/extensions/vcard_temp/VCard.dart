@@ -16,55 +16,54 @@ class VCard extends XmppElement {
     name = 'vCard';
     addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     _parseImage();
-    print('HAS_IMAGE: ${givenName} : ${_imageData != null}');
   }
 
   String get fullName => getChild('FN')?.textValue;
 
-  String get familyName => getChild("N")?.getChild("FAMILY")?.textValue;
+  String get familyName => getChild('N')?.getChild('FAMILY')?.textValue;
 
-  String get givenName => getChild("N")?.getChild("GIVEN")?.textValue;
+  String get givenName => getChild('N')?.getChild('GIVEN')?.textValue;
 
-  String get prefixName => getChild("N")?.getChild("PREFIX")?.textValue;
+  String get prefixName => getChild('N')?.getChild('PREFIX')?.textValue;
 
-  String get nickName => getChild("NICKNAME")?.textValue;
+  String get nickName => getChild('NICKNAME')?.textValue;
 
-  String get url => getChild("URL")?.textValue;
+  String get url => getChild('URL')?.textValue;
 
-  String get bDay => getChild("BDAY")?.textValue;
+  String get bDay => getChild('BDAY')?.textValue;
 
   String get organisationName =>
-      getChild("ORG")?.getChild("ORGNAME")?.textValue;
+      getChild('ORG')?.getChild('ORGNAME')?.textValue;
 
   String get organizationUnit =>
-      getChild("ORG")?.getChild("ORGUNIT")?.textValue;
+      getChild('ORG')?.getChild('ORGUNIT')?.textValue;
 
-  String get title => getChild("TITLE")?.textValue;
+  String get title => getChild('TITLE')?.textValue;
 
-  String get role => getChild("ROLE")?.textValue;
+  String get role => getChild('ROLE')?.textValue;
 
-  String get jabberId => getChild("JABBERID")?.textValue;
+  String get jabberId => getChild('JABBERID')?.textValue;
 
   String getItem(String itemName) => getChild(itemName)?.textValue;
 
-  get imageData => _imageData;
+  dynamic get imageData => _imageData;
 
   img.Image get image => _image;
 
-  get imageType => getChild("PHOTO")?.getChild("TYPE")?.textValue;
+  String get imageType => getChild('PHOTO')?.getChild('TYPE')?.textValue;
 
   List<PhoneItem> get phones {
-    List<PhoneItem> homePhones = List();
+    var homePhones = <PhoneItem>[];
     children
         .where((element) =>
-            (element.name == "TEL" && element.getChild("HOME") != null))
+            (element.name == 'TEL' && element.getChild('HOME') != null))
         .forEach((element) {
       var typeString = element.children.firstWhere(
-          (element) => (element.name != "HOME" && element.name != "NUMBER"),
+          (element) => (element.name != 'HOME' && element.name != 'NUMBER'),
           orElse: () => null);
       if (typeString != null) {
-        PhoneType type = getPhoneTypeFromString(typeString.name);
-        String number = element.getChild("NUMBER")?.textValue;
+        var type = getPhoneTypeFromString(typeString.name);
+        var number = element.getChild('NUMBER')?.textValue;
         if (number != null) {
           homePhones.add(PhoneItem(type, number));
         }
@@ -76,52 +75,52 @@ class VCard extends XmppElement {
   String get emailHome {
     var element = children.firstWhere(
         (element) =>
-            (element.name == "EMAIL" && element.getChild("HOME") != null),
+            (element.name == 'EMAIL' && element.getChild('HOME') != null),
         orElse: () => null);
-    return element?.getChild("USERID")?.textValue;
+    return element?.getChild('USERID')?.textValue;
   }
 
   String get emailWork {
     var element = children.firstWhere(
         (element) =>
-            (element.name == "EMAIL" && element.getChild("WORK") != null),
+            (element.name == 'EMAIL' && element.getChild('WORK') != null),
         orElse: () => null);
-    return element?.getChild("USERID")?.textValue;
+    return element?.getChild('USERID')?.textValue;
   }
 
   static PhoneType getPhoneTypeFromString(String phoneTypeString) {
     switch (phoneTypeString) {
-      case "VOICE":
+      case 'VOICE':
         return PhoneType.VOICE;
         break;
-      case "FAX":
+      case 'FAX':
         return PhoneType.FAX;
         break;
-      case "PAGER":
+      case 'PAGER':
         return PhoneType.PAGER;
         break;
-      case "MSG":
+      case 'MSG':
         return PhoneType.MSG;
         break;
-      case "CELL":
+      case 'CELL':
         return PhoneType.CELL;
         break;
-      case "VIDEO":
+      case 'VIDEO':
         return PhoneType.VIDEO;
         break;
-      case "BBS":
+      case 'BBS':
         return PhoneType.BBS;
         break;
-      case "MODEM":
+      case 'MODEM':
         return PhoneType.MODEM;
         break;
-      case "ISDN":
+      case 'ISDN':
         return PhoneType.ISDN;
         break;
-      case "PCS":
+      case 'PCS':
         return PhoneType.PCS;
         break;
-      case "PREF":
+      case 'PREF':
         return PhoneType.PREF;
         break;
     }
@@ -129,9 +128,8 @@ class VCard extends XmppElement {
   }
 
   void _parseImage() {
-    String base64Image = getChild("PHOTO")?.getChild("BINVAL")?.textValue;
+    var base64Image = getChild('PHOTO')?.getChild('BINVAL')?.textValue;
     if (base64Image != null) {
-      print("hasImage: ${this.givenName}");
       _imageData = base64.decode(base64Image);
       _image = img.decodeImage(_imageData);
     }

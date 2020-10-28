@@ -8,8 +8,9 @@ import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
+import '../elements/nonzas/Nonza.dart';
 
-class BindingResourceConnectionNegotiator extends ConnectionNegotiator {
+class BindingResourceConnectionNegotiator extends Negotiator {
   Connection _connection;
   StreamSubscription<AbstractStanza> subscription;
   static const String BIND_NAME = 'bind';
@@ -18,15 +19,17 @@ class BindingResourceConnectionNegotiator extends ConnectionNegotiator {
   BindingResourceConnectionNegotiator(Connection connection) {
     _connection = connection;
     priorityLevel = 100;
+    expectedName = 'BindingResourceConnectionNegotiator';
   }
   @override
-  bool match(Nonza request) {
-    return request.name == BIND_NAME;
+  List<Nonza> match(List<Nonza> requests) {
+    var nonza = requests.firstWhere((request) => request.name == BIND_NAME, orElse: () => null);
+    return nonza != null ? [nonza] : [];
   }
 
   @override
-  void negotiate(Nonza nonza) {
-    if (nonza.name == BIND_NAME) {
+  void negotiate(List<Nonza> nonzas) {
+    if (match(nonzas).isNotEmpty) {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inStanzasStream.listen(parseStanza);
       sendBindRequestStanza(_connection.account.resource);

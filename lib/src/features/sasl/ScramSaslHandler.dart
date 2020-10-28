@@ -12,9 +12,13 @@ import 'package:unorm_dart/unorm_dart.dart' as unorm;
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/SaslAuthenticationFeature.dart';
 
+import '../../logger/Log.dart';
+
 //https://stackoverflow.com/questions/29298346/xmpp-sasl-scram-sha1-authentication#comment62495063_29299946
 class ScramSaslHandler implements AbstractSaslHandler {
   static const CLIENT_NONCE_LENGTH = 48;
+  static const TAG = 'ScramSaslHandler';
+
   Connection _connection;
   StreamSubscription<Nonza> subscription;
   final _completer = Completer<AuthenticationResult>();
@@ -96,7 +100,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
 
   void _fireAuthFailed(String message) {
     //todo sent auth error message
-    print(message);
+    Log.e(TAG, message);
     subscription.cancel();
     _completer.complete(AuthenticationResult(false, message));
   }

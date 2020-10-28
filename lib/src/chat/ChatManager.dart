@@ -26,8 +26,12 @@ class ChatManager {
         .where((abstractStanza) => abstractStanza is MessageStanza)
         .map((stanza) => stanza as MessageStanza)
         .listen((stanza) {
-      var chat = _getChat(stanza.fromJid);
-      chat.parseMessage(stanza);
+          var message = Message.fromStanza(stanza);
+          // find jid different from mine
+          var buddyJid = this._connection.fullJid.userAtDomain == message.to.userAtDomain ?
+              message?.from : message?.to;
+      var chat = _getChat(buddyJid);
+      chat.parseMessage(message);
     });
   }
 
@@ -52,7 +56,6 @@ class ChatManager {
     if (chat == null) {
       chat = ChatImpl(jid, _connection);
       _chats[jid.userAtDomain] = chat;
-      print("!!! Chat List changed: size ${_chats.length}");
       _chatListStreamController.add(chats);
     }
     return chat;

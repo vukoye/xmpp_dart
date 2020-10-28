@@ -5,7 +5,9 @@ import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/PlainSaslHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
 
-class SaslAuthenticationFeature extends ConnectionNegotiator {
+import '../../elements/nonzas/Nonza.dart';
+
+class SaslAuthenticationFeature extends Negotiator {
   Connection _connection;
 
   Set<SaslMechanism> _offeredMechanisms = Set<SaslMechanism>();
@@ -19,18 +21,22 @@ class SaslAuthenticationFeature extends ConnectionNegotiator {
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_1);
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_256);
     _supportedMechanisms.add(SaslMechanism.PLAIN);
+    expectedName = 'SaslAuthenticationFeature';
   }
 
   // improve this
   @override
-  bool match(Nonza request) {
-    return request.name == "mechanisms";
+  List<Nonza> match(List<Nonza> requests) {
+    var nonza = requests.firstWhere((element) => element.name == 'mechanisms', orElse: () => null);
+    return nonza != null? [nonza] : [];
   }
 
   @override
-  void negotiate(Nonza nonza) {
-    _populateOfferedMechanism(nonza);
-    _process();
+  void negotiate(List<Nonza> nonzas) {
+    if (nonzas != null || nonzas.isNotEmpty) {
+      _populateOfferedMechanism(nonzas[0]);
+      _process();
+    }
   }
 
   void _process() {

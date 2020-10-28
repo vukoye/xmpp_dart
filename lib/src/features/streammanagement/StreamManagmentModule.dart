@@ -15,7 +15,10 @@ import 'package:xmpp_stone/src/features/streammanagement/StreamState.dart';
 import '../../../xmpp_stone.dart';
 import '../Negotiator.dart';
 
-class StreamManagementModule extends ConnectionNegotiator {
+class StreamManagementModule extends Negotiator {
+
+  static const TAG = 'StreamManagementModule';
+
   static Map<Connection, StreamManagementModule> instances =
       Map<Connection, StreamManagementModule>();
 
@@ -61,9 +64,9 @@ class StreamManagementModule extends ConnectionNegotiator {
         _deliveredStanzasStreamController.add(stanza);
       }
       if (stanza.id != null) {
-        print("Delivered: " + stanza.id);
+        Log.d(TAG, 'Delivered: ${stanza.id}');
       } else {
-        print("Delivered stanza without id " + stanza.name);
+        Log.d(TAG, 'Delivered stanza without id ${stanza.name}');
       }
     }
   }
@@ -72,6 +75,7 @@ class StreamManagementModule extends ConnectionNegotiator {
     _connection = connection;
     _connection.streamManagementModule = this;
     ackTurnedOn = connection.account.ackEnabled;
+    expectedName = 'StreamManagementModule';
     _connection.connectionStateStream.listen((state) {
           if (state == XmppConnectionState.Reconnecting) {
             backToIdle();
@@ -85,13 +89,15 @@ class StreamManagementModule extends ConnectionNegotiator {
   }
 
   @override
-  bool match(Nonza request) {
-    return SMNonza.match(request);
+  List<Nonza> match(List<Nonza> requests) {
+  var nonza = requests.firstWhere((request) => SMNonza.match(request), orElse: () => null);
+  return nonza != null ? [nonza] : [];
   }
 
+  //TODO: Improve
   @override
-  void negotiate(Nonza nonza) {
-    if (SMNonza.match(nonza) && _connection.authenticated) {
+  void negotiate(List<Nonza> nonzas) {
+    if (nonzas != null && nonzas.isNotEmpty && SMNonza.match(nonzas[0]) && _connection.authenticated) {
       state = NegotiatorState.NEGOTIATING;
       inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);
       if (streamState.isResumeAvailable()) {
@@ -115,13 +121,13 @@ class StreamManagementModule extends ConnectionNegotiator {
         resumeState(nonza);
       } else if (FailedNonza.match(nonza)) {
         if (streamState.tryingToResume) {
-          print("Resuming failed");
+          Log.d(TAG, 'Resuming failed');
           streamState = StreamState();
           state = NegotiatorState.DONE;
           negotiatorStateStreamController = StreamController();
           state = NegotiatorState.IDLE; //we will try again
         } else {
-          print("StreamManagmentFailed"); //try to send an error down to client
+          Log.d(TAG, 'StreamManagmentFailed'); //try to send an error down to client
           state = NegotiatorState.DONE;
         }
       }
