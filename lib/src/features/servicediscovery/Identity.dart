@@ -1,4 +1,3 @@
-import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
 import '../../elements/nonzas/Nonza.dart';
 
@@ -11,7 +10,8 @@ class Identity extends Nonza {
     return getAttribute('type')?.value;
   }
 
+  @override
   String get name {
-    return getAttribute('name')?.value ?? "INVALID";
+    return getAttribute('name')?.value ?? 'INVALID';
   }
 }

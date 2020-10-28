@@ -1,17 +1,12 @@
+import 'package:xmpp_stone/src/chat/Chat.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
-import '../../xmpp_stone.dart';
-import '../../xmpp_stone.dart';
-import '../../xmpp_stone.dart';
-import '../../xmpp_stone.dart';
-import '../../xmpp_stone.dart';
-import '../../xmpp_stone.dart';
 import '../elements/XmppElement.dart';
 import '../elements/stanzas/MessageStanza.dart';
 import '../logger/Log.dart';
 
 class Message {
-  static String TAG = "Message";
+  static String TAG = 'Message';
   MessageStanza _messageStanza;
 
   MessageStanza get messageStanza => _messageStanza;
@@ -29,7 +24,7 @@ class Message {
   String _messageId;
   String _stanzaId;
   String _threadId;
-  String _queryid; //To be determined if needed
+  String _queryId; //To be determined if needed
   bool _isDelayed;
   bool _isForwarded;
   MessageStanzaType _type;
@@ -51,7 +46,7 @@ class Message {
     _threadId = threadId;
     _isForwarded = isForwarded;
     _isDelayed = isDelayed;
-    _queryid = queryId;
+    _queryId = queryId;
     _messageId = messageId;
     _type = type;
     _chatState = chatState;
@@ -127,8 +122,6 @@ class Message {
           dateTime ??= DateTime.now();
           var delayed = dateTime != null;
           var chatState = _parseState(message);
-          Log.d(TAG, "!!!parse Archived OK");
-          Log.d(TAG, "!!! from: ${from.fullJid} to: ${to.fullJid} body: ${body} time: ${dateTime.toIso8601String()} type: ${type}");
           return Message(stanza, to, from, body, dateTime,
               threadId: threadId,
               isForwarded: true,
@@ -175,8 +168,8 @@ class Message {
   static ChatState _parseState(XmppElement element) {
     var stateElement = element.children.firstWhere(
         (element) =>
-            element.getAttribute("xmlns")?.value ==
-            "http://jabber.org/protocol/chatstates",
+            element.getAttribute('xmlns')?.value ==
+            'http://jabber.org/protocol/chatstates',
         orElse: () => null);
     if (stateElement != null) {
       return _stateFromString(stateElement.name);
@@ -187,15 +180,15 @@ class Message {
 
   static ChatState _stateFromString(String chatStateString) {
     switch (chatStateString) {
-      case "inactive":
+      case 'inactive':
         return ChatState.INACTIVE;
-      case "active":
+      case 'active':
         return ChatState.ACTIVE;
-      case "gone":
+      case 'gone':
         return ChatState.GONE;
-      case "composing":
+      case 'composing':
         return ChatState.COMPOSING;
-      case "paused":
+      case 'paused':
         return ChatState.PAUSED;
     }
     return ChatState.INACTIVE;
@@ -217,7 +210,7 @@ class Message {
         var dateTime = DateTime.parse(stamped);
         return dateTime;
       } catch (e) {
-        Log.e(TAG, "Date Parsing problem");
+        Log.e(TAG, 'Date Parsing problem');
       }
     }
     return null;
@@ -251,7 +244,7 @@ class Message {
 
   String get threadId => _threadId;
 
-  String get queryid => _queryid;
+  String get queryId => _queryId;
 
   bool get isDelayed => _isDelayed;
 

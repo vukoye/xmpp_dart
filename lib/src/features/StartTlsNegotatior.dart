@@ -15,8 +15,8 @@ class StartTlsNegotiator extends Negotiator {
 
   StartTlsNegotiator(Connection connection) {
     _connection = connection;
-    expectedName = "StartTlsNegotiator";
-    expectedNameSpace = "urn:ietf:params:xml:ns:xmpp-tls";
+    expectedName = 'StartTlsNegotiator';
+    expectedNameSpace = 'urn:ietf:params:xml:ns:xmpp-tls';
     priorityLevel = 1;
   }
 
@@ -31,11 +31,11 @@ class StartTlsNegotiator extends Negotiator {
   }
 
   void checkNonzas(Nonza nonza) {
-    if (nonza.name == "proceed") {
+    if (nonza.name == 'proceed') {
       _connection.startSecureSocket();
       state = NegotiatorState.DONE_CLEAN_OTHERS;
       subscription.cancel();
-    } else if (nonza.name == "failure") {
+    } else if (nonza.name == 'failure') {
       _connection.startTlsFailed();
     }
   }
@@ -44,7 +44,7 @@ class StartTlsNegotiator extends Negotiator {
   List<Nonza> match(List<Nonza> requests) {
     var nonza = requests.firstWhere(
         (request) =>
-            request.name == "starttls" &&
+            request.name == 'starttls' &&
             request.getAttribute('xmlns')?.value == expectedNameSpace,
         orElse: () => null);
     return nonza != null ? [nonza] : [];
@@ -53,7 +53,7 @@ class StartTlsNegotiator extends Negotiator {
 
 class StartTlsResponse extends Nonza {
   StartTlsResponse() {
-    name = "starttls";
+    name = 'starttls';
     addAttribute(XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-tls'));
   }
 }

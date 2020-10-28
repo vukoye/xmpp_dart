@@ -1,5 +1,3 @@
-import 'package:xmpp_stone/src/elements/XmppElement.dart';
-
 import '../../elements/nonzas/Nonza.dart';
 
 class Feature extends Nonza {

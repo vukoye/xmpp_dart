@@ -138,11 +138,11 @@ class ConnectionNegotiatorManager {
   }
 
   void addFeatures(List<Feature> supportedFeatures) {
-    Log.e(TAG, "ADDING FEATURES count: ${supportedFeatures.length} ${supportedFeatures} ");
+    Log.e(TAG, 'ADDING FEATURES count: ${supportedFeatures.length} ${supportedFeatures} ');
     supportedNegotiatorList.forEach((negotiator) {
       var matchingNonzas = negotiator.match(supportedFeatures);
       if (matchingNonzas != null && matchingNonzas.isNotEmpty) {
-        Log.d(TAG, "Adding negotiator: ${negotiator} ${matchingNonzas}");
+        Log.d(TAG, 'Adding negotiator: ${negotiator} ${matchingNonzas}');
         waitingNegotiators.add(NegotiatorWithSupportedNonzas(negotiator, matchingNonzas));
       }
     });

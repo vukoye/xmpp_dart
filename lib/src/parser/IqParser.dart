@@ -1,7 +1,5 @@
 import 'package:xml/xml.dart' as xml;
 import '../elements/stanzas/IqStanza.dart';
-import '../elements/stanzas/IqStanza.dart';
-import '../elements/stanzas/IqStanza.dart';
 import '../logger/Log.dart';
 
 class IqParser {
@@ -13,7 +11,6 @@ class IqParser {
   }
 
   static IqStanzaType _parseIqType(String typeString) {
-    IqStanzaType type;
     if (typeString == null) {
       Log.w(TAG, 'No type found for iq stanza');
       return IqStanzaType.INVALID;

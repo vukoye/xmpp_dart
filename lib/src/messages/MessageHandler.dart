@@ -6,7 +6,7 @@ import 'package:xmpp_stone/src/messages/MessageApi.dart';
 
 class MessageHandler implements MessageApi {
   static Map<Connection, MessageHandler> instances =
-      Map<Connection, MessageHandler>();
+      <Connection, MessageHandler>{};
 
   Stream<MessageStanza> get messagesStream {
     return _connection.inStanzasStream
@@ -14,8 +14,8 @@ class MessageHandler implements MessageApi {
         .map((stanza) => stanza as MessageStanza);
   }
 
-  static getInstance(Connection connection) {
-    MessageHandler manager = instances[connection];
+  static MessageHandler getInstance(Connection connection) {
+    var manager = instances[connection];
     if (manager == null) {
       manager = MessageHandler(connection);
       instances[connection] = manager;
@@ -36,7 +36,7 @@ class MessageHandler implements MessageApi {
   }
 
   void _sendMessageStanza(Jid jid, String text) {
-    MessageStanza stanza =
+    var stanza =
         MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = jid;
     stanza.fromJid = _connection.fullJid;

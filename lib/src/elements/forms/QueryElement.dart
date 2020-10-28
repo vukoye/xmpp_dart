@@ -1,6 +1,4 @@
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
-
-import '../../../xmpp_stone.dart';
 import '../XmppAttribute.dart';
 import '../XmppElement.dart';
 
@@ -17,7 +15,7 @@ class QueryElement extends XmppElement{
     addAttribute(XmppAttribute('xmlns', xmlns));
   }
 
-  void setQueryid(String queryId) {
+  void setQueryId(String queryId) {
     XmppAttribute('queryid', queryId);
   }
 

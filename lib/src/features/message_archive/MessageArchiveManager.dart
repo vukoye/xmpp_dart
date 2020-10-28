@@ -1,18 +1,14 @@
 import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
-
-import '../../../xmpp_stone.dart';
 import '../../Connection.dart';
 import '../../data/Jid.dart';
-import '../../elements/XmppAttribute.dart';
-import '../../elements/XmppElement.dart';
 import '../../elements/stanzas/AbstractStanza.dart';
 import '../../elements/stanzas/IqStanza.dart';
 import '../../elements/forms/FieldElement.dart';
 
 class MessageArchiveManager {
-  static const TAG = "MessageArchiveManager";
+  static const TAG = 'MessageArchiveManager';
 
   static final Map<Connection, MessageArchiveManager> _instances =
       <Connection, MessageArchiveManager>{};
@@ -32,13 +28,13 @@ class MessageArchiveManager {
 
   bool get hasExtended => MAMNegotiator.getInstance(_connection).hasExtended;
 
-  MessageArchiveManager(this._connection) {}
+  MessageArchiveManager(this._connection);
 
   void queryAll() {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     var query = QueryElement();
     query.setXmlns('urn:xmpp:mam:2');
-    query.setQueryid(AbstractStanza.getRandomId());
+    query.setQueryId(AbstractStanza.getRandomId());
     iqStanza.addChild(query);
     _connection.writeStanza(iqStanza);
   }
@@ -50,7 +46,7 @@ class MessageArchiveManager {
       var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
       var query = QueryElement();
       query.setXmlns('urn:xmpp:mam:2');
-      query.setQueryid(AbstractStanza.getRandomId());
+      query.setQueryId(AbstractStanza.getRandomId());
       iqStanza.addChild(query);
       var x = XElement.build();
       x.setType(FormType.SUBMIT);
@@ -78,7 +74,7 @@ class MessageArchiveManager {
       var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
       var query = QueryElement();
       query.setXmlns('urn:xmpp:mam:2');
-      query.setQueryid(AbstractStanza.getRandomId());
+      query.setQueryId(AbstractStanza.getRandomId());
       iqStanza.addChild(query);
       var x = XElement.build();
       x.setType(FormType.SUBMIT);

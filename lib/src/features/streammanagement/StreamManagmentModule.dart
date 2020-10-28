@@ -20,10 +20,10 @@ class StreamManagementModule extends Negotiator {
   static const TAG = 'StreamManagementModule';
 
   static Map<Connection, StreamManagementModule> instances =
-      Map<Connection, StreamManagementModule>();
+      <Connection, StreamManagementModule>{};
 
   static StreamManagementModule getInstance(Connection connection) {
-    StreamManagementModule module = instances[connection];
+    var module = instances[connection];
     if (module == null) {
       module = StreamManagementModule(connection);
       instances[connection] = module;
@@ -40,7 +40,7 @@ class StreamManagementModule extends Negotiator {
   bool ackTurnedOn = true;
   Timer timer;
 
-  StreamController<AbstractStanza> _deliveredStanzasStreamController =
+  final StreamController<AbstractStanza> _deliveredStanzasStreamController =
       StreamController.broadcast();
 
   Stream<AbstractStanza> get deliveredStanzasStream {

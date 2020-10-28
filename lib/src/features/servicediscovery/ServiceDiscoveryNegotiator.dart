@@ -47,7 +47,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
 
   final List<Feature> _supportedFeatures = <Feature>[];
 
-  List<Identity> _supportedIdentities = <Identity>[];
+  final List<Identity> _supportedIdentities = <Identity>[];
 
   Stream<XmppElement> get errorStream {
     return _errorStreamController.stream;
@@ -134,20 +134,20 @@ class ServiceDiscoveryNegotiator extends Negotiator {
         stanza.toJid.fullJid == _connection.fullJid.fullJid &&
         stanza.children
             .where((element) =>
-                element.name == "query" &&
-                element.getAttribute("xmlns")?.value == NAMESPACE_DISCO_INFO)
+                element.name == 'query' &&
+                element.getAttribute('xmlns')?.value == NAMESPACE_DISCO_INFO)
             .isNotEmpty;
   }
 
   void sendDiscoInfoResponse(IqStanza request) {
-    IqStanza iqStanza = IqStanza(request.id, IqStanzaType.RESULT);
+    var iqStanza = IqStanza(request.id, IqStanzaType.RESULT);
     //iqStanza.fromJid = _connection.fullJid; //do not send for now
     iqStanza.toJid = request.fromJid;
-    XmppElement query = XmppElement();
-    query.addAttribute(XmppAttribute("xmlns", NAMESPACE_DISCO_INFO));
+    var query = XmppElement();
+    query.addAttribute(XmppAttribute('xmlns', NAMESPACE_DISCO_INFO));
     SERVICE_DISCOVERY_SUPPORT_LIST.forEach((featureName) {
-      XmppElement featureElement = XmppElement();
-      featureElement.addAttribute(XmppAttribute("feature", featureName));
+      var featureElement = XmppElement();
+      featureElement.addAttribute(XmppAttribute('feature', featureName));
       query.addChild(featureElement);
     });
     iqStanza.addChild(query);

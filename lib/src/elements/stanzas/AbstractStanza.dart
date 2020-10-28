@@ -13,21 +13,21 @@ abstract class AbstractStanza extends XmppElement {
 
   set fromJid(Jid value) {
     _fromJid = value;
-    this.addAttribute(XmppAttribute('from', _fromJid.fullJid));
+    addAttribute(XmppAttribute('from', _fromJid.fullJid));
   }
 
   Jid get toJid => _toJid;
 
   set toJid(Jid value) {
     _toJid = value;
-    this.addAttribute(XmppAttribute('to', _toJid.userAtDomain));
+    addAttribute(XmppAttribute('to', _toJid.userAtDomain));
   }
 
   String get id => _id;
 
   set id(String value) {
     _id = value;
-    this.addAttribute(XmppAttribute('id', _id));
+    addAttribute(XmppAttribute('id', _id));
   }
 
   static String getRandomId() {

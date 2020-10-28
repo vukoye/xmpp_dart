@@ -7,11 +7,11 @@ void main() {
   group('ScramSaslTests', () {
     test('sasl escape test', () {
       expect(
-          ScramSaslHandler.saslEscape("test=test,test"), "test=2Ctest=3Dtest");
+          ScramSaslHandler.saslEscape('test=test,test'), 'test=2Ctest=3Dtest');
     });
     test('S1', () {
-      var hmacValue = hmac(utf8.encode("urmasica"), "bV5mZvHe+RNoeL537h5RSQ==");
-      print("hmac: $hmacValue");
+      var hmacValue = hmac(utf8.encode('urmasica'), 'bV5mZvHe+RNoeL537h5RSQ==');
+      print('hmac: $hmacValue');
     });
   });
 }

@@ -7,10 +7,10 @@ import 'package:xmpp_stone/xmpp_stone.dart';
 
 class ChatManager {
   static Map<Connection, ChatManager> instances =
-      Map<Connection, ChatManager>();
+      <Connection, ChatManager>{};
 
-  static getInstance(Connection connection) {
-    ChatManager manager = instances[connection];
+  static ChatManager getInstance(Connection connection) {
+    var manager = instances[connection];
     if (manager == null) {
       manager = ChatManager(connection);
       instances[connection] = manager;
@@ -19,7 +19,7 @@ class ChatManager {
     return manager;
   }
 
-  Connection _connection;
+  final Connection _connection;
 
   ChatManager(this._connection) {
     _connection.inStanzasStream
@@ -28,19 +28,19 @@ class ChatManager {
         .listen((stanza) {
           var message = Message.fromStanza(stanza);
           // find jid different from mine
-          var buddyJid = this._connection.fullJid.userAtDomain == message.to.userAtDomain ?
+          var buddyJid = _connection.fullJid.userAtDomain == message.to.userAtDomain ?
               message?.from : message?.to;
       var chat = _getChat(buddyJid);
       chat.parseMessage(message);
     });
   }
 
-  StreamController<List<Chat>> _chatListStreamController =
+  final StreamController<List<Chat>> _chatListStreamController =
       StreamController.broadcast();
 
   Stream<List<Chat>> get chatListStream => _chatListStreamController.stream;
 
-  Map<String, ChatImpl> _chats = Map<String, ChatImpl>();
+  final Map<String, ChatImpl> _chats = <String, ChatImpl>{};
 
   List<Chat> get chats {
     List<Chat> chatList = _chats.values.toList();

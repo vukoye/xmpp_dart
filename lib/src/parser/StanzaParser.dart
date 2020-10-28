@@ -5,7 +5,6 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
@@ -20,7 +19,6 @@ class StanzaParser {
 
   //TODO: Improve this!
   static AbstractStanza parseStanza(xml.XmlElement element) {
-    print("parsing stanza: ${element.name.local}");
     AbstractStanza stanza;
     var id = element.getAttribute('id');
     if (id == null) {

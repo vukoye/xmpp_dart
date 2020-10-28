@@ -1,21 +1,13 @@
-import 'dart:async';
 
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-
-import '../../../xmpp_stone.dart';
 import '../../Connection.dart';
-import '../../elements/XmppAttribute.dart';
-import '../../elements/XmppElement.dart';
 import '../../elements/nonzas/Nonza.dart';
-import '../../elements/stanzas/AbstractStanza.dart';
-import '../../elements/stanzas/IqStanza.dart';
 import '../Negotiator.dart';
 import 'Feature.dart';
 
 class MAMNegotiator extends Negotiator {
 
-  static const TAG = "MAMNegotiator";
+  static const TAG = 'MAMNegotiator';
 
   static final Map<Connection, MAMNegotiator> _instances =
   <Connection, MAMNegotiator>{};
@@ -30,6 +22,7 @@ class MAMNegotiator extends Negotiator {
     return instance;
   }
 
+  // ignore: unused_field
   final Connection _connection;
 
   bool enabled = false;
@@ -37,7 +30,7 @@ class MAMNegotiator extends Negotiator {
   bool hasExtended;
 
   MAMNegotiator(this._connection) {
-    expectedName = "urn:xmpp:mam";
+    expectedName = 'urn:xmpp:mam';
   }
 
   @override

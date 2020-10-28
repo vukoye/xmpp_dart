@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
@@ -23,7 +22,7 @@ class SessionInitiationNegotiator extends Negotiator {
   }
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere((request) => request.name == "session", orElse: () => null);
+    var nonza = requests.firstWhere((request) => request.name == 'session', orElse: () => null);
     return nonza != null ? [nonza] : [];
   }
 
@@ -48,10 +47,10 @@ class SessionInitiationNegotiator extends Negotiator {
   }
 
   void sendSessionInitiationStanza() {
-    IqStanza stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    XmppElement sessionElement = XmppElement();
+    var stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    var sessionElement = XmppElement();
     sessionElement.name = 'session';
-    XmppAttribute attribute =
+    var attribute =
         XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-session');
     sessionElement.addAttribute(attribute);
     stanza.toJid = _connection.serverName;

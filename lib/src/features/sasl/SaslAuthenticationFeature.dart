@@ -10,8 +10,8 @@ import '../../elements/nonzas/Nonza.dart';
 class SaslAuthenticationFeature extends Negotiator {
   Connection _connection;
 
-  Set<SaslMechanism> _offeredMechanisms = Set<SaslMechanism>();
-  Set<SaslMechanism> _supportedMechanisms = Set<SaslMechanism>();
+  final Set<SaslMechanism> _offeredMechanisms = <SaslMechanism>{};
+  final Set<SaslMechanism> _supportedMechanisms = <SaslMechanism>{};
 
   String _password;
 
@@ -76,22 +76,22 @@ class SaslAuthenticationFeature extends Negotiator {
 
   void _populateOfferedMechanism(Nonza nonza) {
     nonza.children
-        .where((element) => element.name == "mechanism")
+        .where((element) => element.name == 'mechanism')
         .forEach((mechanism) {
       switch (mechanism.textValue) {
-        case "EXTERNAL":
+        case 'EXTERNAL':
           _offeredMechanisms.add(SaslMechanism.EXTERNAL);
           break;
-        case "SCRAM-SHA-1-PLUS":
+        case 'SCRAM-SHA-1-PLUS':
           _offeredMechanisms.add(SaslMechanism.SCRAM_SHA_1_PLUS);
           break;
-        case "SCRAM-SHA-256":
+        case 'SCRAM-SHA-256':
           _offeredMechanisms.add(SaslMechanism.SCRAM_SHA_256);
           break;
-        case "SCRAM-SHA-1":
+        case 'SCRAM-SHA-1':
           _offeredMechanisms.add(SaslMechanism.SCRAM_SHA_1);
           break;
-        case "PLAIN":
+        case 'PLAIN':
           _offeredMechanisms.add(SaslMechanism.PLAIN);
           break;
       }

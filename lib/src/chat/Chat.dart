@@ -11,26 +11,32 @@ import 'Message.dart';
 
 class ChatImpl implements Chat {
 
-  static String TAG = "Chat";
+  static String TAG = 'Chat';
 
-  Connection _connection;
-  Jid _jid;
+  final Connection _connection;
+  final Jid _jid;
 
+  @override
   Jid get jid => _jid;
   ChatState _myState;
+  @override
   ChatState get myState => _myState;
 
   ChatState _remoteState;
+  @override
   ChatState get remoteState => _remoteState;
 
-  List<Message> messages = List();
+  @override
+  List<Message> messages = [];
 
-  StreamController<Message> _newMessageController =
+  final StreamController<Message> _newMessageController =
       StreamController.broadcast();
-  StreamController<ChatState> _remoteStateController =
+  final StreamController<ChatState> _remoteStateController =
       StreamController.broadcast();
 
+  @override
   Stream<Message> get newMessageStream => _newMessageController.stream;
+  @override
   Stream<ChatState> get remoteStateStream => _remoteStateController.stream;
 
   ChatImpl(this._jid, this._connection);
@@ -49,24 +55,26 @@ class ChatImpl implements Chat {
     }
   }
 
+  @override
   void sendMessage(String text) {
-    MessageStanza stanza =
+    var stanza =
         MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
-    Message message = Message.fromStanza(stanza);
+    var message = Message.fromStanza(stanza);
     messages.add(message);
     _newMessageController.add(message);
     _connection.writeStanza(stanza);
   }
 
+  @override
   set myState(ChatState state) {
-    MessageStanza stanza =
+    var stanza =
         MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
-    XmppElement stateElement = XmppElement();
+    var stateElement = XmppElement();
     stateElement.name = state.toString().split('.').last.toLowerCase();
     stateElement.addAttribute(
         XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates'));

@@ -6,9 +6,11 @@ import 'dart:io';
 import 'package:console/console.dart';
 import 'package:image/image.dart' as image;
 
-final String TAG = "example";
+final String TAG = 'example';
 
 void main(List<String> arguments) {
+  Log.logLevel = LogLevel.DEBUG;
+  Log.logXmpp = false;
   Log.d(TAG, 'Type user@domain:');
   var userAtDomain = 'nemanja@127.0.0.1';
   Log.d(TAG, 'Type password');
@@ -19,7 +21,7 @@ void main(List<String> arguments) {
   connection.connect();
   xmpp.MessagesListener messagesListener = ExampleMessagesListener();
   ExampleConnectionStateChangedListener(connection, messagesListener);
-  xmpp.PresenceManager presenceManager = xmpp.PresenceManager.getInstance(connection);
+  var presenceManager = xmpp.PresenceManager.getInstance(connection);
   presenceManager.subscriptionStream.listen((streamEvent) {
     if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
       Log.d(TAG, 'Accepting presence request');
@@ -28,7 +30,7 @@ void main(List<String> arguments) {
   });
   var receiver = 'nemanja2@test';
   var receiverJid = xmpp.Jid.fromFullJid(receiver);
-  xmpp.MessageHandler messageHandler = xmpp.MessageHandler.getInstance(connection);
+  var messageHandler = xmpp.MessageHandler.getInstance(connection);
   getConsoleStream().asBroadcastStream().listen((String str) {
     messageHandler.sendMessage(receiverJid, str);
   });
@@ -56,7 +58,7 @@ class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChang
           Log.d(TAG, 'Your info' + vCard.buildXmlString());
         }
       });
-      xmpp.MessageHandler messageHandler = xmpp.MessageHandler.getInstance(_connection);
+      var messageHandler = xmpp.MessageHandler.getInstance(_connection);
       var rosterManager = xmpp.RosterManager.getInstance(_connection);
       messageHandler.messagesStream.listen(_messagesListener.onNewMessage);
       sleep(const Duration(seconds: 1));

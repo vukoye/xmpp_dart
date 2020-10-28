@@ -15,7 +15,7 @@ import 'Feature.dart';
 
 class CarbonsNegotiator extends Negotiator {
 
-  static const TAG = "CarbonsNegotiator";
+  static const TAG = 'CarbonsNegotiator';
 
   static final Map<Connection, CarbonsNegotiator> _instances =
       <Connection, CarbonsNegotiator>{};
@@ -30,7 +30,7 @@ class CarbonsNegotiator extends Negotiator {
     return instance;
   }
 
-  Connection _connection;
+  final Connection _connection;
 
   bool enabled = false;
 
@@ -38,7 +38,7 @@ class CarbonsNegotiator extends Negotiator {
   IqStanza _myUnrespondedIqStanza;
 
   CarbonsNegotiator(this._connection) {
-    expectedName = "urn:xmpp:carbons";
+    expectedName = 'urn:xmpp:carbons';
   }
 
   @override
