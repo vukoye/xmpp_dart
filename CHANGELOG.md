@@ -1,3 +1,10 @@
+## 0.3.0
+- Added Support for
+ - __XEP-0280__: Message Carbons
+ - __XEP-0313__: Message Archive Management
+ - Added logging level mechanism
+ - Optimisation and bug fixing
+
 ## 0.2.9
 - bug fixing
 
