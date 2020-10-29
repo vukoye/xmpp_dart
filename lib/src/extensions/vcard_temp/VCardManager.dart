@@ -11,10 +11,10 @@ import 'package:xmpp_stone/src/extensions/vcard_temp/VCard.dart';
 
 class VCardManager {
   static Map<Connection, VCardManager> instances =
-      Map<Connection, VCardManager>();
+      <Connection, VCardManager>{};
 
-  static getInstance(Connection connection) {
-    VCardManager manager = instances[connection];
+  static VCardManager getInstance(Connection connection) {
+    var manager = instances[connection];
     if (manager == null) {
       manager = VCardManager(connection);
       instances[connection] = manager;
@@ -23,24 +23,24 @@ class VCardManager {
     return manager;
   }
 
-  Connection _connection;
+  final Connection _connection;
 
   VCardManager(this._connection) {
     _connection.connectionStateStream.listen(_connectionStateProcessor);
     _connection.inStanzasStream.listen(_processStanza);
   }
 
-  Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas =
-      Map<String, Tuple2<IqStanza, Completer>>();
+  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas =
+      <String, Tuple2<IqStanza, Completer>>{};
 
-  Map<String, VCard> _vCards = Map<String, VCard>();
+  final Map<String, VCard> _vCards = <String, VCard>{};
 
   Future<VCard> getSelfVCard() {
     var completer = Completer<VCard>();
-    IqStanza iqStanza =
+    var iqStanza =
         IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
-    XmppElement vCardElement = XmppElement();
+    var vCardElement = XmppElement();
     vCardElement.name = 'vCard';
     vCardElement.addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     iqStanza.addChild(vCardElement);
@@ -51,11 +51,11 @@ class VCardManager {
 
   Future<VCard> getVCardFor(Jid jid) {
     var completer = Completer<VCard>();
-    IqStanza iqStanza =
+    var iqStanza =
         IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = jid;
-    XmppElement vCardElement = XmppElement();
+    var vCardElement = XmppElement();
     vCardElement.name = 'vCard';
     vCardElement.addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     iqStanza.addChild(vCardElement);
@@ -75,9 +75,9 @@ class VCardManager {
       var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
       if (_myUnrespondedIqStanzas[stanza.id] != null) {
         if (stanza.type == IqStanzaType.RESULT) {
-          var vCardChild = stanza.getChild("vCard");
+          var vCardChild = stanza.getChild('vCard');
           if (vCardChild != null) {
-            VCard vCard = VCard(vCardChild);
+            var vCard = VCard(vCardChild);
             if (stanza.fromJid != null) {
               _vCards[stanza.fromJid.userAtDomain] = vCard;
             } else {
@@ -87,7 +87,7 @@ class VCardManager {
           }
         } else if (stanza.type == IqStanzaType.ERROR) {
           unrespondedStanza.item2
-              .complete(InvalidVCard(stanza.getChild("vCard")));
+              .complete(InvalidVCard(stanza.getChild('vCard')));
         }
       }
     }

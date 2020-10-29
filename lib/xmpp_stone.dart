@@ -19,3 +19,7 @@ export 'src/chat/Chat.dart';
 export 'src/chat/Message.dart';
 export 'src/chat/ChatManager.dart';
 export 'src/extensions/ping/PingManager.dart';
+export 'src/logger/Log.dart';
+export 'src/elements/stanzas/AbstractStanza.dart';
+export 'src/elements/XmppElement.dart';
+export 'src/features/message_archive/MessageArchiveManager.dart';

@@ -18,7 +18,7 @@ class PresenceStanza extends AbstractStanza {
   }
 
   PresenceType get type {
-    String typeValue = getAttribute('type')?.value;
+    var typeValue = getAttribute('type')?.value;
     return typeFromString(typeValue);
   }
 

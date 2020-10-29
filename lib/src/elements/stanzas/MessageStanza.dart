@@ -15,46 +15,43 @@ class MessageStanza extends AbstractStanza {
     name = 'message';
     this.id = id;
     _type = type;
-    this.addAttribute(
+    addAttribute(
         XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
   }
 
-  String get body => this
-      .children
+  String get body => children
       .firstWhere((child) => (child.name == 'body' && child.attributes.isEmpty),
           orElse: () => null)
       ?.textValue;
 
   set body(String value) {
-    XmppElement element = XmppElement();
+    var element = XmppElement();
     element.name = 'body';
     element.textValue = value;
-    this.addChild(element);
+    addChild(element);
   }
 
-  String get subject => this
-      .children
+  String get subject => children
       .firstWhere((child) => (child.name == 'subject'), orElse: () => null)
       ?.textValue;
 
   set subject(String value) {
-    XmppElement element = XmppElement();
+    var element = XmppElement();
     element.name = 'subject';
     element.textValue = value;
-    this.addChild(element);
+    addChild(element);
   }
 
-  String get thread => this
-      .children
+  String get thread => children
       .firstWhere((child) => (child.name == 'thread'), orElse: () => null)
       ?.textValue;
 
   set thread(String value) {
-    XmppElement element = XmppElement();
+    var element = XmppElement();
     element.name = 'thread';
     element.textValue = value;
-    this.addChild(element);
+    addChild(element);
   }
 }
 
-enum MessageStanzaType { CHAT, ERROR, GROUPCHAT, HEADLINE, NORMAL }
+enum MessageStanzaType { CHAT, ERROR, GROUPCHAT, HEADLINE, NORMAL, UNKOWN }

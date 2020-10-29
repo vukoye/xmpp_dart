@@ -7,90 +7,80 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'Message.dart';
 
 class ChatImpl implements Chat {
-  Connection _connection;
-  Jid _jid;
 
+  static String TAG = 'Chat';
+
+  final Connection _connection;
+  final Jid _jid;
+
+  @override
   Jid get jid => _jid;
   ChatState _myState;
+  @override
   ChatState get myState => _myState;
 
   ChatState _remoteState;
+  @override
   ChatState get remoteState => _remoteState;
 
-  List<Message> messages = List();
+  @override
+  List<Message> messages = [];
 
-  StreamController<Message> _newMessageController =
+  final StreamController<Message> _newMessageController =
       StreamController.broadcast();
-  StreamController<ChatState> _remoteStateController =
+  final StreamController<ChatState> _remoteStateController =
       StreamController.broadcast();
 
+  @override
   Stream<Message> get newMessageStream => _newMessageController.stream;
+  @override
   Stream<ChatState> get remoteStateStream => _remoteStateController.stream;
 
   ChatImpl(this._jid, this._connection);
 
-  void parseMessage(MessageStanza stanza) {
-    if (stanza.type == MessageStanzaType.CHAT) {
-      if (stanza.body != null && stanza.body.isNotEmpty) {
-        Message message = Message.fromStanza(stanza);
+  void parseMessage(Message message) {
+    if (message.type == MessageStanzaType.CHAT) {
+      if (message.text != null && message.text.isNotEmpty) {
         messages.add(message);
         _newMessageController.add(message);
       }
-      var stateElement = stanza.children.firstWhere(
-          (element) =>
-              element.getAttribute("xmlns")?.value ==
-              "http://jabber.org/protocol/chatstates",
-          orElse: () => null);
-      if (stateElement != null) {
-        var state = stateFromString(stateElement.name);
-        _remoteState = state;
-        _remoteStateController.add(state);
+
+      if (message.chatState != null && !message.isDelayed) {
+        _remoteState = message.chatState;
+        _remoteStateController.add(message.chatState);
       }
     }
   }
 
+  @override
   void sendMessage(String text) {
-    MessageStanza stanza =
+    var stanza =
         MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
-    Message message = Message.fromStanza(stanza);
+    var message = Message.fromStanza(stanza);
     messages.add(message);
     _newMessageController.add(message);
     _connection.writeStanza(stanza);
   }
 
+  @override
   set myState(ChatState state) {
-    MessageStanza stanza =
+    var stanza =
         MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
-    XmppElement stateElement = XmppElement();
+    var stateElement = XmppElement();
     stateElement.name = state.toString().split('.').last.toLowerCase();
     stateElement.addAttribute(
         XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates'));
     stanza.addChild(stateElement);
     _connection.writeStanza(stanza);
     _myState = state;
-  }
-
-  static ChatState stateFromString(String chatStateString) {
-    switch (chatStateString) {
-      case "inactive":
-        return ChatState.INACTIVE;
-      case "active":
-        return ChatState.ACTIVE;
-      case "gone":
-        return ChatState.GONE;
-      case "composing":
-        return ChatState.COMPOSING;
-      case "paused":
-        return ChatState.PAUSED;
-    }
-    return ChatState.INACTIVE;
   }
 }
 

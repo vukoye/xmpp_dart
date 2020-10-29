@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
@@ -9,7 +8,9 @@ import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 
-class SessionInitiationNegotiator extends ConnectionNegotiator {
+import '../elements/nonzas/Nonza.dart';
+
+class SessionInitiationNegotiator extends Negotiator {
   Connection _connection;
   StreamSubscription<AbstractStanza> subscription;
 
@@ -17,15 +18,17 @@ class SessionInitiationNegotiator extends ConnectionNegotiator {
 
   SessionInitiationNegotiator(Connection connection) {
     _connection = connection;
+    expectedName = 'SessionInitiationNegotiator';
   }
   @override
-  bool match(Nonza request) {
-    return request.name == "session";
+  List<Nonza> match(List<Nonza> requests) {
+    var nonza = requests.firstWhere((request) => request.name == 'session', orElse: () => null);
+    return nonza != null ? [nonza] : [];
   }
 
   @override
-  void negotiate(Nonza nonza) {
-    if (nonza.name == "session") {
+  void negotiate(List<Nonza> nonzas) {
+    if (match(nonzas).isNotEmpty) {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inStanzasStream.listen(parseStanza);
       sendSessionInitiationStanza();
@@ -44,10 +47,10 @@ class SessionInitiationNegotiator extends ConnectionNegotiator {
   }
 
   void sendSessionInitiationStanza() {
-    IqStanza stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    XmppElement sessionElement = XmppElement();
+    var stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    var sessionElement = XmppElement();
     sessionElement.name = 'session';
-    XmppAttribute attribute =
+    var attribute =
         XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-session');
     sessionElement.addAttribute(attribute);
     stanza.toJid = _connection.serverName;

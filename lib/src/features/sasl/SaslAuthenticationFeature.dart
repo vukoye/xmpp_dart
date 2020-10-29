@@ -5,11 +5,13 @@ import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/PlainSaslHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
 
-class SaslAuthenticationFeature extends ConnectionNegotiator {
+import '../../elements/nonzas/Nonza.dart';
+
+class SaslAuthenticationFeature extends Negotiator {
   Connection _connection;
 
-  Set<SaslMechanism> _offeredMechanisms = Set<SaslMechanism>();
-  Set<SaslMechanism> _supportedMechanisms = Set<SaslMechanism>();
+  final Set<SaslMechanism> _offeredMechanisms = <SaslMechanism>{};
+  final Set<SaslMechanism> _supportedMechanisms = <SaslMechanism>{};
 
   String _password;
 
@@ -19,18 +21,22 @@ class SaslAuthenticationFeature extends ConnectionNegotiator {
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_1);
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_256);
     _supportedMechanisms.add(SaslMechanism.PLAIN);
+    expectedName = 'SaslAuthenticationFeature';
   }
 
   // improve this
   @override
-  bool match(Nonza request) {
-    return request.name == "mechanisms";
+  List<Nonza> match(List<Nonza> requests) {
+    var nonza = requests.firstWhere((element) => element.name == 'mechanisms', orElse: () => null);
+    return nonza != null? [nonza] : [];
   }
 
   @override
-  void negotiate(Nonza nonza) {
-    _populateOfferedMechanism(nonza);
-    _process();
+  void negotiate(List<Nonza> nonzas) {
+    if (nonzas != null || nonzas.isNotEmpty) {
+      _populateOfferedMechanism(nonzas[0]);
+      _process();
+    }
   }
 
   void _process() {
@@ -70,22 +76,22 @@ class SaslAuthenticationFeature extends ConnectionNegotiator {
 
   void _populateOfferedMechanism(Nonza nonza) {
     nonza.children
-        .where((element) => element.name == "mechanism")
+        .where((element) => element.name == 'mechanism')
         .forEach((mechanism) {
       switch (mechanism.textValue) {
-        case "EXTERNAL":
+        case 'EXTERNAL':
           _offeredMechanisms.add(SaslMechanism.EXTERNAL);
           break;
-        case "SCRAM-SHA-1-PLUS":
+        case 'SCRAM-SHA-1-PLUS':
           _offeredMechanisms.add(SaslMechanism.SCRAM_SHA_1_PLUS);
           break;
-        case "SCRAM-SHA-256":
+        case 'SCRAM-SHA-256':
           _offeredMechanisms.add(SaslMechanism.SCRAM_SHA_256);
           break;
-        case "SCRAM-SHA-1":
+        case 'SCRAM-SHA-1':
           _offeredMechanisms.add(SaslMechanism.SCRAM_SHA_1);
           break;
-        case "PLAIN":
+        case 'PLAIN':
           _offeredMechanisms.add(SaslMechanism.PLAIN);
           break;
       }

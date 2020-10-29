@@ -137,7 +137,6 @@ class RosterManager {
   void _fireOnRosterListChanged() {
     var rosterList = _rosterMap.values.toList();
     _rosterController.add(rosterList);
-    print('RosterListChanged: ${rosterList}');
   }
 
   void _handleFullRosterResponse(IqStanza stanza) {
@@ -147,8 +146,8 @@ class RosterManager {
       xmppElement.children.forEach((child) {
         if (child.name == 'item') {
           var jid = Jid.fromFullJid(child.getAttribute('jid').value);
-          String name = child.getAttribute('name')?.value;
-          String subscriptionString = child.getAttribute('subscription')?.value;
+          var name = child.getAttribute('name')?.value;
+          var subscriptionString = child.getAttribute('subscription')?.value;
           var buddy = Buddy(jid);
           buddy.name = name;
           buddy.accountJid = _connection.fullJid;

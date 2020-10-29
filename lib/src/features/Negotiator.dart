@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 
-abstract class ConnectionNegotiator {
+abstract class Negotiator {
   static int defaultPriorityLevel = 1000;
 
   String _expectedName;
@@ -39,9 +39,10 @@ abstract class ConnectionNegotiator {
     _expectedName = value;
   }
 
-  bool match(Nonza request);
+  //goes trough all features and match only needed nonzas
+  List<Nonza> match(List<Nonza> request);
 
-  void negotiate(Nonza nonza);
+  void negotiate(List<Nonza> nonza);
 
   void backToIdle() {
     if (negotiatorStateStreamController.isClosed) {

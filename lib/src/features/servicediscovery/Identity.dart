@@ -1,15 +1,17 @@
-import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
-class Identity extends XmppElement {
+import '../../elements/nonzas/Nonza.dart';
+
+class Identity extends Nonza {
   String get category {
-    return this.getAttribute('category')?.value;
+    return getAttribute('category')?.value;
   }
 
   String get type {
-    return this.getAttribute('type')?.value;
+    return getAttribute('type')?.value;
   }
 
+  @override
   String get name {
-    return this.getAttribute('name')?.value;
+    return getAttribute('name')?.value ?? 'INVALID';
   }
 }

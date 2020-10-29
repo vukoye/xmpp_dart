@@ -15,10 +15,10 @@ class XmppElement {
     _textValue = value;
   }
 
-  List<XmppElement> _children = List<XmppElement>();
+  final List<XmppElement> _children = <XmppElement>[];
   List<XmppElement> get children => _children;
 
-  List<XmppAttribute> _attributes = List<XmppAttribute>();
+  final List<XmppAttribute> _attributes = <XmppAttribute>[];
   XmppAttribute getAttribute(String name) {
     return _attributes.firstWhere((attr) => attr.name == name, orElse: () => null);
   }
@@ -44,8 +44,8 @@ class XmppElement {
   }
 
   xml.XmlElement buildXml() {
-    List<xml.XmlAttribute> xmlAttributes = List<xml.XmlAttribute>();
-    List<xml.XmlNode> xmlNodes = List<xml.XmlNode>();
+    var xmlAttributes = <xml.XmlAttribute>[];
+    var xmlNodes = <xml.XmlNode>[];
     _attributes.forEach((xmppAttribute) {
       if (xmppAttribute.value != null) {
         xmlAttributes.add(xml.XmlAttribute(xml.XmlName(xmppAttribute.name), xmppAttribute.value));
@@ -57,7 +57,7 @@ class XmppElement {
     if (textValue != null) {
       xmlNodes.add(xml.XmlText(textValue));
     }
-    var xmlElement = xml.XmlElement(xml.XmlName(this.name), xmlAttributes, xmlNodes);
+    var xmlElement = xml.XmlElement(xml.XmlName(name), xmlAttributes, xmlNodes);
     return xmlElement;
   }
 

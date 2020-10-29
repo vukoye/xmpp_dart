@@ -10,7 +10,7 @@ class EnableNonza extends Nonza {
 
   EnableNonza(bool resume) {
     name = NAME;
-    this.addAttribute(XmppAttribute('xmlns', 'urn:xmpp:sm:3'));
-    this.addAttribute(XmppAttribute('resume', resume.toString()));
+    addAttribute(XmppAttribute('xmlns', 'urn:xmpp:sm:3'));
+    addAttribute(XmppAttribute('resume', resume.toString()));
   }
 }

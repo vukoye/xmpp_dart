@@ -10,7 +10,7 @@ import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
 class PlainSaslHandler implements AbstractSaslHandler {
   Connection _connection;
   StreamSubscription<Nonza> subscription;
-  var _completer = Completer<AuthenticationResult>();
+  final _completer = Completer<AuthenticationResult>();
 
   String _password;
 
@@ -19,6 +19,7 @@ class PlainSaslHandler implements AbstractSaslHandler {
     _connection = connection;
   }
 
+  @override
   Future<AuthenticationResult> start() {
     subscription = _connection.inNonzasStream.listen(_parseAnswer);
     sendPlainAuthMessage();
@@ -29,10 +30,10 @@ class PlainSaslHandler implements AbstractSaslHandler {
     if (nonza.name == 'failure') {
       subscription.cancel();
       _completer.complete(
-          AuthenticationResult(false, "Invalid username or password"));
+          AuthenticationResult(false, 'Invalid username or password'));
     } else if (nonza.name == 'success') {
       subscription.cancel();
-      _completer.complete(AuthenticationResult(true, ""));
+      _completer.complete(AuthenticationResult(true, ''));
     }
   }
 
@@ -41,8 +42,8 @@ class PlainSaslHandler implements AbstractSaslHandler {
         '\u0000' + _connection.fullJid.local + '\u0000' + _password;
     var bytes = utf8.encode(authString);
     var base64 = CryptoUtils.bytesToBase64(bytes);
-    Nonza nonza = Nonza();
-    nonza.name = "auth";
+    var nonza = Nonza();
+    nonza.name = 'auth';
     nonza.addAttribute(
         XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
     nonza.addAttribute(XmppAttribute('mechanism', 'PLAIN'));
