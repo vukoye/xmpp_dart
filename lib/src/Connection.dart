@@ -413,7 +413,9 @@ xml:lang='en'
   }
 
   void doneParsingFeatures() {
-    setState(XmppConnectionState.Ready);
+    if (state == XmppConnectionState.SessionInitialized) {
+      setState(XmppConnectionState.Ready);
+    }
   }
 
   void startTlsFailed() {
