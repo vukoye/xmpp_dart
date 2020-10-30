@@ -28,6 +28,12 @@ class MessageArchiveManager {
 
   bool get hasExtended => MAMNegotiator.getInstance(_connection).hasExtended;
 
+  bool get isQueryByDateSupported => MAMNegotiator.getInstance(_connection).isQueryByDateSupported;
+
+  bool get isQueryByIdSupported => MAMNegotiator.getInstance(_connection).isQueryByIdSupported;
+
+  bool get isQueryByJidSupported => MAMNegotiator.getInstance(_connection).isQueryByJidSupported;
+
   MessageArchiveManager(this._connection);
 
   void queryAll() {
@@ -92,5 +98,12 @@ class MessageArchiveManager {
       }
       _connection.writeStanza(iqStanza);
     }
+  }
+}
+
+//method for getting module
+extension MamModuleGetter on Connection {
+  MessageArchiveManager getMamModule() {
+    return MessageArchiveManager.getInstance(this);
   }
 }

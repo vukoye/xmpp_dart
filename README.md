@@ -67,26 +67,34 @@ Initial implementation of Message Archive Management.
 RST is not yet implemented.
 
 Usage:
-Temporary solution for grabing the module:
+
+- Grabbing the module
 ```dart
-var mamManager = MessageArchiveManager.getInstance(connection);
+connection.getMamModule()
 ```
 
-To query all messages:
+- Querying all messages:
 
 ```dart
 mamManager.queryAll();
 ```
 
-To query messages based on date (All parameters are optional):
+- Querying messages based on date (All parameters are optional):
 
 ```dart
-mamManager.queryByTime(start: startTime, end: endTime,jid: buddyJid);
+mamManager.queryByTime(start: startTime, end: endTime, jid: buddyJid);
 ```
 
-To query messages based on messageId (All parameters are optional):
+- Querying messages based on messageId (All parameters are optional):
 This method requires *urn:xmpp:mam:2#extended* to be supported by the serve, soon it will be available to check feature support.
 
 ```dart
 mamManager.queryById(beforeId: beforeId, afterId: afterId, jid: buddyJid});
+```
+
+Checking capabilities of the server:
+```dart
+mamManager.isQueryByDateSupported
+mamManager.isQueryByIdSupported
+mamManager.isQueryByJidSupported
 ```

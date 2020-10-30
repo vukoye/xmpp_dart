@@ -1,10 +1,8 @@
-
 import 'dart:async';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'logger/Log.dart';
 
 class ReconnectionManager {
-
   static const TAG = 'ReconnectionManager';
 
   Connection _connection;
@@ -29,7 +27,7 @@ class ReconnectionManager {
       handleReconnection();
     } else if (state == XmppConnectionState.SocketOpening) {
       //do nothing
-    }else if (state != XmppConnectionState.Reconnecting) {
+    } else if (state != XmppConnectionState.Reconnecting) {
       isActive = false;
       timeOutInMs = initialTimeout;
       counter = 0;
@@ -44,7 +42,7 @@ class ReconnectionManager {
     if (timer != null) {
       timer.cancel();
     }
-    if (counter< totalReconnections) {
+    if (counter < totalReconnections) {
       timer = Timer(Duration(milliseconds: timeOutInMs), _connection.reconnect);
       timeOutInMs += timeOutInMs;
       Log.d(TAG, 'TimeOut is: $timeOutInMs reconnection counter $counter');

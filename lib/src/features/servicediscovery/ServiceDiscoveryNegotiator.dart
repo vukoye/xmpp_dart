@@ -10,8 +10,6 @@ import 'package:xmpp_stone/src/features/Negotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Identity.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoverySupport.dart';
-
-import '../../elements/nonzas/Nonza.dart';
 import 'Feature.dart';
 
 class ServiceDiscoveryNegotiator extends Negotiator {
@@ -152,5 +150,11 @@ class ServiceDiscoveryNegotiator extends Negotiator {
     });
     iqStanza.addChild(query);
     _connection.writeStanza(iqStanza);
+  }
+}
+
+extension ServiceDiscoveryExtension on Connection {
+  List<Feature> getSupportedFeatures() {
+    return ServiceDiscoveryNegotiator.getInstance(this).getSupportedFeatures();
   }
 }

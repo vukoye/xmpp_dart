@@ -1,3 +1,6 @@
+## 0.3.1
+- bug fixing
+
 ## 0.3.0
 - Added Support for
  - __XEP-0280__: Message Carbons
