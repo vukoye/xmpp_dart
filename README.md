@@ -86,7 +86,7 @@ mamManager.queryByTime(start: startTime, end: endTime, jid: buddyJid);
 ```
 
 - Querying messages based on messageId (All parameters are optional):
-This method requires *urn:xmpp:mam:2#extended* to be supported by the serve, soon it will be available to check feature support.
+This method requires *urn:xmpp:mam:2#extended* to be supported by the server.
 
 ```dart
 mamManager.queryById(beforeId: beforeId, afterId: afterId, jid: buddyJid});

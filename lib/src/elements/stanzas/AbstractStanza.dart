@@ -6,21 +6,17 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
 abstract class AbstractStanza extends XmppElement {
   String _id;
-  Jid _fromJid;
-  Jid _toJid;
 
-  Jid get fromJid => _fromJid;
+  Jid get fromJid => Jid.fromFullJid(getAttribute('from')?.value);
 
   set fromJid(Jid value) {
-    _fromJid = value;
-    addAttribute(XmppAttribute('from', _fromJid.fullJid));
+    addAttribute(XmppAttribute('from', value.fullJid));
   }
 
-  Jid get toJid => _toJid;
+  Jid get toJid => Jid.fromFullJid(getAttribute('to')?.value);
 
   set toJid(Jid value) {
-    _toJid = value;
-    addAttribute(XmppAttribute('to', _toJid.userAtDomain));
+    addAttribute(XmppAttribute('to', value.userAtDomain));
   }
 
   String get id => _id;

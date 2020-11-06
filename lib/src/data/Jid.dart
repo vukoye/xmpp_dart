@@ -50,6 +50,9 @@ class Jid {
   }
 
   static Jid fromFullJid(String fullJid) {
+    if (fullJid == null) {
+      return InvalidJid();
+    }
     var exp = RegExp(r'^((.*?)@)?([^/@]+)(/(.*))?$');
     Iterable<Match> matches = exp.allMatches(fullJid);
     var match = matches.first;

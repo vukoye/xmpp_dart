@@ -46,7 +46,7 @@ class ConnectionNegotiatorManager {
   }
 
   void negotiateFeatureList(xml.XmlElement element) {
-    Log.d(TAG, 'Negotiating features');
+    Log.d(TAG, '!!!Negotiating features ${element.name.local}');
     var nonzas = element.descendants
         .whereType<xml.XmlElement>()
         .map((element) => Nonza.parse(element))

@@ -1,6 +1,6 @@
 import 'package:xml/xml.dart' as xml;
-import '../elements/stanzas/IqStanza.dart';
-import '../logger/Log.dart';
+import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
+import '../../logger/Log.dart';
 
 class IqParser {
   static const TAG = 'IqParser';

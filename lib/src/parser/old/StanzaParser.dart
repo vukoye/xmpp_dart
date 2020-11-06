@@ -9,10 +9,9 @@ import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Identity.dart';
-import 'package:xmpp_stone/src/parser/IqParser.dart';
+import 'file:///C:/Users/Nemanja/StudioProjects/xmpp_dart/lib/src/parser/old/IqParser.dart';
 
-import '../elements/stanzas/MessageStanza.dart';
-import '../logger/Log.dart';
+import '../../logger/Log.dart';
 
 class StanzaParser {
   static const TAG = 'StanzaParser';
@@ -118,3 +117,4 @@ class StanzaParser {
     return xmppElement;
   }
 }
+

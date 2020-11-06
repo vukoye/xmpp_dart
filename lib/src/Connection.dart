@@ -12,7 +12,8 @@ import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
-import 'package:xmpp_stone/src/parser/StanzaParser.dart';
+import 'package:xmpp_stone/src/parser/XmppParser.dart';
+import 'file:///C:/Users/Nemanja/StudioProjects/xmpp_dart/lib/src/parser/old/StanzaParser.dart';
 import 'package:xmpp_stone/src/presence/PresenceManager.dart';
 import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
@@ -46,11 +47,15 @@ class Connection {
 
   static String TAG = 'Connection';
 
+  bool useNewParser = false;
+
   static Map<String, Connection> instances = <String, Connection>{};
 
   XmppAccountSettings account;
 
   StreamManagementModule streamManagementModule;
+
+  final XmppParser _xmppParser = XmppParser();
 
   Jid get serverName {
     if (_serverName != null) {
@@ -293,29 +298,34 @@ xml:lang='en'
 //        Log.d("element: " + element.name.local);
 //      });
       //TODO: Improve parser for children only
-      xmlResponse.descendants
-          .whereType<xml.XmlElement>()
-          .where((element) => startMatcher(element))
-          .forEach((element) => processInitialStream(element));
+      if (useNewParser) {
 
-      xmlResponse.children
-          .whereType<xml.XmlElement>()
-          .where((element) => stanzaMatcher(element))
-          .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
-          .forEach((stanza) => _inStanzaStreamController.add(stanza));
+      } else {
+        xmlResponse.children
+            .whereType<xml.XmlElement>()
+            .where((element) => startMatcher(element))
+            .forEach((element) => processInitialStream(element));
 
-      xmlResponse.descendants
-          .whereType<xml.XmlElement>()
-          .where((element) => featureMatcher(element))
-          .forEach((feature) =>
-              connectionNegotatiorManager.negotiateFeatureList(feature));
+        xmlResponse.children
+            .whereType<xml.XmlElement>()
+            .where((element) => stanzaMatcher(element))
+            .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
+            .forEach((stanza) => _inStanzaStreamController.add(stanza));
 
-      //TODO: Probably will introduce bugs!!!
-      xmlResponse.children
-          .whereType<xml.XmlElement>()
-          .where((element) => nonzaMatcher(element))
-          .map((xmlElement) => Nonza.parse(xmlElement))
-          .forEach((nonza) => _inNonzaStreamController.add(nonza));
+        xmlResponse.descendants
+            .whereType<xml.XmlElement>()
+            .where((element) => featureMatcher(element))
+            .forEach((feature) =>
+            connectionNegotatiorManager.negotiateFeatureList(feature));
+
+        //TODO: Probably will introduce bugs!!!
+        xmlResponse.children
+            .whereType<xml.XmlElement>()
+            .where((element) => nonzaMatcher(element))
+            .map((xmlElement) => Nonza.parse(xmlElement))
+            .forEach((nonza) => _inNonzaStreamController.add(nonza));
+      }
+
     }
   }
 
