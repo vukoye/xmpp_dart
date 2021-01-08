@@ -64,12 +64,12 @@ class ServiceDiscoveryNegotiator extends Negotiator {
   }
 
   @override
-  List<Nonza> match(List<Nonza> requests) {
+  List<XmppElement> match(List<XmppElement> requests) {
     return [];
   }
 
   @override
-  void negotiate(List<Nonza> nonza) {
+  void negotiate(List<XmppElement> nonza) {
     if (state == NegotiatorState.IDLE) {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inStanzasStream.listen(_parseStanza);

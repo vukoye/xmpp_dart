@@ -42,7 +42,7 @@ class CarbonsNegotiator extends Negotiator {
   }
 
   @override
-  List<Nonza> match(List<Nonza> requests) {
+  List<XmppElement> match(List<XmppElement> requests) {
     return (requests.where((element) =>
         element != null && element is Feature &&
         ((element).xmppVar == 'urn:xmpp:carbons:2' ||
@@ -50,7 +50,7 @@ class CarbonsNegotiator extends Negotiator {
   }
 
   @override
-  void negotiate(List<Nonza> nonzas) {
+  void negotiate(List<XmppElement> nonzas) {
     if (match(nonzas).isNotEmpty) {
       state = NegotiatorState.NEGOTIATING;
       sendRequest();

@@ -22,13 +22,13 @@ class BindingResourceConnectionNegotiator extends Negotiator {
     expectedName = 'BindingResourceConnectionNegotiator';
   }
   @override
-  List<Nonza> match(List<Nonza> requests) {
+  List<XmppElement> match(List<XmppElement> requests) {
     var nonza = requests.firstWhere((request) => request.name == BIND_NAME, orElse: () => null);
     return nonza != null ? [nonza] : [];
   }
 
   @override
-  void negotiate(List<Nonza> nonzas) {
+  void negotiate(List<XmppElement> nonzas) {
     if (match(nonzas).isNotEmpty) {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inStanzasStream.listen(parseStanza);

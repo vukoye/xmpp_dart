@@ -3,6 +3,8 @@ import 'dart:collection';
 
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
+import 'package:xmpp_stone/src/elements/StreamFeaturesElement.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/BindingResourceNegotiator.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
@@ -45,8 +47,26 @@ class ConnectionNegotiatorManager {
     waitingNegotiators.clear();
   }
 
+  void negotiateFeatureListXmpp(StreamFeaturesElement element) {
+    Log.d(TAG, '!!!Negotiating features ${element.name}');
+    var elements = element.descendants;
+    supportedNegotiatorList.forEach((negotiator) {
+      var matchingNonzas = negotiator.match(elements);
+      if (matchingNonzas != null && matchingNonzas.isNotEmpty) {
+        waitingNegotiators
+            .add(NegotiatorWithSupportedNonzas(negotiator, matchingNonzas));
+      }
+    });
+    if (_connection.authenticated) {
+      waitingNegotiators.add(NegotiatorWithSupportedNonzas(
+          ServiceDiscoveryNegotiator.getInstance(_connection), []));
+    }
+    negotiateNextFeature();
+  }
+
   void negotiateFeatureList(xml.XmlElement element) {
-    Log.d(TAG, '!!!Negotiating features ${element.name.local}');
+
+    Log.d(TAG, '!!!Negotiating features ${element.name.local} parent ${element.parentElement.name.local}');
     var nonzas = element.descendants
         .whereType<xml.XmlElement>()
         .map((element) => Nonza.parse(element))
@@ -160,7 +180,7 @@ class ConnectionNegotiatorManager {
 
 class NegotiatorWithSupportedNonzas {
   Negotiator negotiator;
-  List<Nonza> supportedNonzas;
+  List<XmppElement> supportedNonzas;
 
   NegotiatorWithSupportedNonzas(this.negotiator, this.supportedNonzas);
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
 import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
@@ -54,7 +55,7 @@ class MAMNegotiator extends Negotiator {
       _supportedParameters.contains(MamQueryParameters.WITH);
 
   @override
-  List<Nonza> match(List<Nonza> requests) {
+  List<XmppElement> match(List<XmppElement> requests) {
     return requests
         .where((element) =>
             element is Feature &&
@@ -64,7 +65,7 @@ class MAMNegotiator extends Negotiator {
   }
 
   @override
-  void negotiate(List<Nonza> nonzas) {
+  void negotiate(List<XmppElement> nonzas) {
     if (match(nonzas).isNotEmpty) {
       enabled = true;
       state = NegotiatorState.NEGOTIATING;

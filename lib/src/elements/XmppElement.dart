@@ -18,6 +18,13 @@ class XmppElement {
   final List<XmppElement> _children = <XmppElement>[];
   List<XmppElement> get children => _children;
 
+  List<XmppElement> get descendants {
+    var list = List<XmppElement>();
+    list.addAll(children);
+    children.forEach((element) {list.addAll(descendants);});
+    return list;
+  }
+
   final List<XmppAttribute> _attributes = <XmppAttribute>[];
   XmppAttribute getAttribute(String name) {
     return _attributes.firstWhere((attr) => attr.name == name, orElse: () => null);
