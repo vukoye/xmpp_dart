@@ -21,13 +21,13 @@ class SessionInitiationNegotiator extends Negotiator {
     expectedName = 'SessionInitiationNegotiator';
   }
   @override
-  List<Nonza> match(List<Nonza> requests) {
+  List<XmppElement> match(List<XmppElement> requests) {
     var nonza = requests.firstWhere((request) => request.name == 'session', orElse: () => null);
     return nonza != null ? [nonza] : [];
   }
 
   @override
-  void negotiate(List<Nonza> nonzas) {
+  void negotiate(List<XmppElement> nonzas) {
     if (match(nonzas).isNotEmpty) {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inStanzasStream.listen(parseStanza);

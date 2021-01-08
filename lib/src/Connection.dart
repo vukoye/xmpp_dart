@@ -7,6 +7,8 @@ import 'package:xmpp_stone/src/ReconnectionManager.dart';
 import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 
 import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/StreamElement.dart';
+import 'package:xmpp_stone/src/elements/StreamFeaturesElement.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
@@ -47,7 +49,7 @@ class Connection {
 
   static String TAG = 'Connection';
 
-  bool useNewParser = false;
+  bool useNewParser = true;
 
   static Map<String, Connection> instances = <String, Connection>{};
 
@@ -87,19 +89,19 @@ class Connection {
   bool authenticated = false;
 
   final StreamController<AbstractStanza> _inStanzaStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   final StreamController<AbstractStanza> _outStanzaStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   final StreamController<Nonza> _inNonzaStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   final StreamController<Nonza> _outNonzaStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   final StreamController<XmppConnectionState> _connectionStateStreamController =
-      StreamController.broadcast();
+  StreamController.broadcast();
 
   Stream<AbstractStanza> get inStanzasStream {
     return _inStanzaStreamController.stream;
@@ -288,7 +290,9 @@ xml:lang='en'
     if (fullResponse != null && fullResponse.isNotEmpty) {
       xml.XmlNode xmlResponse;
       try {
-        xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
+        xmlResponse = xml.XmlDocument
+            .parse(fullResponse)
+            .firstChild;
       } catch (e) {
         _unparsedXmlResponse += fullResponse.substring(
             0, fullResponse.length - 13); //remove  xmpp_stone end tag
@@ -299,7 +303,24 @@ xml:lang='en'
 //      });
       //TODO: Improve parser for children only
       if (useNewParser) {
-
+        xmlResponse.children
+            .whereType<xml.XmlElement>()
+            .map((element) => _xmppParser.parse(element))
+            .forEach((xmppElement) {
+          if (xmppElement is StreamElement) {
+            _serverName = xmppElement.serverName;
+            Log.d(TAG, '!!!stream element found');
+            xmppElement.children.forEach((element) {Log.d(TAG, "Children ${element.name}");});
+            var element = xmppElement.children.firstWhere((element) => element is StreamFeaturesElement, orElse: () => null);
+            if (element != null) {
+              Log.d(TAG, '!!!stream features element found');
+              connectionNegotatiorManager.negotiateFeatureListXmpp(element);
+            }
+          }
+          if (xmppElement is StreamFeaturesElement) {
+            connectionNegotatiorManager.negotiateFeatureListXmpp(xmppElement);
+          }
+        });
       } else {
         xmlResponse.children
             .whereType<xml.XmlElement>()
@@ -325,7 +346,6 @@ xml:lang='en'
             .map((xmlElement) => Nonza.parse(xmlElement))
             .forEach((nonza) => _inNonzaStreamController.add(nonza));
       }
-
     }
   }
 
@@ -393,9 +413,9 @@ xml:lang='en'
           .transform(utf8.decoder)
           .map(prepareStreamResponse)
           .listen(handleResponse,
-              onError: (error) =>
-                  {handleSecuredConnectionError(error.toString())},
-              onDone: handleSecuredConnectionDone);
+          onError: (error) =>
+          {handleSecuredConnectionError(error.toString())},
+          onDone: handleSecuredConnectionDone);
       _openStream();
     });
   }
@@ -410,8 +430,8 @@ xml:lang='en'
 
   bool elementHasAttribute(xml.XmlElement element, xml.XmlAttribute attribute) {
     var list = element.attributes.firstWhere(
-        (attr) =>
-            attr.name.local == attribute.name.local &&
+            (attr) =>
+        attr.name.local == attribute.name.local &&
             attr.value == attribute.value,
         orElse: () => null);
     return list != null;

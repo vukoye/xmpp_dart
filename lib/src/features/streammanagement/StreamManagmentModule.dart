@@ -89,14 +89,14 @@ class StreamManagementModule extends Negotiator {
   }
 
   @override
-  List<Nonza> match(List<Nonza> requests) {
+  List<XmppElement> match(List<XmppElement> requests) {
   var nonza = requests.firstWhere((request) => SMNonza.match(request), orElse: () => null);
   return nonza != null ? [nonza] : [];
   }
 
   //TODO: Improve
   @override
-  void negotiate(List<Nonza> nonzas) {
+  void negotiate(List<XmppElement> nonzas) {
     if (nonzas != null && nonzas.isNotEmpty && SMNonza.match(nonzas[0]) && _connection.authenticated) {
       state = NegotiatorState.NEGOTIATING;
       inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);

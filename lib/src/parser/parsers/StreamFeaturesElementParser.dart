@@ -5,7 +5,7 @@ import 'package:xmpp_stone/src/parser/XmppElementParser.dart';
 
 class StreamFeaturesElementParser extends XmppElementParser {
   @override
-  bool elementValidator(XmlElement xmlElement) => xmlElement.name.local == 'stream:features';
+  bool elementValidator(XmlElement xmlElement) => xmlElement.name.local == 'stream:features' ||  xmlElement.name.local == 'features';
 
   @override
   XmppElement parse(XmlElement xmlElement) {

@@ -1,4 +1,5 @@
 import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
@@ -26,13 +27,13 @@ class SaslAuthenticationFeature extends Negotiator {
 
   // improve this
   @override
-  List<Nonza> match(List<Nonza> requests) {
+  List<XmppElement> match(List<XmppElement> requests) {
     var nonza = requests.firstWhere((element) => element.name == 'mechanisms', orElse: () => null);
     return nonza != null? [nonza] : [];
   }
 
   @override
-  void negotiate(List<Nonza> nonzas) {
+  void negotiate(List<XmppElement> nonzas) {
     if (nonzas != null || nonzas.isNotEmpty) {
       _populateOfferedMechanism(nonzas[0]);
       _process();

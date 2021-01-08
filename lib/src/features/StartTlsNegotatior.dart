@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 
@@ -21,7 +22,7 @@ class StartTlsNegotiator extends Negotiator {
   }
 
   @override
-  void negotiate(List<Nonza> nonzas) {
+  void negotiate(List<XmppElement> nonzas) {
     Log.d(TAG, 'negotiating starttls');
     if (match(nonzas) != null) {
       state = NegotiatorState.NEGOTIATING;
@@ -41,7 +42,7 @@ class StartTlsNegotiator extends Negotiator {
   }
 
   @override
-  List<Nonza> match(List<Nonza> requests) {
+  List<XmppElement> match(List<XmppElement> requests) {
     var nonza = requests.firstWhere(
         (request) =>
             request.name == 'starttls' &&

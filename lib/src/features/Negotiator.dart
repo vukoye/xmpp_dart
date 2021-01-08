@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 
 abstract class Negotiator {
@@ -40,9 +41,9 @@ abstract class Negotiator {
   }
 
   //goes trough all features and match only needed nonzas
-  List<Nonza> match(List<Nonza> request);
+  List<XmppElement> match(List<XmppElement> request);
 
-  void negotiate(List<Nonza> nonza);
+  void negotiate(List<XmppElement> nonza);
 
   void backToIdle() {
     if (negotiatorStateStreamController.isClosed) {
