@@ -87,8 +87,12 @@ class ConnectionNegotiatorManager {
         Log.d(TAG, 'ACTIVE FEATURE: ${negotiatorWithData.negotiator}');
       }
 
+      try {
         activeSubscription =
             activeNegotiator.featureStateStream.listen(stateListener);
+      } catch (e) {
+        // Stream has already been listened to this listener
+      }
     } else {
       activeNegotiator = null;
       _connection.doneParsingFeatures();

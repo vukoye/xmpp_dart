@@ -166,6 +166,17 @@ class StreamManagementModule extends Negotiator {
     inStanzaSubscription = _connection.inStanzasStream.listen(parseInStanza);
   }
 
+  void handleResumed(Nonza nonza) {
+    parseAckResponse(nonza.getAttribute('h').value);
+
+    state = NegotiatorState.DONE;
+    if (timer != null) {
+      timer.cancel();
+    }
+    timer = Timer.periodic(
+        Duration(milliseconds: 5000), (Timer t) => sendAckRequest());
+  }
+
   void sendEnableStreamManagement() =>
       _connection.writeNonza(EnableNonza(true));
 
@@ -173,15 +184,18 @@ class StreamManagementModule extends Negotiator {
       _connection.writeNonza(ANonza(streamState.lastReceivedStanza));
 
   void tryToResumeStream() {
-    _connection.writeNonza(
-        ResumeNonza(streamState.id, streamState.lastReceivedStanza));
-    streamState.tryingToResume = true;
+    if(!streamState.tryingToResume) {
+      _connection.writeNonza(
+          ResumeNonza(streamState.id, streamState.lastReceivedStanza));
+      streamState.tryingToResume = true;
+    }
   }
 
   void resumeState(Nonza resumedNonza) {
+    streamState.tryingToResume = false;
     state = NegotiatorState.DONE_CLEAN_OTHERS;
-    parseAckResponse(resumedNonza.getAttribute('h').value);
     _connection.setState(XmppConnectionState.Resumed);
+    handleResumed(resumedNonza);
   }
 
   bool isResumeAvailable() => streamState.isResumeAvailable();
