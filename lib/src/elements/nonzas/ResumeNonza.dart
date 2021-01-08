@@ -12,6 +12,6 @@ class ResumeNonza extends Nonza {
     name = NAME;
     addAttribute(XmppAttribute('xmlns', XMLNS));
     addAttribute(XmppAttribute('h', hValue.toString()));
-    addAttribute(XmppAttribute('id', id));
+    addAttribute(XmppAttribute('previd', id));
   }
 }
