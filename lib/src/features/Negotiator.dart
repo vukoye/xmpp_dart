@@ -22,9 +22,6 @@ abstract class Negotiator {
   set state(NegotiatorState value) {
     _state = value;
     negotiatorStateStreamController.add(state);
-    if (state == NegotiatorState.DONE) {
-      negotiatorStateStreamController.close();
-    }
   }
 
   String get expectedNameSpace => _expectedNameSpace;
@@ -45,9 +42,6 @@ abstract class Negotiator {
   void negotiate(List<Nonza> nonza);
 
   void backToIdle() {
-    if (negotiatorStateStreamController.isClosed) {
-      negotiatorStateStreamController = StreamController();
-    }
     state = NegotiatorState.IDLE;
   }
 
