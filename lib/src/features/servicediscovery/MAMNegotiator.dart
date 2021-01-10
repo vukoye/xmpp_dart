@@ -117,8 +117,8 @@ class MAMNegotiator extends Negotiator {
     }
   }
 
-  void checkForExtendedSupport(List<Nonza> nonzas) {
-    hasExtended = nonzas.any(
+  void checkForExtendedSupport(List<XmppElement> elements) {
+    hasExtended = elements.any(
         (element) => (element as Feature).xmppVar == 'urn:xmpp:mam:2#extended');
   }
 }

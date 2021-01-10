@@ -7,6 +7,7 @@ import 'package:cryptoutils/utils.dart';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:unorm_dart/unorm_dart.dart' as unorm;
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
@@ -20,7 +21,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
   static const TAG = 'ScramSaslHandler';
 
   Connection _connection;
-  StreamSubscription<Nonza> subscription;
+  StreamSubscription<XmppElement> subscription;
   final _completer = Completer<AuthenticationResult>();
   ScramStates _scramState = ScramStates.INITIAL;
   String _password;
@@ -82,19 +83,19 @@ class ScramSaslHandler implements AbstractSaslHandler {
     _connection.writeNonza(nonza);
   }
 
-  void _parseAnswer(Nonza nonza) {
+  void _parseAnswer(XmppElement element) {
     if (_scramState == ScramStates.AUTH_SENT) {
-      if (nonza.name == 'failure') {
+      if (element.name == 'failure') {
         _fireAuthFailed('Auth Error in sent username');
-      } else if (nonza.name == 'challenge') {
+      } else if (element.name == 'challenge') {
         //challenge
-        challengeFirst(nonza.textValue);
+        challengeFirst(element.textValue);
       }
     } else if (_scramState == ScramStates.RESPONSE_SENT) {
-      if (nonza.name == 'failure') {
+      if (element.name == 'failure') {
         _fireAuthFailed('Auth Error in challenge');
-      } else if (nonza.name == 'success') {
-        verifyServerHasKey(nonza.textValue);
+      } else if (element.name == 'success') {
+        verifyServerHasKey(element.textValue);
       }
     }
   }

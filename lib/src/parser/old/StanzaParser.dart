@@ -9,9 +9,9 @@ import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Identity.dart';
-import 'file:///C:/Users/Nemanja/StudioProjects/xmpp_dart/lib/src/parser/old/IqParser.dart';
 
 import '../../logger/Log.dart';
+import 'IqParser.dart';
 
 class StanzaParser {
   static const TAG = 'StanzaParser';

@@ -64,27 +64,6 @@ class ConnectionNegotiatorManager {
     negotiateNextFeature();
   }
 
-  void negotiateFeatureList(xml.XmlElement element) {
-
-    Log.d(TAG, '!!!Negotiating features ${element.name.local} parent ${element.parentElement.name.local}');
-    var nonzas = element.descendants
-        .whereType<xml.XmlElement>()
-        .map((element) => Nonza.parse(element))
-        .toList();
-    supportedNegotiatorList.forEach((negotiator) {
-      var matchingNonzas = negotiator.match(nonzas);
-      if (matchingNonzas != null && matchingNonzas.isNotEmpty) {
-        waitingNegotiators
-            .add(NegotiatorWithSupportedNonzas(negotiator, matchingNonzas));
-      }
-    });
-    if (_connection.authenticated) {
-      waitingNegotiators.add(NegotiatorWithSupportedNonzas(
-          ServiceDiscoveryNegotiator.getInstance(_connection), []));
-    }
-    negotiateNextFeature();
-  }
-
   void cleanNegotiators() {
     waitingNegotiators.clear();
     if (activeNegotiator != null) {

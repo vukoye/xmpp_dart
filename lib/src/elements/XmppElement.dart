@@ -21,7 +21,7 @@ class XmppElement {
   List<XmppElement> get descendants {
     var list = List<XmppElement>();
     list.addAll(children);
-    children.forEach((element) {list.addAll(descendants);});
+    children.forEach((element) {list.addAll(element.descendants);});
     return list;
   }
 

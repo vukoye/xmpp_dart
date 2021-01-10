@@ -75,7 +75,7 @@ class SaslAuthenticationFeature extends Negotiator {
     }
   }
 
-  void _populateOfferedMechanism(Nonza nonza) {
+  void _populateOfferedMechanism(XmppElement nonza) {
     nonza.children
         .where((element) => element.name == 'mechanism')
         .forEach((mechanism) {

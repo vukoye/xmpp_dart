@@ -12,7 +12,7 @@ import '../logger/Log.dart';
 class StartTlsNegotiator extends Negotiator {
   static const TAG = 'StartTlsNegotiator';
   Connection _connection;
-  StreamSubscription<Nonza> subscription;
+  StreamSubscription<XmppElement> subscription;
 
   StartTlsNegotiator(Connection connection) {
     _connection = connection;
@@ -22,21 +22,22 @@ class StartTlsNegotiator extends Negotiator {
   }
 
   @override
-  void negotiate(List<XmppElement> nonzas) {
+  void negotiate(List<XmppElement> elements) {
     Log.d(TAG, 'negotiating starttls');
-    if (match(nonzas) != null) {
+    if (match(elements) != null) {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inNonzasStream.listen(checkNonzas);
       _connection.writeNonza(StartTlsResponse());
     }
   }
 
-  void checkNonzas(Nonza nonza) {
-    if (nonza.name == 'proceed') {
+  void checkNonzas(XmppElement element) {
+    if (element.name == 'proceed') {
+      Log.d(TAG, 'starting secured socket!!!');
       _connection.startSecureSocket();
       state = NegotiatorState.DONE_CLEAN_OTHERS;
       subscription.cancel();
-    } else if (nonza.name == 'failure') {
+    } else if (element.name == 'failure') {
       _connection.startTlsFailed();
     }
   }

@@ -4,12 +4,13 @@ import 'dart:convert';
 import 'package:cryptoutils/utils.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
 
 class PlainSaslHandler implements AbstractSaslHandler {
   Connection _connection;
-  StreamSubscription<Nonza> subscription;
+  StreamSubscription<XmppElement> subscription;
   final _completer = Completer<AuthenticationResult>();
 
   String _password;
@@ -26,12 +27,12 @@ class PlainSaslHandler implements AbstractSaslHandler {
     return _completer.future;
   }
 
-  void _parseAnswer(Nonza nonza) {
-    if (nonza.name == 'failure') {
+  void _parseAnswer(XmppElement element) {
+    if (element.name == 'failure') {
       subscription.cancel();
       _completer.complete(
           AuthenticationResult(false, 'Invalid username or password'));
-    } else if (nonza.name == 'success') {
+    } else if (element.name == 'success') {
       subscription.cancel();
       _completer.complete(AuthenticationResult(true, ''));
     }
