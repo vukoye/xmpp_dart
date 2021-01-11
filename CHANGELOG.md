@@ -1,3 +1,6 @@
+## 0.3.3
+- bug fixing
+
 ## 0.3.2
 - bug fixing
 
