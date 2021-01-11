@@ -98,3 +98,16 @@ mamManager.isQueryByDateSupported
 mamManager.isQueryByIdSupported
 mamManager.isQueryByJidSupported
 ```
+
+## Adding new feature
+
+### Custom Elements
+If your feature contains Xmpp element which is not defined in the xmppstone library,
+ in order to have more structural behavior, it's best to define it 
+ and to create Custom Xmpp Parser for that element. 
+ In order to do this: 
+ 1) Define Xmpp element by extending _XmppElement_ class 
+ 2) Write custom element parser by implementing _XmppElementParser_
+ 3) Add custom parser by calling _connection.addCustomParser(customParser)_
+
+### 

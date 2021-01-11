@@ -14,6 +14,7 @@ import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
+import 'package:xmpp_stone/src/parser/XmppElementParser.dart';
 import 'package:xmpp_stone/src/parser/XmppParser.dart';
 import 'package:xmpp_stone/src/presence/PresenceManager.dart';
 import 'package:xmpp_stone/src/roster/RosterManager.dart';
@@ -54,6 +55,10 @@ class Connection {
   StreamManagementModule streamManagementModule;
 
   final XmppParser _xmppParser = XmppParser();
+
+  void addCustomParser(XmppElementParser parser) {
+    _xmppParser.addCustomParser(parser);
+  }
 
   Jid get serverName {
     if (_serverName != null) {
@@ -266,7 +271,6 @@ xml:lang='en'
           .forEach((xmppElement) {
         if (xmppElement is StreamElement) {
           _serverName = xmppElement.serverName;
-          Log.d(TAG, '!!!stream element found');
           xmppElement.children.forEach((element) {
             Log.d(TAG, 'Children ${element.name}');
           });
@@ -274,7 +278,6 @@ xml:lang='en'
               (element) => element is StreamFeaturesElement,
               orElse: () => null);
           if (element != null) {
-            Log.d(TAG, '!!!stream features element found');
             connectionNegotiatorManager.negotiateFeatureListXmpp(element);
           }
         }

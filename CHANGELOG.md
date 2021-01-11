@@ -1,3 +1,7 @@
+## 0.4.0
+- Improving Xmpp parser
+- Standardizing extensions adding
+
 ## 0.3.2
 - bug fixing
 

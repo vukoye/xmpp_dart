@@ -48,7 +48,6 @@ class ConnectionNegotiatorManager {
   }
 
   void negotiateFeatureListXmpp(StreamFeaturesElement element) {
-    Log.d(TAG, '!!!Negotiating features ${element.name}');
     var elements = element.descendants;
     supportedNegotiatorList.forEach((negotiator) {
       var matchingNonzas = negotiator.match(elements);
@@ -144,8 +143,6 @@ class ConnectionNegotiatorManager {
   }
 
   void addFeatures(List<Feature> supportedFeatures) {
-    Log.e(TAG,
-        'ADDING FEATURES count: ${supportedFeatures.length} ${supportedFeatures} ');
     supportedNegotiatorList.forEach((negotiator) {
       var matchingNonzas = negotiator.match(supportedFeatures);
       if (matchingNonzas != null && matchingNonzas.isNotEmpty) {

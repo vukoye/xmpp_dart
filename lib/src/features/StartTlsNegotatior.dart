@@ -33,7 +33,6 @@ class StartTlsNegotiator extends Negotiator {
 
   void checkNonzas(XmppElement element) {
     if (element.name == 'proceed') {
-      Log.d(TAG, 'starting secured socket!!!');
       _connection.startSecureSocket();
       state = NegotiatorState.DONE_CLEAN_OTHERS;
       subscription.cancel();
