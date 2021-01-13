@@ -83,7 +83,6 @@ class StreamManagementModule extends Negotiator {
           if (!_connection.isOpened() && timer != null) {timer.cancel();};
           if (state == XmppConnectionState.Closed) {
             streamState = StreamState();
-            //state = XmppConnectionState.Idle;
           }
         });
   }
@@ -116,6 +115,7 @@ class StreamManagementModule extends Negotiator {
   void parseNonza(XmppElement element) {
     if (state == NegotiatorState.NEGOTIATING) {
       if (EnabledNonza.match(element)) {
+        print("!!! Handle Enabled");
         handleEnabled(element);
       } else if (ResumedNonza.match(element)) {
         resumeState(element);
@@ -162,6 +162,8 @@ class StreamManagementModule extends Negotiator {
     }
     timer = Timer.periodic(
         Duration(milliseconds: 5000), (Timer t) => sendAckRequest());
+    inNonzaSubscription.cancel();
+    outStanzaSubscription.cancel();
     outStanzaSubscription = _connection.outStanzasStream.listen(parseOutStanza);
     inStanzaSubscription = _connection.inStanzasStream.listen(parseInStanza);
   }

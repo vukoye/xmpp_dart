@@ -100,19 +100,15 @@ class ConnectionNegotiatorManager {
   void _initSupportedNegotiatorList() {
     var streamManagement = StreamManagementModule.getInstance(_connection);
     streamManagement.reset();
-    supportedNegotiatorList.add(StartTlsNegotiator(_connection)); //priority 1
+    supportedNegotiatorList.add(StartTlsNegotiator(_connection));
     supportedNegotiatorList
         .add(SaslAuthenticationFeature(_connection, _accountSettings.password));
     if (streamManagement.isResumeAvailable()) {
       supportedNegotiatorList.add(streamManagement);
     }
-    supportedNegotiatorList
-        .add(BindingResourceConnectionNegotiator(_connection));
-    supportedNegotiatorList
-        .add(streamManagement); //doesn't care if success it will be done
+    supportedNegotiatorList.add(BindingResourceConnectionNegotiator(_connection));
+    supportedNegotiatorList.add(streamManagement);
     supportedNegotiatorList.add(SessionInitiationNegotiator(_connection));
-    // supportedNegotiatorList
-    //     .add(ServiceDiscoveryNegotiator.getInstance(_connection));
     supportedNegotiatorList.add(CarbonsNegotiator.getInstance(_connection));
     supportedNegotiatorList.add(MAMNegotiator.getInstance(_connection));
 
