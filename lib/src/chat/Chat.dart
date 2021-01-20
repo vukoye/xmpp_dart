@@ -10,7 +10,6 @@ import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'Message.dart';
 
 class ChatImpl implements Chat {
-
   static String TAG = 'Chat';
 
   final Connection _connection;
@@ -48,10 +47,15 @@ class ChatImpl implements Chat {
         _newMessageController.add(message);
       }
 
-      if (message.chatState != null && !message.isDelayed) {
+      if (message.chatState != null) {
         _remoteState = message.chatState;
         _remoteStateController.add(message.chatState);
       }
+
+      // if (message.chatState != null && !message.isDelayed) {
+      //   _remoteState = message.chatState;
+      //   _remoteStateController.add(message.chatState);
+      // }
     }
   }
 
