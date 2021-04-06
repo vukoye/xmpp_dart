@@ -23,21 +23,17 @@ import 'servicediscovery/ServiceDiscoveryNegotiator.dart';
 
 class ConnectionNegotiatorManager {
   static const String TAG = 'ConnectionNegotiatorManager';
-  List<Negotiator> supportedNegotiatorList = <Negotiator>[];
-  Negotiator activeNegotiator;
-  Queue<NegotiatorWithSupportedNonzas> waitingNegotiators =
-      Queue<NegotiatorWithSupportedNonzas>();
+  List<Negotiator> supportedNegotiatorList = [];
+  Negotiator? activeNegotiator;
+  Queue<NegotiatorWithSupportedNonzas?> waitingNegotiators =
+      Queue<NegotiatorWithSupportedNonzas?>();
 
-  Connection _connection;
-  XmppAccountSettings _accountSettings;
+  final Connection _connection;
+  final XmppAccountSettings _accountSettings;
 
-  StreamSubscription<NegotiatorState> activeSubscription;
+  StreamSubscription<NegotiatorState>? activeSubscription;
 
-  ConnectionNegotiatorManager(
-      Connection connection, XmppAccountSettings accountSettings) {
-    _connection = connection;
-    _accountSettings = accountSettings;
-  }
+  ConnectionNegotiatorManager(this._connection, this._accountSettings);
 
   void init() {
     supportedNegotiatorList.clear();
@@ -68,11 +64,11 @@ class ConnectionNegotiatorManager {
   void cleanNegotiators() {
     waitingNegotiators.clear();
     if (activeNegotiator != null) {
-      activeNegotiator.backToIdle();
+      activeNegotiator!.backToIdle();
       activeNegotiator = null;
     }
     if (activeSubscription != null) {
-      activeSubscription.cancel();
+      activeSubscription!.cancel();
     }
   }
 
@@ -80,16 +76,16 @@ class ConnectionNegotiatorManager {
     var negotiatorWithData = pickNextNegotiator();
     if (negotiatorWithData != null) {
       activeNegotiator = negotiatorWithData.negotiator;
-      activeNegotiator.negotiate(negotiatorWithData.supportedNonzas);
+      activeNegotiator!.negotiate(negotiatorWithData.supportedNonzas);
       //TODO: this should be refactored
-      if (activeSubscription != null) activeSubscription.cancel();
+      if (activeSubscription != null) activeSubscription!.cancel();
       if (activeNegotiator != null) {
         Log.d(TAG, 'ACTIVE FEATURE: ${negotiatorWithData.negotiator}');
       }
 
       try {
         activeSubscription =
-            activeNegotiator.featureStateStream.listen(stateListener);
+            activeNegotiator!.featureStateStream.listen(stateListener);
       } catch (e) {
         // Stream has already been listened to this listener
       }
@@ -130,11 +126,11 @@ class ConnectionNegotiatorManager {
     }
   }
 
-  NegotiatorWithSupportedNonzas pickNextNegotiator() {
+  NegotiatorWithSupportedNonzas? pickNextNegotiator() {
     if (waitingNegotiators.isEmpty) return null;
     var negotiatorWithData = waitingNegotiators.firstWhere((element) {
       Log.d(TAG,
-          'Found matching negotiator ${element.negotiator.isReady().toString()}');
+          'Found matching negotiator ${element!.negotiator.isReady().toString()}');
       return element.negotiator.isReady();
     }, orElse: () {
       Log.d(TAG, 'No matching negotiator');
@@ -146,11 +142,11 @@ class ConnectionNegotiatorManager {
 
   void addFeatures(List<Feature> supportedFeatures) {
     Log.e(TAG,
-        'ADDING FEATURES count: ${supportedFeatures.length} ${supportedFeatures} ');
+        'ADDING FEATURES count: ${supportedFeatures.length} $supportedFeatures');
     supportedNegotiatorList.forEach((negotiator) {
       var matchingNonzas = negotiator.match(supportedFeatures);
       if (matchingNonzas != null && matchingNonzas.isNotEmpty) {
-        Log.d(TAG, 'Adding negotiator: ${negotiator} ${matchingNonzas}');
+        Log.d(TAG, 'Adding negotiator: $negotiator $matchingNonzas');
         waitingNegotiators
             .add(NegotiatorWithSupportedNonzas(negotiator, matchingNonzas));
       }

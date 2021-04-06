@@ -19,26 +19,25 @@ class ScramSaslHandler implements AbstractSaslHandler {
   static const CLIENT_NONCE_LENGTH = 48;
   static const TAG = 'ScramSaslHandler';
 
-  Connection _connection;
-  StreamSubscription<Nonza> subscription;
+  final Connection _connection;
+  late StreamSubscription<Nonza> subscription;
   final _completer = Completer<AuthenticationResult>();
   ScramStates _scramState = ScramStates.INITIAL;
-  String _password;
-  String _username;
-  String _clientNonce;
-  String _initialMessage;
+  String? _password;
+  String? _username;
+  late String _clientNonce;
+  String? _initialMessage;
 
   final SaslMechanism _mechanism;
-  Hash _hash;
+  late Hash _hash;
 
-  String _mechanismString;
+  String? _mechanismString;
 
-  var serverSignature;
+  late var serverSignature;
 
-  ScramSaslHandler(Connection connection, String password, this._mechanism) {
-    _username = connection.fullJid.local;
+  ScramSaslHandler(this._connection, String? password, this._mechanism) {
+    _username = _connection.fullJid.local;
     _password = password;
-    _connection = connection;
     initMechanism();
     generateRandomClientNonce();
   }
@@ -61,15 +60,15 @@ class ScramSaslHandler implements AbstractSaslHandler {
   }
 
   void generateRandomClientNonce() {
-    var bytes = List<int>(CLIENT_NONCE_LENGTH);
+    var bytes = [];
     for (var i = 0; i < CLIENT_NONCE_LENGTH; i++) {
       bytes[i] = Random.secure().nextInt(256);
     }
-    _clientNonce = base64.encode(bytes);
+    _clientNonce = base64.encode(bytes as List<int>);
   }
 
   void sendInitialMessage() {
-    _initialMessage = 'n=${saslEscape(normalize(_username))},r=${_clientNonce}';
+    _initialMessage = 'n=${saslEscape(normalize(_username!))},r=$_clientNonce';
     var bytes = utf8.encode('n,,$_initialMessage');
     var message = CryptoUtils.bytesToBase64(bytes, false, false);
     var nonza = Nonza();
@@ -88,13 +87,13 @@ class ScramSaslHandler implements AbstractSaslHandler {
         _fireAuthFailed('Auth Error in sent username');
       } else if (nonza.name == 'challenge') {
         //challenge
-        challengeFirst(nonza.textValue);
+        challengeFirst(nonza.textValue!);
       }
     } else if (_scramState == ScramStates.RESPONSE_SENT) {
       if (nonza.name == 'failure') {
         _fireAuthFailed('Auth Error in challenge');
       } else if (nonza.name == 'success') {
-        verifyServerHasKey(nonza.textValue);
+        verifyServerHasKey(nonza.textValue!);
       }
     }
   }
@@ -165,10 +164,10 @@ class ScramSaslHandler implements AbstractSaslHandler {
     var authMessage = utf8.encode(
         '$_initialMessage,${utf8.decode(serverFirstMessage)},$clientFinalMessageBare');
     var saltB = base64.decode(salt);
-    var saltedPassword = PBKDF2(utf8.encode(_password), saltB, iterationsNo);
+    var saltedPassword = PBKDF2(utf8.encode(_password!), saltB, iterationsNo);
     var serverKey = hmac(saltedPassword, utf8.encode('Server Key'));
     var clientKey = hmac(saltedPassword, utf8.encode('Client Key'));
-    List<int> clientSignature;
+    late List<int> clientSignature;
     try {
       serverSignature = hmac(serverKey, authMessage);
       var storedKey = _hash.convert(clientKey).bytes;
@@ -176,12 +175,12 @@ class ScramSaslHandler implements AbstractSaslHandler {
     } catch (e) {
       _fireAuthFailed('Invalid key');
     }
-    var clientProof = List<int>(clientKey.length);
+    var clientProof = [];
     for (var i = 0; i < clientKey.length; i++) {
       clientProof[i] = clientKey[i] ^ clientSignature[i];
     }
     var clientFinalMessage =
-        '$clientFinalMessageBare,p=${base64.encode(clientProof)}';
+        '$clientFinalMessageBare,p=${base64.encode(clientProof as List<int>)}';
     var response = Nonza();
     response.name = 'response';
     response.addAttribute(

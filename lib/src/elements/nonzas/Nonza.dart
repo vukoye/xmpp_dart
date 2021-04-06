@@ -5,21 +5,21 @@ import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xml/xml.dart' as xml;
 
 class Nonza extends XmppElement {
-  Jid _fromJid;
-  Jid _toJid;
+  Jid? _fromJid;
+  Jid? _toJid;
 
-  Jid get fromJid => _fromJid;
+  Jid? get fromJid => _fromJid;
 
-  set fromJid(Jid value) {
+  set fromJid(Jid? value) {
     _fromJid = value;
-    addAttribute(XmppAttribute('from', _fromJid.fullJid));
+    addAttribute(XmppAttribute('from', _fromJid!.fullJid));
   }
 
-  Jid get toJid => _toJid;
+  Jid? get toJid => _toJid;
 
-  set toJid(Jid value) {
+  set toJid(Jid? value) {
     _toJid = value;
-    addAttribute(XmppAttribute('to', _toJid.userAtDomain));
+    addAttribute(XmppAttribute('to', _toJid!.userAtDomain));
   }
 
   static Nonza parse(xml.XmlElement xmlElement) {
