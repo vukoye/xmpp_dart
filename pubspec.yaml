@@ -12,17 +12,17 @@ environment:
 #dependencies:
 #  path: ^1.4.1
 dependencies:
-  xml: ^4.0.0
-  cryptoutils: ^0.4.0
-  crypto: ^2.0.6
-  synchronized: ^2.1.0
-  tuple: ^1.0.2
-  unorm_dart: ^0.1.1
-  image: ^2.0.7
-  quiver: '>=2.0.0 <3.0.0' #hash code generator
-  console: ^3.1.0 #for example
-  intl: ^0.16.1
+  xml: ^5.0.0
+  cryptoutils: ^0.5.0
+  crypto: ^3.0.0
+  synchronized: ^3.0.0
+  tuple: ^2.0.0
+  unorm_dart: ^0.2.0
+  image: ^3.0.1
+  quiver: '>=3.0.0 <4.0.0' #hash code generator
+  console: ^4.0.0 #for example
+  intl: ^0.17.0
 
 dev_dependencies:
   test: ^1.0.0
-  mockito: ^4.0.0
+  mockito: ^5.0.0
