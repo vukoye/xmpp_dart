@@ -10,14 +10,12 @@ import '../../elements/nonzas/Nonza.dart';
 
 class SaslAuthenticationFeature extends Negotiator {
   final Connection _connection;
+  final String _password;
 
   final Set<SaslMechanism> _offeredMechanisms = {};
   final Set<SaslMechanism> _supportedMechanisms = {};
 
-  String? _password;
-
-  SaslAuthenticationFeature(this._connection, String password) {
-    _password = password;
+  SaslAuthenticationFeature(this._connection, this._password) {
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_1);
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_256);
     _supportedMechanisms.add(SaslMechanism.PLAIN);

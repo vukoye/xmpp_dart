@@ -56,7 +56,7 @@ class PresenceStanza extends AbstractStanza {
   int? get priority {
     var priority = getChild('priority');
 
-    return priority == null || priority.textValue == null ?  null : int.tryParse(priority.textValue!);
+    return priority == null || priority.textValue == null ? null : int.tryParse(priority.textValue!);
   }
 
   set priority(int? value) {

@@ -57,7 +57,7 @@ class Connection {
     if (_serverName != null) {
       return Jid.fromFullJid(_serverName!);
     } else {
-      return Jid.fromFullJid(fullJid.domain!); //todo move to account.domain!
+      return Jid.fromFullJid(fullJid.domain); //todo move to account.domain!
     }
   } //move this somewhere
 

@@ -42,7 +42,7 @@ class ChatManager {
   final Map<String, ChatImpl> _chats = {};
 
   List<Chat> get chats {
-    List<Chat> chatList = _chats.values.toList();
+    var chatList = _chats.values.toList();
     return chatList;
   }
 
@@ -51,12 +51,12 @@ class ChatManager {
   }
 
   ChatImpl _getChat(Jid jid) {
-    Chat? chat = _chats[jid.userAtDomain];
+    var chat = _chats[jid.userAtDomain];
     if (chat == null) {
       chat = ChatImpl(jid, _connection);
-      _chats[jid.userAtDomain] = chat as ChatImpl;
+      _chats[jid.userAtDomain] = chat;
       _chatListStreamController.add(chats);
     }
-    return chat as ChatImpl;
+    return chat;
   }
 }

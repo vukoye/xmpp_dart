@@ -37,7 +37,7 @@ class VCardManager {
     var completer = Completer<VCard>();
     var iqStanza =
         IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
-    iqStanza.fromJid = _connection!.fullJid;
+    iqStanza.fromJid = _connection.fullJid;
     var vCardElement = XmppElement();
     vCardElement.name = 'vCard';
     vCardElement.addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
@@ -64,7 +64,7 @@ class VCardManager {
 
   void _connectionStateProcessor(XmppConnectionState event) {}
 
-  Map<String?, VCard> getAllReceivedVCards() {
+  Map<String, VCard> getAllReceivedVCards() {
     return _vCards;
   }
 

@@ -90,37 +90,26 @@ class VCard extends XmppElement {
     switch (phoneTypeString) {
       case 'VOICE':
         return PhoneType.VOICE;
-        break;
       case 'FAX':
         return PhoneType.FAX;
-        break;
       case 'PAGER':
         return PhoneType.PAGER;
-        break;
       case 'MSG':
         return PhoneType.MSG;
-        break;
       case 'CELL':
         return PhoneType.CELL;
-        break;
       case 'VIDEO':
         return PhoneType.VIDEO;
-        break;
       case 'BBS':
         return PhoneType.BBS;
-        break;
       case 'MODEM':
         return PhoneType.MODEM;
-        break;
       case 'ISDN':
         return PhoneType.ISDN;
-        break;
       case 'PCS':
         return PhoneType.PCS;
-        break;
       case 'PREF':
         return PhoneType.PREF;
-        break;
     }
     return PhoneType.OTHER;
   }

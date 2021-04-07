@@ -39,7 +39,7 @@ class XmppElement {
     var xmlNodes = <xml.XmlNode>[];
     _attributes.forEach((xmppAttribute) {
       if (xmppAttribute.value != null) {
-        xmlAttributes.add(xml.XmlAttribute(xml.XmlName(xmppAttribute.name!), xmppAttribute.value!));
+        xmlAttributes.add(xml.XmlAttribute(xml.XmlName(xmppAttribute.name), xmppAttribute.value!));
       }
     });
     _children.forEach((xmppChild) {
