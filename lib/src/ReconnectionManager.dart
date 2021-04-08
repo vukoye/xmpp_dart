@@ -5,13 +5,13 @@ import 'logger/Log.dart';
 class ReconnectionManager {
   static const TAG = 'ReconnectionManager';
 
-  Connection _connection;
+  late Connection _connection;
   bool isActive = false;
   int initialTimeout = 1000;
   int totalReconnections = 3;
-  int timeOutInMs;
+  late int timeOutInMs;
   int counter = 0;
-  Timer timer;
+  Timer? timer;
 
   ReconnectionManager(Connection connection) {
     _connection = connection;
@@ -32,7 +32,7 @@ class ReconnectionManager {
       timeOutInMs = initialTimeout;
       counter = 0;
       if (timer != null) {
-        timer.cancel();
+        timer!.cancel();
         timer = null;
       }
     }
@@ -40,7 +40,7 @@ class ReconnectionManager {
 
   void handleReconnection() {
     if (timer != null) {
-      timer.cancel();
+      timer!.cancel();
     }
     if (counter < totalReconnections) {
       timer = Timer(Duration(milliseconds: timeOutInMs), _connection.reconnect);

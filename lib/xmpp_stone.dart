@@ -22,4 +22,5 @@ export 'src/extensions/ping/PingManager.dart';
 export 'src/logger/Log.dart';
 export 'src/elements/stanzas/AbstractStanza.dart';
 export 'src/elements/XmppElement.dart';
+export 'src/elements/XmppAttribute.dart';
 export 'src/features/message_archive/MessageArchiveManager.dart';

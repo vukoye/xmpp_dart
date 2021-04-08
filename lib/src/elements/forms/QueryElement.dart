@@ -19,5 +19,5 @@ class QueryElement extends XmppElement{
     XmppAttribute('queryid', queryId);
   }
 
-  String get queryId => getAttribute('queryid')?.value;
+  String? get queryId => getAttribute('queryid')?.value;
 }

@@ -4,13 +4,14 @@ class XmppAccountSettings {
   String name;
   String username;
   String domain;
-  String resource = '';
+  String? resource = '';
   String password;
-  String host;
+  String? host;
   int port;
   int totalReconnections = 3;
   int reconnectionTimeout = 1000;
   bool ackEnabled = true;
+  bool smResumable = true;
 
   XmppAccountSettings(this.name, this.username, this.domain, this.password, this.port, {this.host, this.resource} );
 
@@ -18,6 +19,12 @@ class XmppAccountSettings {
 
   static XmppAccountSettings fromJid(String jid, String password) {
     var fullJid = Jid.fromFullJid(jid);
-    return XmppAccountSettings(jid, fullJid.local, fullJid.domain, password, 5222);
+    var accountSettings =
+        XmppAccountSettings(jid, fullJid.local, fullJid.domain, password, 5222);
+    if (fullJid.resource != null && fullJid.resource!.isNotEmpty) {
+      accountSettings.resource = fullJid.resource;
+    }
+
+    return accountSettings;
   }
 }

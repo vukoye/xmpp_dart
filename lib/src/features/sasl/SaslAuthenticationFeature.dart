@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
@@ -8,16 +9,13 @@ import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
 import '../../elements/nonzas/Nonza.dart';
 
 class SaslAuthenticationFeature extends Negotiator {
-  Connection _connection;
+  final Connection _connection;
+  final String _password;
 
-  final Set<SaslMechanism> _offeredMechanisms = <SaslMechanism>{};
-  final Set<SaslMechanism> _supportedMechanisms = <SaslMechanism>{};
+  final Set<SaslMechanism> _offeredMechanisms = {};
+  final Set<SaslMechanism> _supportedMechanisms = {};
 
-  String _password;
-
-  SaslAuthenticationFeature(Connection connection, String password) {
-    _password = password;
-    _connection = connection;
+  SaslAuthenticationFeature(this._connection, this._password) {
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_1);
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_256);
     _supportedMechanisms.add(SaslMechanism.PLAIN);
@@ -27,13 +25,13 @@ class SaslAuthenticationFeature extends Negotiator {
   // improve this
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere((element) => element.name == 'mechanisms', orElse: () => null);
-    return nonza != null? [nonza] : [];
+    var nonza = requests.firstWhereOrNull((element) => element.name == 'mechanisms');
+    return nonza != null ? [nonza] : [];
   }
 
   @override
   void negotiate(List<Nonza> nonzas) {
-    if (nonzas != null || nonzas.isNotEmpty) {
+    if (nonzas.isNotEmpty) {
       _populateOfferedMechanism(nonzas[0]);
       _process();
     }
@@ -43,7 +41,7 @@ class SaslAuthenticationFeature extends Negotiator {
     var mechanism = _supportedMechanisms.firstWhere(
         (mch) => _offeredMechanisms.contains(mch),
         orElse: _handleAuthNotSupported);
-    AbstractSaslHandler saslHandler;
+    AbstractSaslHandler? saslHandler;
     switch (mechanism) {
       case SaslMechanism.PLAIN:
         saslHandler = PlainSaslHandler(_connection, _password);

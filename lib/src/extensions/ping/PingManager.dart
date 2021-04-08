@@ -6,7 +6,7 @@ class PingManager {
 
   final Connection _connection;
 
-  static final Map<Connection, PingManager> _instances = <Connection, PingManager>{};
+  static final Map<Connection, PingManager> _instances = {};
 
   PingManager(this._connection) {
     _connection.connectionStateStream.listen(_connectionStateProcessor);
@@ -26,7 +26,7 @@ class PingManager {
     // connection state processor.
   }
 
-  void _processStanza(AbstractStanza stanza) {
+  void _processStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       if (stanza.type == IqStanzaType.GET) {
         var ping = stanza.getChild('ping');

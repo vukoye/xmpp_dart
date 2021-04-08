@@ -18,22 +18,22 @@ abstract class PresenceApi {
 }
 
 class PresenceData {
-  PresenceShowElement showElement;
-  String status;
-  Jid jid; // if Jid is Null or self jid its self presence
+  PresenceShowElement? showElement;
+  String? status;
+  Jid? jid; // if Jid is Null or self jid its self presence
   PresenceData(this.showElement, this.status, this.jid);
 }
 
 enum SubscriptionEventType { REQUEST, ACCEPTED, DECLINED }
 
 class SubscriptionEvent {
-  SubscriptionEventType type;
-  Jid jid;
+  SubscriptionEventType? type;
+  Jid? jid;
 }
 
 class PresenceErrorEvent {
-  PresenceStanza presenceStanza;
-  PresenceErrorType type;
+  PresenceStanza? presenceStanza;
+  PresenceErrorType? type;
 }
 
 enum PresenceErrorType { MODIFY }

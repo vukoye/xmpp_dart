@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
@@ -16,8 +17,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
   static const String NAMESPACE_DISCO_INFO =
       'http://jabber.org/protocol/disco#info';
 
-  static final Map<Connection, ServiceDiscoveryNegotiator> _instances =
-      <Connection, ServiceDiscoveryNegotiator>{};
+  static final Map<Connection, ServiceDiscoveryNegotiator> _instances = {};
 
   static ServiceDiscoveryNegotiator getInstance(Connection connection) {
     var instance = _instances[connection];
@@ -28,9 +28,9 @@ class ServiceDiscoveryNegotiator extends Negotiator {
     return instance;
   }
 
-  IqStanza fullRequestStanza;
+  IqStanza? fullRequestStanza;
 
-  StreamSubscription<AbstractStanza> subscription;
+  late StreamSubscription<AbstractStanza?> subscription;
 
   final Connection _connection;
 
@@ -51,7 +51,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
     return _errorStreamController.stream;
   }
 
-  void _parseStanza(AbstractStanza stanza) {
+  void _parseStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       var idValue = stanza.getAttribute('id')?.value;
       if (idValue != null &&
@@ -117,9 +117,8 @@ class ServiceDiscoveryNegotiator extends Negotiator {
   }
 
   bool isFeatureSupported(String feature) {
-    return _supportedFeatures.firstWhere(
-            (element) => element.textValue == feature,
-            orElse: () => null) !=
+    return _supportedFeatures.firstWhereOrNull(
+            (element) => element.textValue == feature) !=
         null;
   }
 
@@ -129,7 +128,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
 
   bool isDiscoInfoQuery(IqStanza stanza) {
     return stanza.type == IqStanzaType.GET &&
-        stanza.toJid.fullJid == _connection.fullJid.fullJid &&
+        stanza.toJid!.fullJid == _connection.fullJid.fullJid &&
         stanza.children
             .where((element) =>
                 element.name == 'query' &&

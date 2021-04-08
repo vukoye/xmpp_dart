@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
@@ -11,19 +12,18 @@ import 'package:xmpp_stone/src/features/Negotiator.dart';
 import '../elements/nonzas/Nonza.dart';
 
 class BindingResourceConnectionNegotiator extends Negotiator {
-  Connection _connection;
-  StreamSubscription<AbstractStanza> subscription;
+  final Connection _connection;
+  late StreamSubscription<AbstractStanza?> subscription;
   static const String BIND_NAME = 'bind';
   static const String BIND_ATTRIBUTE = 'urn:ietf:params:xml:ns:xmpp-bind';
 
-  BindingResourceConnectionNegotiator(Connection connection) {
-    _connection = connection;
+  BindingResourceConnectionNegotiator(this._connection) {
     priorityLevel = 100;
     expectedName = 'BindingResourceConnectionNegotiator';
   }
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere((request) => request.name == BIND_NAME, orElse: () => null);
+    var nonza = requests.firstWhereOrNull((request) => request.name == BIND_NAME);
     return nonza != null ? [nonza] : [];
   }
 
@@ -36,7 +36,7 @@ class BindingResourceConnectionNegotiator extends Negotiator {
     }
   }
 
-  void parseStanza(AbstractStanza stanza) {
+  void parseStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       var element = stanza.getChild(BIND_NAME);
       var jidValue = element?.getChild('jid')?.textValue;
@@ -49,7 +49,7 @@ class BindingResourceConnectionNegotiator extends Negotiator {
     }
   }
 
-  void sendBindRequestStanza(String resource) {
+  void sendBindRequestStanza(String? resource) {
     var stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     var bindElement = XmppElement();
     bindElement.name = BIND_NAME;
