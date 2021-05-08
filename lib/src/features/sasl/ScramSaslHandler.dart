@@ -60,11 +60,9 @@ class ScramSaslHandler implements AbstractSaslHandler {
   }
 
   void generateRandomClientNonce() {
-    var bytes = [];
-    for (var i = 0; i < CLIENT_NONCE_LENGTH; i++) {
-      bytes[i] = Random.secure().nextInt(256);
-    }
-    _clientNonce = base64.encode(bytes as List<int>);
+    var bytes = List<int>.generate(
+        CLIENT_NONCE_LENGTH, (index) => Random.secure().nextInt(256));
+    _clientNonce = base64.encode(bytes);
   }
 
   void sendInitialMessage() {
@@ -175,12 +173,12 @@ class ScramSaslHandler implements AbstractSaslHandler {
     } catch (e) {
       _fireAuthFailed('Invalid key');
     }
-    var clientProof = [];
-    for (var i = 0; i < clientKey.length; i++) {
-      clientProof[i] = clientKey[i] ^ clientSignature[i];
-    }
+
+    var clientProof = List<int>.generate(
+        clientKey.length, (i) => clientKey[i] ^ clientSignature[i]);
+
     var clientFinalMessage =
-        '$clientFinalMessageBare,p=${base64.encode(clientProof as List<int>)}';
+        '$clientFinalMessageBare,p=${base64.encode(clientProof)}';
     var response = Nonza();
     response.name = 'response';
     response.addAttribute(
