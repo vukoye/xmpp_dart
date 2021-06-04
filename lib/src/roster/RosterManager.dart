@@ -22,9 +22,18 @@ class RosterManager {
     return manager;
   }
 
+  static void removeInstance(Connection connection) {
+    instances[connection]?._abstractStanzaSubscription.cancel();
+    instances[connection]?._xmppConnectionStateSubscription.cancel();
+    instances.remove(connection);
+  }
+
   final Map<String, Tuple2<IqStanza, Completer?>> _myUnrespondedIqStanzas = {};
 
   final StreamController<List<Buddy>> _rosterController = StreamController<List<Buddy>>.broadcast();
+
+  late StreamSubscription<XmppConnectionState> _xmppConnectionStateSubscription;
+  late StreamSubscription<AbstractStanza?> _abstractStanzaSubscription;
 
   Stream<List<Buddy>> get rosterStream {
     return _rosterController.stream;
@@ -91,8 +100,10 @@ class RosterManager {
 
   RosterManager(Connection connection) {
     _connection = connection;
-    connection.connectionStateStream.listen(_connectionStateProcessor);
-    connection.inStanzasStream.listen(_processStanza);
+    _xmppConnectionStateSubscription =
+        connection.connectionStateStream.listen(_connectionStateProcessor);
+    _abstractStanzaSubscription =
+        connection.inStanzasStream.listen(_processStanza);
   }
 
   void _connectionStateProcessor(XmppConnectionState state) {
