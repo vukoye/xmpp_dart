@@ -31,8 +31,19 @@ class StreamManagementModule extends Negotiator {
     return module;
   }
 
+  static void removeInstance(Connection connection) {
+    var instance = instances[connection];
+    instance?.timer?.cancel();
+    instance?.inNonzaSubscription?.cancel();
+    instance?.outStanzaSubscription?.cancel();
+    instance?.inNonzaSubscription?.cancel();
+    instance?._xmppConnectionStateSubscription.cancel();
+    instances.remove(connection);
+  }
+
   StreamState streamState = StreamState();
   final Connection _connection;
+  late StreamSubscription<XmppConnectionState> _xmppConnectionStateSubscription;
   StreamSubscription<AbstractStanza?>? inStanzaSubscription;
   StreamSubscription<AbstractStanza>? outStanzaSubscription;
   StreamSubscription<Nonza>? inNonzaSubscription;
@@ -75,6 +86,7 @@ class StreamManagementModule extends Negotiator {
     _connection.streamManagementModule = this;
     ackTurnedOn = _connection.account.ackEnabled;
     expectedName = 'StreamManagementModule';
+    _xmppConnectionStateSubscription =
     _connection.connectionStateStream.listen((state) {
           if (state == XmppConnectionState.Reconnecting) {
             backToIdle();

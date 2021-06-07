@@ -12,10 +12,12 @@ class ReconnectionManager {
   late int timeOutInMs;
   int counter = 0;
   Timer? timer;
+  late StreamSubscription<XmppConnectionState> _xmppConnectionStateSubscription;
 
   ReconnectionManager(Connection connection) {
     _connection = connection;
-    _connection.connectionStateStream.listen(connectionStateHandler);
+    _xmppConnectionStateSubscription =
+        _connection.connectionStateStream.listen(connectionStateHandler);
     initialTimeout = _connection.account.reconnectionTimeout;
     totalReconnections = _connection.account.totalReconnections;
     timeOutInMs = initialTimeout;
@@ -50,5 +52,10 @@ class ReconnectionManager {
     } else {
       _connection.close();
     }
+  }
+
+  void close() {
+    timer?.cancel();
+    _xmppConnectionStateSubscription.cancel();
   }
 }

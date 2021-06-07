@@ -28,9 +28,14 @@ class ServiceDiscoveryNegotiator extends Negotiator {
     return instance;
   }
 
+  static void removeInstance(Connection connection) {
+    _instances[connection]?.subscription?.cancel();
+    _instances.remove(connection);
+  }
+
   IqStanza? fullRequestStanza;
 
-  late StreamSubscription<AbstractStanza?> subscription;
+  StreamSubscription<AbstractStanza?>? subscription;
 
   final Connection _connection;
 
@@ -111,7 +116,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
         _errorStreamController.add(errorStanza);
       }
     }
-    subscription.cancel();
+    subscription?.cancel();
     _connection.connectionNegotatiorManager.addFeatures(_supportedFeatures);
     state = NegotiatorState.DONE;
   }

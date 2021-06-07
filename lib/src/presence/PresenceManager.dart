@@ -9,6 +9,9 @@ import 'package:xmpp_stone/src/presence/PresenceApi.dart';
 class PresenceManager implements PresenceApi {
   final Connection _connection;
 
+  late StreamSubscription<XmppConnectionState> _xmppConnectionStateSubscription;
+  late StreamSubscription<PresenceStanza?> _presenceStanzaSubscription;
+
   List<PresenceStanza> requests = <PresenceStanza>[];
 
   final StreamController<PresenceData> _presenceStreamController = StreamController<PresenceData>.broadcast();
@@ -51,12 +54,19 @@ class PresenceManager implements PresenceApi {
     return manager;
   }
 
+  static void removeInstance(Connection connection) {
+    instances[connection]?._presenceStanzaSubscription.cancel();
+    instances[connection]?._xmppConnectionStateSubscription.cancel();
+    instances.remove(connection);
+  }
+
   PresenceManager(this._connection) {
-    _connection.inStanzasStream
+    _presenceStanzaSubscription = _connection.inStanzasStream
         .where((abstractStanza) => abstractStanza is PresenceStanza)
         .map((stanza) => stanza as PresenceStanza?)
         .listen(_processPresenceStanza);
-    _connection.connectionStateStream.listen(_connectionStateHandler);
+    _xmppConnectionStateSubscription =
+        _connection.connectionStateStream.listen(_connectionStateHandler);
   }
 
   @override

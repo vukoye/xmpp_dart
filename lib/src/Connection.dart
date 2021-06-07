@@ -12,6 +12,9 @@ import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone/src/presence/PresenceManager.dart';
@@ -70,6 +73,10 @@ class Connection {
       instances[account.fullJid.userAtDomain] = connection;
     }
     return connection;
+  }
+
+  static void removeInstance(XmppAccountSettings account) {
+    instances.remove(account);
   }
 
   String? errorMessage;
@@ -239,6 +246,27 @@ xml:lang='en'
     }
   }
 
+  /// Dispose of the connection so stops all activities and cannot be re-used.
+  /// For the connection to be garbage collected.
+  /// 
+  /// If the Connection instance was created with [getInstance],
+  /// you must also call [Connection.removeInstance] after calling [dispose].
+  /// 
+  /// If you intend to re-use the connection later, consider just calling [close] instead.
+  void dispose() {
+    close();
+    RosterManager.removeInstance(this);
+    PresenceManager.removeInstance(this);
+    MessageHandler.removeInstance(this);
+    PingManager.removeInstance(this);
+    ServiceDiscoveryNegotiator.removeInstance(this);
+    StreamManagementModule.removeInstance(this);
+    CarbonsNegotiator.removeInstance(this);
+    MAMNegotiator.removeInstance(this);
+    reconnectionManager?.close();
+    _socket?.close();
+  }
+
   bool startMatcher(xml.XmlElement element) {
     var name = element.name.local;
     return name == 'stream';
@@ -397,10 +425,9 @@ xml:lang='en'
   }
 
   bool elementHasAttribute(xml.XmlElement element, xml.XmlAttribute attribute) {
-    var list = element.attributes.firstWhereOrNull(
-        (attr) =>
-            attr.name.local == attribute.name.local &&
-            attr.value == attribute.value);
+    var list = element.attributes.firstWhereOrNull((attr) =>
+        attr.name.local == attribute.name.local &&
+        attr.value == attribute.value);
     return list != null;
   }
 
