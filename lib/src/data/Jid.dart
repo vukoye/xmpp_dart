@@ -1,5 +1,4 @@
 import 'package:quiver/core.dart';
-import 'package:xmpp_stone/src/logger/Log.dart';
 
 class Jid {
   String _local = '';
@@ -49,10 +48,10 @@ class Jid {
   }
 
   static Jid fromFullJid(String fullJid) {
-    var exp = RegExp(r'^((.*?)@)?([^/@]+)(/(.*))?$');
+    var exp = RegExp('^(?:([^@/<>\'"]*)@)?([^@/<>\'"]+)(?:/([^<>\'"]*))?\$');
     var match = exp.firstMatch(fullJid);
     if (match != null) {
-      return Jid(match[2] ?? '', match[3] ?? '', match[5]);
+      return Jid(match.group(1) ?? '', match.group(2) ?? '', match.group(3));
     } else {
       return InvalidJid();
     }
