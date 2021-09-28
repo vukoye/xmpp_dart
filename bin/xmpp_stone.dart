@@ -25,5 +25,8 @@ void onManagerReady(XMPPClientManager _context) {
     vCardToUpdate.fullName = 'Promsopheak';
     return vCardToUpdate;
   });
+  // Query the service information
+  _context.mucDiscover('muc.localhost');
+  _context.mucDiscover('mudddc.localhost'); // incorrect service discover
 
 }

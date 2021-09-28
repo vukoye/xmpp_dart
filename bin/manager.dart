@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChat.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 import 'dart:io';
@@ -66,6 +67,20 @@ class XMPPClientManager {
       vCardManager.updateSelfVCard(_vCardUpdated).then((updatedAckVCard) {
         Log.d(TAG, 'Updated info success');
       });
+    });
+  }
+
+  void mucDiscover(String domain) {
+    var mucManager = xmpp.MultiUserChatManager(_connection);
+    mucManager.discoverMucService(xmpp.Jid('', domain, '')).then((MultiUserChat muc) {
+      
+      if (muc != null) {
+        print('MUC response success');
+        print(muc);
+      } else {
+        print('MUC response not found or error');
+      }
+      
     });
   }
 
