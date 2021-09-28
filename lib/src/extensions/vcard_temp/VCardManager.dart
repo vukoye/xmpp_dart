@@ -49,6 +49,20 @@ class VCardManager {
     return completer.future;
   }
 
+  Future<VCard> updateSelfVCard(VCard selfCard) {
+
+    var completer = Completer<VCard>();
+    var iqStanza =
+        IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    var vCardElement = selfCard.buildXMLWithAttributes();
+    iqStanza.addChild(vCardElement);
+    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+    // TODO: remove
+    print(iqStanza.buildXmlString());
+    _connection.writeStanza(iqStanza);
+    return completer.future;
+  }
+
   Future<VCard> getVCardFor(Jid jid) {
     var completer = Completer<VCard>();
     var iqStanza =
@@ -84,6 +98,9 @@ class VCardManager {
               _vCards[_connection.fullJid.userAtDomain] = vCard;
             }
             unrespondedStanza.item2.complete(vCard);
+          } else {
+            // vCardChild is null because of the result response of updating the card
+            unrespondedStanza.item2.complete(UpdateAckVCard(XmppElement()));
           }
         } else if (stanza.type == IqStanzaType.ERROR) {
           unrespondedStanza.item2
@@ -92,4 +109,5 @@ class VCardManager {
       }
     }
   }
+
 }

@@ -4,8 +4,28 @@ import 'package:image/image.dart' as img;
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
+enum TelephonePremiseType { WORK, HOME }
+enum TelephoneVoiceType { VOICE, FAX, MSG }
+class VCardTelephone {
+  TelephonePremiseType premiseType;
+  TelephoneVoiceType voiceType;
+  String number;
+}
+
 class VCard extends XmppElement {
   var _imageData;
+  String fullName;
+  String familyName;
+  String givenName;
+  String prefixName;
+  String nickName;
+  String url;
+  String bDay;
+  String organisationName;
+  String organisationUnit;
+  String title;
+  String role;
+  String jabberId;
 
   img.Image _image;
 
@@ -16,33 +36,10 @@ class VCard extends XmppElement {
     name = 'vCard';
     addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     _parseImage();
+    _parseAttributes();
   }
 
-  String get fullName => getChild('FN')?.textValue;
-
-  String get familyName => getChild('N')?.getChild('FAMILY')?.textValue;
-
-  String get givenName => getChild('N')?.getChild('GIVEN')?.textValue;
-
-  String get prefixName => getChild('N')?.getChild('PREFIX')?.textValue;
-
-  String get nickName => getChild('NICKNAME')?.textValue;
-
-  String get url => getChild('URL')?.textValue;
-
-  String get bDay => getChild('BDAY')?.textValue;
-
-  String get organisationName =>
-      getChild('ORG')?.getChild('ORGNAME')?.textValue;
-
-  String get organizationUnit =>
-      getChild('ORG')?.getChild('ORGUNIT')?.textValue;
-
-  String get title => getChild('TITLE')?.textValue;
-
-  String get role => getChild('ROLE')?.textValue;
-
-  String get jabberId => getChild('JABBERID')?.textValue;
+  // TODO - START: getItem, imageData, image and phones, etc.. are not mapped yet.
 
   String getItem(String itemName) => getChild(itemName)?.textValue;
 
@@ -127,6 +124,8 @@ class VCard extends XmppElement {
     return PhoneType.OTHER;
   }
 
+  // TODO - END: getItem, imageData, image and phones, etc.. are not mapped yet.
+
   void _parseImage() {
     var base64Image = getChild('PHOTO')?.getChild('BINVAL')?.textValue;
     if (base64Image != null) {
@@ -134,10 +133,54 @@ class VCard extends XmppElement {
       _image = img.decodeImage(_imageData);
     }
   }
+
+  void _parseAttributes() {
+    fullName = getChild('FN')?.textValue;
+    familyName = getChild('N')?.getChild('FAMILY')?.textValue;
+    givenName = getChild('N')?.getChild('GIVEN')?.textValue;
+    prefixName = getChild('N')?.getChild('PREFIX')?.textValue;
+    nickName = getChild('NICKNAME')?.textValue;
+    url = getChild('URL')?.textValue;
+    bDay = getChild('BDAY')?.textValue;
+    organisationName =
+        getChild('ORG')?.getChild('ORGNAME')?.textValue;
+    organisationUnit =
+        getChild('ORG')?.getChild('ORGUNIT')?.textValue;
+    title = getChild('TITLE')?.textValue;
+    role = getChild('ROLE')?.textValue;
+    jabberId = getChild('JABBERID')?.textValue;
+  }
+
+  XmppElement buildXMLWithAttributes() {
+
+    var vCardElement = XmppElement();
+    vCardElement.name = 'vCard';
+    vCardElement.addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
+
+    var attrFN = XmppElement();
+    attrFN.name = 'FN';
+    attrFN.textValue = fullName;
+    vCardElement.addChild(attrFN);
+
+    var attrNickname = XmppElement();
+    attrNickname.name = 'NICKNAME';
+    attrNickname.textValue = nickName;
+    vCardElement.addChild(attrNickname);
+
+    var attrBDay = XmppElement();
+    attrBDay.name = 'BDAY';
+    attrBDay.textValue = fullName;
+    vCardElement.addChild(attrBDay);
+    return vCardElement; 
+  }
 }
 
 class InvalidVCard extends VCard {
   InvalidVCard(XmppElement element) : super(element);
+}
+
+class UpdateAckVCard extends VCard {
+  UpdateAckVCard(XmppElement element) : super(element);
 }
 
 class PhoneItem {
