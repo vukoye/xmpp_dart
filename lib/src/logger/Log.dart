@@ -19,6 +19,7 @@ class Log {
 
   static void i(String tag, String message) {
     if (logLevel.index <= LogLevel.INFO.index) {
+      print('D/[$tag]: $message');
       log('I/[$tag]: $message');
     }
   }

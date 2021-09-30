@@ -41,6 +41,7 @@ class MessageHandler implements MessageApi {
     stanza.toJid = jid;
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
+    print(stanza.buildXmlString());
     _connection.writeStanza(stanza);
   }
 }

@@ -21,6 +21,9 @@ class XMPPClientManager {
   Function(XMPPClientManager _context) _onReady;
   Function(String timestamp, String logMessage) _onLog;
   xmpp.Connection _connection;
+
+
+  MessageHandler _messageHandler;
   XMPPClientManager(jid, password,
       {void Function(XMPPClientManager _context) onReady,
       void Function(String _timestamp, String _message) onLog}) {
@@ -46,6 +49,7 @@ class XMPPClientManager {
 
   void onReady() {
     onLog('Connected');
+    _messageHandler = MessageHandler(_connection);
     _onReady(this);
   }
 
@@ -158,8 +162,7 @@ class XMPPClientManager {
 
   // Send 1-1 message
   void sendMessage(String message, String receiver) {
-    var messageHandler = MessageHandler(_connection);
-    messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message);
+    _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message);
   }
 
   void listens() {
@@ -168,8 +171,16 @@ class XMPPClientManager {
   }
 
   void _listenMessage() {
-    xmpp.MessagesListener messagesListener = ClientMessagesListener();
-    ConnectionManagerStateChangedListener(_connection, messagesListener, this);
+    _messageHandler.messagesStream.listen((xmpp.MessageStanza message) {
+      if (message.body != null) {
+        Log.i(
+            TAG,
+            format(
+                'New Message from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end}'));
+      }
+    });
+    // xmpp.MessagesListener messagesListener = ClientMessagesListener();
+    // ConnectionManagerStateChangedListener(_connection, messagesListener, this);
   }
 
   void _listenPresence() {

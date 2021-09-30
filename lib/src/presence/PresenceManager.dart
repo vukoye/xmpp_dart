@@ -91,6 +91,7 @@ class PresenceManager implements PresenceApi {
     var presenceStanza = PresenceStanza.withType(PresenceType.PROBE);
     presenceStanza.toJid = to;
     presenceStanza.fromJid = _connection.fullJid;
+    print(presenceStanza.buildXmlString());
     _connection.writeStanza(presenceStanza);
   }
 
@@ -99,6 +100,7 @@ class PresenceManager implements PresenceApi {
     var presenceStanza = PresenceStanza();
     presenceStanza.show = presence.showElement;
     presenceStanza.status = presence.status;
+    print(presenceStanza.buildXmlString());
     _connection.writeStanza(presenceStanza);
   }
 
