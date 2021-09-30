@@ -34,14 +34,17 @@ class RosterManager {
 
   Connection _connection;
 
-  void queryForRoster() {
+  Future<IqStanzaResult> queryForRoster() {
+    var completer = Completer<IqStanzaResult>();
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     var element = XmppElement();
     element.name = 'query';
     element.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(element);
-    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, null);
+    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
     _connection.writeStanza(iqStanza);
+
+    return completer.future;
   }
 
   List<Buddy> getRoster() {
@@ -111,6 +114,7 @@ class RosterManager {
         if (stanza.type == IqStanzaType.RESULT) {
           if (_isFullJidRequest(unrespondedStanza.item1)) {
             _handleFullRosterResponse(stanza);
+            _handleRosterResultSuccessResponse(unrespondedStanza);
           } else if (_isRosterSet(stanza)) {
             _handleRosterSetSuccessResponse(unrespondedStanza);
           }
@@ -163,6 +167,13 @@ class RosterManager {
     var iqStanza = IqStanza(stanza.id, IqStanzaType.RESULT);
     iqStanza.fromJid = _connection.fullJid;
     _connection.writeStanza(iqStanza);
+  }
+
+  void _handleRosterResultSuccessResponse(Tuple2<IqStanza, Completer> request) {
+    request.item2.complete(IqStanzaResult()
+      ..type = IqStanzaType.RESULT
+      ..description = 'Get list of roster successfully');
+    _myUnrespondedIqStanzas.remove(request.item1.id);
   }
 
   void _handleRosterSetSuccessResponse(Tuple2<IqStanza, Completer> request) {
