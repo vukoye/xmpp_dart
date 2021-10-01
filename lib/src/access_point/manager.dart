@@ -16,40 +16,41 @@ final String TAG = 'manager::general';
 
 class XMPPClientManager {
   String LOG_TAG = 'manager';
-
+  String host;
   XMPPClientPersonel personel;
   Function(XMPPClientManager _context) _onReady;
   Function(String timestamp, String logMessage) _onLog;
   xmpp.Connection _connection;
-
-
   MessageHandler _messageHandler;
+
   XMPPClientManager(jid, password,
       {void Function(XMPPClientManager _context) onReady,
-      void Function(String _timestamp, String _message) onLog}) {
+      void Function(String _timestamp, String _message) onLog, String host}) {
     personel = XMPPClientPersonel(jid, password);
     LOG_TAG = 'manager::$jid';
     _onReady = onReady;
     _onLog = onLog;
+    this.host = host;
   }
 
   XMPPClientManager createSession() {
     Log.logLevel = LogLevel.DEBUG;
     Log.logXmpp = false;
     var jid = xmpp.Jid.fromFullJid(personel.jid);
+    print('connecting to' + host);
     var account = xmpp.XmppAccountSettings(
         personel.jid, jid.local, jid.domain, personel.password, 5222,
-        host: '192.168.18.230'); // , resource: 'xmppstone'
+        host: host); // , resource: 'xmppstone'
     _connection = xmpp.Connection(account);
     _connection.connect();
-
+    _listenConnection();
     onLog('Start connecting');
     return this;
   }
 
   void onReady() {
     onLog('Connected');
-    _messageHandler = MessageHandler(_connection);
+    _messageHandler = xmpp.MessageHandler.getInstance(_connection);
     _onReady(this);
   }
 
@@ -121,17 +122,20 @@ class XMPPClientManager {
   }
 
   // Get roster list
-  void rosterList() {
+  Future<List<xmpp.Buddy>> rosterList() {
+    var completer = Completer<List<xmpp.Buddy>>();
     var rosterManager = xmpp.RosterManager.getInstance(_connection);
     rosterManager.queryForRoster().then((result) {
       var rosterList = rosterManager.getRoster();
       personel.buddies = rosterList;
-      onLog('manager.rosterList.rosterList: ' + rosterList.length.toString());
+      completer.complete(rosterList);
     });
+    return completer.future;
   }
 
   // Add friend
-  void rosterAdd(receiver) {
+  Future<List<xmpp.Buddy>> rosterAdd(receiver) {
+    var completer = Completer<List<xmpp.Buddy>>();
     var receiverJid = xmpp.Jid.fromFullJid(receiver);
 
     var rosterManager = xmpp.RosterManager.getInstance(_connection);
@@ -139,9 +143,33 @@ class XMPPClientManager {
       if (result.description != null) {
         onLog('add roster' + result.description);
         // Refresh the list
-        rosterList();
+        rosterList().then((rosterList) {
+          completer.complete(rosterList);
+        });
+      } else {
+        onLog('add roster error');
       }
     });
+    return completer.future;
+  }
+
+  Future<List<xmpp.Buddy>> rosterRemove(receiver) {
+    var completer = Completer<List<xmpp.Buddy>>();
+    var receiverJid = xmpp.Jid.fromFullJid(receiver);
+
+    var rosterManager = xmpp.RosterManager.getInstance(_connection);
+    rosterManager.removeRosterItem(xmpp.Buddy(receiverJid)).then((result) {
+      if (result.description != null) {
+        onLog('remove roster' + result.description);
+        // Refresh the list
+        rosterList().then((rosterList) {
+          completer.complete(rosterList);
+        });
+      } else {
+        onLog('remove roster error');
+      }
+    });
+    return completer.future;
   }
 
   // Multi user chat
@@ -179,8 +207,12 @@ class XMPPClientManager {
                 'New Message from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end}'));
       }
     });
-    // xmpp.MessagesListener messagesListener = ClientMessagesListener();
-    // ConnectionManagerStateChangedListener(_connection, messagesListener, this);
+  }
+
+  void _listenConnection() {
+
+    xmpp.MessagesListener messagesListener = ClientMessagesListener();
+    ConnectionManagerStateChangedListener(_connection, messagesListener, this);
   }
 
   void _listenPresence() {

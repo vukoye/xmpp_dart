@@ -11,16 +11,18 @@ final String C_RECEIVER_BOB = 'bob@localhost';
 // final String C_RECEIVER = 'sean@localhost';
 
 void main(List<String> arguments) {
-  var seanClient = XMPPClientManager('sean@localhost', 'qwerty', onManagerForSeanReady);
+  var seanClient = XMPPClientManager('sean@localhost', 'qwerty', onReady: onManagerForSeanReady, host: '13.229.165.123', onLog: onLog);
   seanClient.createSession();
-  seanClient.listens();
-
-  var aliceClient = XMPPClientManager('alice@localhost', 'qwerty', onManagerForAliceReady);
+  var aliceClient = XMPPClientManager('alice@localhost', 'qwerty', onReady: onManagerForAliceReady, host: '13.229.165.123', onLog: onLog);
   aliceClient.createSession();
-  aliceClient.listens();
+}
+
+void onLog(String time, String message) {
+
 }
 
 void onManagerForSeanReady(XMPPClientManager _context) {
+  _context.listens();
   var friendAlice = 'alice@localhost';
   _context.presenceSend();
   // Read your vcard profile

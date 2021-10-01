@@ -112,6 +112,8 @@ class RosterManager {
       var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
       if (_myUnrespondedIqStanzas[stanza.id] != null) {
         if (stanza.type == IqStanzaType.RESULT) {
+
+          print('sdfd' + stanza.buildXmlString());
           if (_isFullJidRequest(unrespondedStanza.item1)) {
             _handleFullRosterResponse(stanza);
             _handleRosterResultSuccessResponse(unrespondedStanza);
