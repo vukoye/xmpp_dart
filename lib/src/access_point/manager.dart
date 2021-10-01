@@ -20,16 +20,23 @@ class XMPPClientManager {
   XMPPClientPersonel personel;
   Function(XMPPClientManager _context) _onReady;
   Function(String timestamp, String logMessage) _onLog;
+  Function(xmpp.MessageStanza message) _onMessage;
   xmpp.Connection _connection;
   MessageHandler _messageHandler;
 
   XMPPClientManager(jid, password,
-      {void Function(XMPPClientManager _context) onReady,
-      void Function(String _timestamp, String _message) onLog, String host}) {
+      {
+        void Function(XMPPClientManager _context) onReady,
+        void Function(String _timestamp, String _message) onLog,
+        void Function(xmpp.MessageStanza message) onMessage,
+        String host
+      }
+  ) {
     personel = XMPPClientPersonel(jid, password);
     LOG_TAG = 'manager::$jid';
     _onReady = onReady;
     _onLog = onLog;
+    _onMessage = onMessage;
     this.host = host;
   }
 
@@ -201,6 +208,7 @@ class XMPPClientManager {
   void _listenMessage() {
     _messageHandler.messagesStream.listen((xmpp.MessageStanza message) {
       if (message.body != null) {
+        _onMessage(message);
         Log.i(
             TAG,
             format(
