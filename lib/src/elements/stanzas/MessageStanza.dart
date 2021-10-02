@@ -54,4 +54,31 @@ class MessageStanza extends AbstractStanza {
   }
 }
 
+class MessageReceiptsStanza extends MessageStanza {
+  MessageReceiptsStanza(id, type) : super(id, type);
+
+  set receipts(String value) {
+    var element = XmppElement();
+    element.name = value; // request or  received
+    element.addAttribute(XmppAttribute('xmlns', 'urn:xmpp:receipts'));
+    addChild(element);
+  }
+
+  String get receipts => children
+      .firstWhere((child) => (child.name == 'request' || child.name == 'received'), orElse: () => null)
+      ?.textValue;
+
+  @override
+  set body(String value) {
+    if (value == '') {
+      children.removeWhere((child) => (child.name == 'body'));
+    } else {
+      var element = XmppElement();
+      element.name = 'body';
+      element.textValue = value;
+      addChild(element);
+    }
+  }
+}
+
 enum MessageStanzaType { CHAT, ERROR, GROUPCHAT, HEADLINE, NORMAL, UNKOWN }

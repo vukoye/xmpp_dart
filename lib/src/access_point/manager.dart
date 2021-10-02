@@ -21,6 +21,8 @@ class XMPPClientManager {
   Function(XMPPClientManager _context) _onReady;
   Function(String timestamp, String logMessage) _onLog;
   Function(xmpp.MessageStanza message) _onMessage;
+  Function(xmpp.SubscriptionEvent event) _onPresenceSubscription;
+  Function(xmpp.PresenceData event) _onPresence;
   xmpp.Connection _connection;
   MessageHandler _messageHandler;
 
@@ -29,6 +31,8 @@ class XMPPClientManager {
         void Function(XMPPClientManager _context) onReady,
         void Function(String _timestamp, String _message) onLog,
         void Function(xmpp.MessageStanza message) onMessage,
+        void Function(xmpp.SubscriptionEvent event) onPresenceSubscription,
+        void Function(xmpp.PresenceData event) onPresence,
         String host
       }
   ) {
@@ -37,6 +41,8 @@ class XMPPClientManager {
     _onReady = onReady;
     _onLog = onLog;
     _onMessage = onMessage;
+    _onPresence = onPresence;
+    _onPresenceSubscription = onPresenceSubscription;
     this.host = host;
   }
 
@@ -197,7 +203,11 @@ class XMPPClientManager {
 
   // Send 1-1 message
   void sendMessage(String message, String receiver) {
-    _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message);
+    _messageHandler.sendMessageRequestReceipt(xmpp.Jid.fromFullJid(receiver), message);
+  }
+
+   void receiveMessage(xmpp.MessageStanza message) {
+    _messageHandler.sendMessageReceipt(message.fromJid, message.textValue, message.id);
   }
 
   void listens() {
@@ -206,13 +216,15 @@ class XMPPClientManager {
   }
 
   void _listenMessage() {
+    print('================start listine');
     _messageHandler.messagesStream.listen((xmpp.MessageStanza message) {
       if (message.body != null) {
         _onMessage(message);
+        receiveMessage(message);
         Log.i(
             TAG,
             format(
-                'New Message from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end}'));
+                'New Message222 from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end} - ${message.id}'));
       }
     });
   }
@@ -226,6 +238,7 @@ class XMPPClientManager {
   void _listenPresence() {
     var presenceManager = xmpp.PresenceManager.getInstance(_connection);
     presenceManager.presenceStream.listen((presenceTypeEvent) {
+      _onPresence(presenceTypeEvent);
       onLog('Presence status: ' +
           presenceTypeEvent.jid.fullJid +
           ': ' +
@@ -233,6 +246,8 @@ class XMPPClientManager {
     });
     presenceManager.subscriptionStream.listen((streamEvent) {
       print(streamEvent.type.toString() + 'stream type');
+
+      _onPresenceSubscription(streamEvent);
       if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
         onLog('Accepting presence request');
         presenceManager.acceptSubscription(streamEvent.jid);
