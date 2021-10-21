@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
-import 'dart:io';
+import 'package:universal_io/io.dart';
 import 'package:console/console.dart';
 import 'package:image/image.dart' as image;
 

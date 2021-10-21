@@ -17,6 +17,7 @@ class XmppAccountSettings {
 
   Jid get fullJid => Jid(username, domain, resource);
 
+  /// for `port` setting by default used default XMPP port 5222, for the Web platform set it manually via [XmppAccountSettings.port]
   static XmppAccountSettings fromJid(String jid, String password) {
     var fullJid = Jid.fromFullJid(jid);
     var accountSettings =
