@@ -18,11 +18,13 @@ dependencies:
   synchronized: ^3.0.0
   tuple: ^2.0.0
   unorm_dart: ^0.2.0
-  image: ^3.0.2
+  image: ^3.0.8
   quiver: ^3.0.1 #hash code generator
   console: ^4.0.0 #for example
   intl: ^0.17.0
   collection: ^1.15.0
+  universal_io: ^2.0.4
+  web_socket_channel: 2.1.0
 
 dev_dependencies:
   test: ^1.16.8

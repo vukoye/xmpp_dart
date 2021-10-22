@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
+import 'package:universal_io/io.dart';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
@@ -20,6 +20,10 @@ import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone/src/presence/PresenceManager.dart';
 import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
+
+import 'connection/XmppWebsocketApi.dart'
+  if (dart.library.io) 'connection/XmppWebsocketIo.dart'
+  if (dart.library.html) 'connection/XmppWebsocketHtml.dart' as xmppSocket;
 
 import 'logger/Log.dart';
 
@@ -126,10 +130,10 @@ class Connection {
     account.resource = jid.resource;
   }
 
-  Socket? _socket;
+  xmppSocket.XmppWebSocket? _socket;
 
   // for testing purpose
-  set socket(Socket value) {
+  set socket(xmppSocket.XmppWebSocket? value) {
     _socket = value;
   }
 
@@ -204,16 +208,15 @@ xml:lang='en'
     connectionNegotatiorManager.init();
     setState(XmppConnectionState.SocketOpening);
     try {
-      return await Socket.connect(account.host ?? account.domain, account.port)
-          .then((Socket socket) {
+
+      var socket = xmppSocket.createSocket();
+
+      return await socket.connect(account.host ?? account.domain, account.port, map: prepareStreamResponse).then((socket) {
         // if not closed in meantime
         if (_state != XmppConnectionState.Closed) {
           setState(XmppConnectionState.SocketOpened);
           _socket = socket;
           socket
-              .cast<List<int>>()
-              .transform(utf8.decoder)
-              .map(prepareStreamResponse)
               .listen(handleResponse, onDone: handleConnectionDone);
           _openStream();
         } else {
@@ -221,7 +224,7 @@ xml:lang='en'
           socket.close();
         }
       });
-    } on SocketException catch (error) {
+    } catch (error) {
       Log.e(TAG, 'Socket Exception' + error.toString());
       handleConnectionError(error.toString());
     }
@@ -401,10 +404,12 @@ xml:lang='en'
 
   void startSecureSocket() {
     Log.d(TAG, 'startSecureSocket');
-    SecureSocket.secure(_socket!, onBadCertificate: _validateBadCertificate)
-        .then((secureSocket) {
-      _socket = secureSocket;
-      _socket!
+
+    _socket!.secure(onBadCertificate: _validateBadCertificate).
+        then((secureSocket) {
+          if(secureSocket == null) return;
+
+      secureSocket
           .cast<List<int>>()
           .transform(utf8.decoder)
           .map(prepareStreamResponse)
@@ -453,6 +458,10 @@ xml:lang='en'
 
   bool _validateBadCertificate(X509Certificate certificate) {
     return true;
+  }
+
+  bool isTlsRequired() {
+    return xmppSocket.isTlsRequired();
   }
 
   void handleConnectionDone() {

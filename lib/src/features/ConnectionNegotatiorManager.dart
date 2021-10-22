@@ -98,7 +98,9 @@ class ConnectionNegotiatorManager {
   void _initSupportedNegotiatorList() {
     var streamManagement = StreamManagementModule.getInstance(_connection);
     streamManagement.reset();
-    supportedNegotiatorList.add(StartTlsNegotiator(_connection)); //priority 1
+    if (_connection.isTlsRequired()) {
+      supportedNegotiatorList.add(StartTlsNegotiator(_connection)); //priority 1
+    }
     supportedNegotiatorList
         .add(SaslAuthenticationFeature(_connection, _accountSettings.password));
     if (streamManagement.isResumeAvailable()) {
