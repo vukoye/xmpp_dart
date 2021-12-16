@@ -118,7 +118,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
 
   bool isFeatureSupported(String feature) {
     return _supportedFeatures.firstWhereOrNull(
-            (element) => element.textValue == feature) !=
+            (element) => element.xmppVar == feature) !=
         null;
   }
 
