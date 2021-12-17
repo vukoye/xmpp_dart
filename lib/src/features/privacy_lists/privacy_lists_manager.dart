@@ -96,7 +96,9 @@ class PrivacyListsManager {
 
     var completer = Completer<PrivacyLists>();
 
-    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET)
+      ..fromJid = _connection.fullJid;
+
     var queryStanza = QueryElement();
     queryStanza.setXmlns('jabber:iq:privacy');
     iqStanza.addChild(queryStanza);
@@ -131,7 +133,9 @@ class PrivacyListsManager {
 
     var completer = Completer<List<PrivacyListItem>>();
 
-    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET)
+      ..fromJid = _connection.fullJid;
+
     var queryStanza = QueryElement();
     queryStanza.setXmlns('jabber:iq:privacy');
     queryStanza.addChild(ListElement(name));
@@ -160,8 +164,9 @@ class PrivacyListsManager {
 
     var completer = Completer<void>();
 
-    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    iqStanza.fromJid = _connection.fullJid;
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET)
+      ..fromJid = _connection.fullJid;
+
     var queryStanza = QueryElement();
     queryStanza.setXmlns('jabber:iq:privacy');
     queryStanza.addChild(ActiveElement(name));
@@ -183,7 +188,9 @@ class PrivacyListsManager {
 
     var completer = Completer<void>();
 
-    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET)
+      ..fromJid = _connection.fullJid;
+
     var queryStanza = QueryElement();
     queryStanza.setXmlns('jabber:iq:privacy');
     queryStanza.addChild(XmppElement()..name = 'active');
@@ -205,7 +212,9 @@ class PrivacyListsManager {
 
     var completer = Completer<void>();
 
-    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET)
+      ..fromJid = _connection.fullJid;
+
     var queryStanza = QueryElement();
     queryStanza.setXmlns('jabber:iq:privacy');
     queryStanza.addChild(DefaultElement(name));
@@ -227,7 +236,9 @@ class PrivacyListsManager {
 
     var completer = Completer<void>();
 
-    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET)
+      ..fromJid = _connection.fullJid;
+
     var queryStanza = QueryElement();
     queryStanza.setXmlns('jabber:iq:privacy');
     queryStanza.addChild(XmppElement()..name = 'default');
@@ -249,7 +260,9 @@ class PrivacyListsManager {
 
     var completer = Completer<void>();
 
-    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET)
+      ..fromJid = _connection.fullJid;
+
     var queryStanza = QueryElement();
     queryStanza.setXmlns('jabber:iq:privacy');
     var listStanza = ListElement(privacyList.name);
@@ -279,11 +292,13 @@ class PrivacyListsManager {
 
     var completer = Completer<void>();
 
-    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET)
+      ..fromJid = _connection.fullJid;
+
     var queryStanza = QueryElement();
     queryStanza.setXmlns('jabber:iq:privacy');
-
     queryStanza.addChild(ListElement(name));
+
     iqStanza.addChild(queryStanza);
 
     _unrespondedStanzas[iqStanza.id!] = Tuple2((resultStanza) {
