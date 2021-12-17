@@ -65,6 +65,7 @@ class PrivacyListsManager {
 
         _unrespondedStanzas.remove(stanza.id);
       } else {
+        //TODO unchecked part cause test server doesn't support this part, check and fix if need on alive server
         if (stanza.type == IqStanzaType.SET && stanza.id != null) {
           if (stanza.getChild('query') != null) {
             var queryElement = stanza.getChild('query');
