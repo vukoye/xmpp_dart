@@ -21,6 +21,7 @@ __Actively working on:__
 
 ## Latest news
 
+ - 2021-12-14: Added support for XEP-0016: Privacy Lists
  - 2020-10-30: Added support for XEP-0280: Message Carbons
  - 2020-10-30: Added initial support for XEP-0313: Message Archive Management
  - 2020-10-30: Added logging mechanism
