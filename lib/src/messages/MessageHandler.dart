@@ -32,36 +32,37 @@ class MessageHandler implements MessageApi {
   }
 
   @override
-  void sendMessage(Jid to, String text) {
-    _sendMessageStanza(to, text);
+  void sendMessage(Jid to, String text,
+      {ReceiptRequestType receipt = ReceiptRequestType.NONE,
+      String messageId = '',
+      int millisecondTs = 0}) {
+    _sendMessageStanza(to, text,
+        receipt: receipt, messageId: messageId, millisecondTs: millisecondTs);
   }
 
-  @override
-  void sendMessageRequestReceipt(Jid to, String text) {
-    _sendMessageStanzaReceipt(to, text, request: true);
-  }
-  @override
-  void sendMessageReceipt(Jid to, String text, String messageId) {
-    _sendMessageStanzaReceipt(to, text, request: false, messageId: messageId);
-  }
-
-  void _sendMessageStanza(Jid jid, String text) {
-    var stanza =
-        MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+  void _sendMessageStanza(Jid jid, String text,
+      {ReceiptRequestType receipt = ReceiptRequestType.NONE,
+      String messageId = '',
+      int millisecondTs = 0}) {
+    final stanza = MessageStanza(
+        messageId.isEmpty ? AbstractStanza.getRandomId() : messageId,
+        MessageStanzaType.CHAT);
     stanza.toJid = jid;
     stanza.fromJid = _connection.fullJid;
-    stanza.body = text;
-    print(stanza.buildXmlString());
-    _connection.writeStanza(stanza);
-  }
+    if (text.isNotEmpty) {
+      stanza.body = text;
+    }
 
-  void _sendMessageStanzaReceipt(Jid jid, String text, { bool request = false, String messageId }) {
-    var stanza =
-        MessageReceiptsStanza(request ? AbstractStanza.getRandomId() : messageId , MessageStanzaType.CHAT);
-    stanza.toJid = jid;
-    stanza.fromJid = _connection.fullJid;
-    stanza.body = request ? text : '';
-    stanza.receipts = request ? 'request' : 'received';
+    // Add receipt delivery
+    if (receipt == ReceiptRequestType.RECEIVED) {
+      stanza.addReceivedReceipt();
+    } else if (receipt == ReceiptRequestType.REQUEST) {
+      stanza.addRequestReceipt();
+    }
+
+    if (millisecondTs != 0) {
+      stanza.addTime(millisecondTs);
+    }
     print(stanza.buildXmlString());
     _connection.writeStanza(stanza);
   }

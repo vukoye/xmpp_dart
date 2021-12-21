@@ -74,8 +74,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inStanzasStream.listen(_parseStanza);
       _sendServiceDiscoveryRequest();
-    } else if (state == NegotiatorState.DONE) {
-    }
+    } else if (state == NegotiatorState.DONE) {}
   }
 
   void _sendServiceDiscoveryRequest() {
