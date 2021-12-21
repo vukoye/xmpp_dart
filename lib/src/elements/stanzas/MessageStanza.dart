@@ -1,8 +1,28 @@
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/messages/ReceiptReceivedElement.dart';
+import 'package:xmpp_stone/src/elements/messages/ReceiptRequestElement.dart';
+import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
-class MessageStanza extends AbstractStanza {
+abstract class ReceiptInterface {
+  ReceiptInterface addRequestReceipt();
+  ReceiptInterface addReceivedReceipt();
+  String getReceipt();
+}
+
+abstract class TimeInterface {
+  ReceiptInterface addTime(int timeMilliseconds);
+  XmppElement getTime();
+}
+
+abstract class CustomInterface {
+  ReceiptInterface addCustom();
+  String getCustom();
+}
+
+class MessageStanza extends AbstractStanza
+    implements ReceiptInterface, TimeInterface {
   MessageStanzaType _type;
 
   MessageStanzaType get type => _type;
@@ -52,33 +72,39 @@ class MessageStanza extends AbstractStanza {
     element.textValue = value;
     addChild(element);
   }
-}
-
-class MessageReceiptsStanza extends MessageStanza {
-  MessageReceiptsStanza(id, type) : super(id, type);
-
-  set receipts(String value) {
-    var element = XmppElement();
-    element.name = value; // request or  received
-    element.addAttribute(XmppAttribute('xmlns', 'urn:xmpp:receipts'));
-    addChild(element);
-  }
-
-  String get receipts => children
-      .firstWhere((child) => (child.name == 'request' || child.name == 'received'), orElse: () => null)
-      ?.textValue;
 
   @override
-  set body(String value) {
-    if (value == '') {
-      children.removeWhere((child) => (child.name == 'body'));
-    } else {
-      var element = XmppElement();
-      element.name = 'body';
-      element.textValue = value;
-      addChild(element);
-    }
+  ReceiptInterface addReceivedReceipt() {
+    addChild(ReceiptReceivedElement.build());
+    return this;
+  }
+
+  @override
+  ReceiptInterface addRequestReceipt() {
+    addChild(ReceiptRequestElement.build());
+    return this;
+  }
+
+  @override
+  String getReceipt() {
+    return children
+        .firstWhere(
+            (child) => (child.name == 'request' || child.name == 'received'),
+            orElse: () => null)
+        ?.textValue;
+  }
+
+  @override
+  ReceiptInterface addTime(int timeMilliseconds) {
+    addChild(TimeElement.build(timeMilliseconds.toString()));
+    return this;
+  }
+
+  @override
+  XmppElement getTime() {
+    return TimeElement.parse(this);
   }
 }
 
 enum MessageStanzaType { CHAT, ERROR, GROUPCHAT, HEADLINE, NORMAL, UNKOWN }
+enum ReceiptRequestType { NONE, REQUEST, RECEIVED }

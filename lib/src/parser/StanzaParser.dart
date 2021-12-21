@@ -4,6 +4,10 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
+import 'package:xmpp_stone/src/elements/messages/ReceiptReceivedElement.dart';
+import 'package:xmpp_stone/src/elements/messages/ReceiptRequestElement.dart';
+import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
+import 'package:xmpp_stone/src/elements/messages/TimeStampElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
@@ -100,6 +104,14 @@ class StanzaParser {
       xmppElement = XElement();
     } else if (name == 'field') {
       xmppElement = FieldElement();
+    } else if (parentName == 'message' && name.toLowerCase() == 'time') {
+      xmppElement = TimeElement();
+    } else if (parentName == 'time' && name.toLowerCase() == 'ts') {
+      xmppElement = TimeStampElement();
+    } else if (parentName == 'message' && name.toLowerCase() == 'request') {
+      xmppElement = ReceiptRequestElement();
+    } else if (parentName == 'message' && name.toLowerCase() == 'received') {
+      xmppElement = ReceiptReceivedElement();
     } else {
       xmppElement = XmppElement();
     }
