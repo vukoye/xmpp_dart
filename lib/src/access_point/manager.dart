@@ -27,15 +27,12 @@ class XMPPClientManager {
   MessageHandler _messageHandler;
 
   XMPPClientManager(jid, password,
-      {
-        void Function(XMPPClientManager _context) onReady,
-        void Function(String _timestamp, String _message) onLog,
-        void Function(xmpp.MessageStanza message) onMessage,
-        void Function(xmpp.SubscriptionEvent event) onPresenceSubscription,
-        void Function(xmpp.PresenceData event) onPresence,
-        String host
-      }
-  ) {
+      {void Function(XMPPClientManager _context) onReady,
+      void Function(String _timestamp, String _message) onLog,
+      void Function(xmpp.MessageStanza message) onMessage,
+      void Function(xmpp.SubscriptionEvent event) onPresenceSubscription,
+      void Function(xmpp.PresenceData event) onPresence,
+      String host}) {
     personel = XMPPClientPersonel(jid, password);
     LOG_TAG = 'manager::$jid';
     _onReady = onReady;
@@ -68,7 +65,6 @@ class XMPPClientManager {
   }
 
   void onLog(String message) {
-    
     _onLog(DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()), message);
     Log.i(LOG_TAG, message);
   }
@@ -201,13 +197,30 @@ class XMPPClientManager {
     });
   }
 
-  // Send 1-1 message
-  void sendMessage(String message, String receiver) {
-    _messageHandler.sendMessageRequestReceipt(xmpp.Jid.fromFullJid(receiver), message);
+  // Send 1-1 feature discovery
+  void discoverMessageDelivery(String sender, String receiver) {
+    var mucManager = xmpp.MessageDeliveryManager(_connection);
+    mucManager
+        .discoverDeliveryFeature(
+            xmpp.Jid.fromFullJid(sender), xmpp.Jid.fromFullJid(receiver))
+        .then((String result) {
+      if (result != null) {
+        onLog('Discovery failed response success');
+      } else {
+        onLog('Discover success: ' + result);
+      }
+    });
   }
 
-   void receiveMessage(xmpp.MessageStanza message) {
-    _messageHandler.sendMessageReceipt(message.fromJid, message.textValue, message.id);
+  // Send 1-1 message
+  void sendMessage(String message, String receiver, {int time}) {
+    _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
+        millisecondTs: time, receipt: xmpp.ReceiptRequestType.REQUEST);
+  }
+
+  void receiveMessage(xmpp.MessageStanza message) {
+    _messageHandler.sendMessage(message.fromJid, '',
+        messageId: message.id, receipt: xmpp.ReceiptRequestType.RECEIVED);
   }
 
   void listens() {
@@ -224,13 +237,12 @@ class XMPPClientManager {
         Log.i(
             TAG,
             format(
-                'New Message222 from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end} - ${message.id}'));
+                'New Message from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end} - ${message.id}'));
       }
     });
   }
 
   void _listenConnection() {
-
     xmpp.MessagesListener messagesListener = ClientMessagesListener();
     ConnectionManagerStateChangedListener(_connection, messagesListener, this);
   }
