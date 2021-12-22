@@ -4,6 +4,8 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
+import 'package:xmpp_stone/src/elements/messages/Amp.dart';
+import 'package:xmpp_stone/src/elements/messages/AmpRuleElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptReceivedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptRequestElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
@@ -60,6 +62,7 @@ class StanzaParser {
     var typeString = element.getAttribute('type');
     MessageStanzaType type;
     if (typeString == null) {
+      type = MessageStanzaType.UNKOWN;
       Log.w(TAG, 'No type found for message stanza');
     } else {
       switch (typeString) {
@@ -112,6 +115,12 @@ class StanzaParser {
       xmppElement = ReceiptRequestElement();
     } else if (parentName == 'message' && name.toLowerCase() == 'received') {
       xmppElement = ReceiptReceivedElement();
+    }
+    // Amp for message
+    else if (parentName == 'message' && name.toLowerCase() == 'amp') {
+      xmppElement = AmpElement();
+    } else if (parentName == 'amp' && name.toLowerCase() == 'rule') {
+      xmppElement = AmpRuleElement();
     } else {
       xmppElement = XmppElement();
     }
