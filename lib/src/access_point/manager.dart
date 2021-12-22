@@ -17,42 +17,69 @@ final String TAG = 'manager::general';
 enum MessageDelivery { UNKNOWN, DIRECT, STORED, ONLINE }
 
 class XMPPMessageParams {
-  final xmpp.MessageStanza message;
-  const XMPPMessageParams({this.message});
+  final xmpp.MessageStanza original;
+  const XMPPMessageParams({this.original});
 
-  xmpp.MessageStanza get response {
-    if (message.body != null) {
-      return message;
+  xmpp.MessageStanza get message {
+    if (original.body != null) {
+      return original;
+    } else {
+      return null;
+    }
+  }
+
+  xmpp.MessageStanza get customMessage {
+    if (original.body == null && original.getCustom() != null) {
+      return original;
     } else {
       return null;
     }
   }
 
   xmpp.MessageStanza get ackDeliveryDirect {
-    if (message.body == null && message.isAmpDeliverDirect()) {
-      return message;
+    if (original.body == null && original.isAmpDeliverDirect()) {
+      return original;
     } else {
       return null;
     }
   }
 
   xmpp.MessageStanza get ackDeliveryStored {
-    if (message.body == null && message.isAmpDeliverStore()) {
-      return message;
+    if (original.body == null && original.isAmpDeliverStore()) {
+      return original;
     } else {
       return null;
     }
   }
 
-  xmpp.MessageStanza get ackDeliveryDevice {
-    if (message.body == null &&
-        !message.isAmpDeliverStore() &&
-        !message.isAmpDeliverDirect() &&
-        message.fromJid.isValid() &&
-        message.toJid.isValid()) {
-      return message;
+  xmpp.MessageStanza get ackDeliveryClient {
+    if (original.body == null &&
+        original.getCustom() == null &&
+        !original.isAmpDeliverStore() &&
+        !original.isAmpDeliverDirect() &&
+        original.fromJid.isValid() &&
+        original.toJid.isValid()) {
+      return original;
     } else {
       return null;
+    }
+  }
+
+  xmpp.MessageStanza get ackReadClient {
+    if (original.body == null &&
+        original.getCustom() != null &&
+        getCustomData['iqType'] == 'Read-Ack') {
+      return original;
+    } else {
+      return null;
+    }
+  }
+
+  Map<String, dynamic> get getCustomData {
+    if (customMessage != null && customMessage.getCustom() != null) {
+      return json.decode(customMessage.getCustom().textValue);
+    } else {
+      return {};
     }
   }
 }
@@ -66,6 +93,7 @@ class XMPPClientManager {
   Function(xmpp.MessageStanza message) _onMessage;
   Function(xmpp.MessageStanza message, MessageDelivery delivery)
       _onMessageDelivery;
+  Function(xmpp.MessageStanza message) _onMessageRead;
   Function(xmpp.SubscriptionEvent event) _onPresenceSubscription;
   Function(xmpp.PresenceData event) _onPresence;
   xmpp.Connection _connection;
@@ -77,6 +105,7 @@ class XMPPClientManager {
       void Function(xmpp.MessageStanza message) onMessage,
       void Function(xmpp.MessageStanza message, MessageDelivery delivery)
           onMessageDelivery,
+      void Function(xmpp.MessageStanza message) onMessageRead,
       void Function(xmpp.SubscriptionEvent event) onPresenceSubscription,
       void Function(xmpp.PresenceData event) onPresence,
       String host}) {
@@ -86,6 +115,7 @@ class XMPPClientManager {
     _onLog = onLog;
     _onMessage = onMessage;
     _onMessageDelivery = onMessageDelivery;
+    _onMessageRead = onMessageRead;
     _onPresence = onPresence;
     _onPresenceSubscription = onPresenceSubscription;
     this.host = host;
@@ -262,11 +292,12 @@ class XMPPClientManager {
 
   // Send 1-1 message
   Future<xmpp.MessageStanza> sendMessage(String message, String receiver,
-      {int time, String messageId}) {
+      {int time, String messageId, String customString = ''}) {
     return _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
         millisecondTs: time,
         receipt: xmpp.ReceiptRequestType.REQUEST,
-        messageId: messageId);
+        messageId: messageId,
+        customString: customString);
   }
 
   void sendDeliveryAck(xmpp.MessageStanza message) {
@@ -282,9 +313,10 @@ class XMPPClientManager {
   void _listenMessage() {
     print('================start listine');
     _messageHandler.messagesStream.listen((xmpp.MessageStanza message) {
-      var _messageWrapped = XMPPMessageParams(message: message);
-      if (_messageWrapped.response != null) {
+      var _messageWrapped = XMPPMessageParams(original: message);
+      if (_messageWrapped.message != null) {
         _onMessage(message);
+        // Check if delivery receipt request?
         sendDeliveryAck(message);
         Log.i(
             TAG,
@@ -300,11 +332,21 @@ class XMPPClientManager {
         // Acknowledgement after stored in offline storage
         _onMessageDelivery(
             _messageWrapped.ackDeliveryStored, MessageDelivery.STORED);
-      } else if (_messageWrapped.ackDeliveryDevice != null) {
+      } else if (_messageWrapped.ackDeliveryClient != null) {
         Log.d(TAG, 'Message delivered to client device after online?');
         // Acknowledgement sent by client device
         _onMessageDelivery(
-            _messageWrapped.ackDeliveryDevice, MessageDelivery.ONLINE);
+            _messageWrapped.ackDeliveryClient, MessageDelivery.ONLINE);
+      } else if (_messageWrapped.customMessage != null) {
+        sendDeliveryAck(message);
+        if (_messageWrapped.ackReadClient != null) {
+          Log.d(TAG,
+              'Read ack received - ${_messageWrapped.customMessage.getCustom().buildXmlString()}');
+          _onMessageRead(_messageWrapped.ackReadClient);
+        } else {
+          Log.d(TAG,
+              'Custom Message received - ${_messageWrapped.customMessage.getCustom().buildXmlString()}');
+        }
       }
     });
   }
