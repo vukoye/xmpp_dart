@@ -14,6 +14,35 @@ import 'personel.dart';
 
 final String TAG = 'manager::general';
 
+class XMPPMessageParams {
+  final xmpp.MessageStanza message;
+  const XMPPMessageParams({this.message});
+
+  xmpp.MessageStanza get response {
+    if (message.body != null) {
+      return message;
+    } else {
+      return null;
+    }
+  }
+
+  xmpp.MessageStanza get ackDeliveryDirect {
+    if (message.body == null && message.isAmpDeliverDirect()) {
+      return message;
+    } else {
+      return null;
+    }
+  }
+
+  xmpp.MessageStanza get ackDeliveryStored {
+    if (message.body == null && message.isAmpDeliverStore()) {
+      return message;
+    } else {
+      return null;
+    }
+  }
+}
+
 class XMPPClientManager {
   String LOG_TAG = 'manager';
   String host;
@@ -214,8 +243,12 @@ class XMPPClientManager {
 
   // Send 1-1 message
   void sendMessage(String message, String receiver, {int time}) {
-    _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
-        millisecondTs: time, receipt: xmpp.ReceiptRequestType.REQUEST);
+    _messageHandler
+        .sendMessage(xmpp.Jid.fromFullJid(receiver), message,
+            millisecondTs: time, receipt: xmpp.ReceiptRequestType.REQUEST)
+        .then((value) {
+      print('xmpp_dart: message sent successfully for ${value.id}');
+    });
   }
 
   void receiveMessage(xmpp.MessageStanza message) {
@@ -231,13 +264,18 @@ class XMPPClientManager {
   void _listenMessage() {
     print('================start listine');
     _messageHandler.messagesStream.listen((xmpp.MessageStanza message) {
-      if (message.body != null) {
+      var _messageWrapped = XMPPMessageParams(message: message);
+      if (_messageWrapped.response != null) {
         _onMessage(message);
         receiveMessage(message);
         Log.i(
             TAG,
             format(
                 'New Message from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end} - ${message.id}'));
+      } else if (_messageWrapped.ackDeliveryDirect != null) {
+        Log.d(TAG, 'Message delivered to client resource');
+      } else if (_messageWrapped.ackDeliveryStored != null) {
+        Log.d(TAG, 'Message delivered to offline storage resource');
       }
     });
   }
@@ -299,7 +337,7 @@ class ConnectionManagerStateChangedListener
 
   @override
   void onConnectionStateChanged(xmpp.XmppConnectionState state) {
-    if (state == xmpp.XmppConnectionState.Ready) {
+    if (state == xmpp.XmppConnectionState.Authenticated) {
       Log.i(_context.LOG_TAG, 'Connected');
       _context.onReady();
     }
