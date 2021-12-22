@@ -9,6 +9,7 @@ import 'package:xmpp_stone/src/features/Negotiator.dart';
 import 'package:xmpp_stone/src/features/SessionInitiationNegotiator.dart';
 import 'package:xmpp_stone/src/features/StartTlsNegotatior.dart';
 import 'package:xmpp_stone/src/features/sasl/SaslAuthenticationFeature.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/AmpNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
@@ -117,7 +118,18 @@ class ConnectionNegotiatorManager {
     //     .add(ServiceDiscoveryNegotiator.getInstance(_connection));
     supportedNegotiatorList.add(CarbonsNegotiator.getInstance(_connection));
     supportedNegotiatorList.add(MAMNegotiator.getInstance(_connection));
+    supportedNegotiatorList.add(AmpNegotiator.getInstance(_connection));
+  }
 
+  bool isNegotiateorSupport(Function checkType) {
+    var negotiators =
+        supportedNegotiatorList.where((element) => checkType(element)).toList();
+    // AmpNegotiator
+    if (negotiators.isNotEmpty) {
+      return negotiators.first.isReady();
+    } else {
+      return false;
+    }
   }
 
   void stateListener(NegotiatorState state) {
