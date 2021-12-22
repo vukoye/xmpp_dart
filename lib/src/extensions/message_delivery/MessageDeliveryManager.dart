@@ -40,16 +40,20 @@ class MessageDeliveryManager {
   //   return _mucList;
   // }
 
+  void init() {
+    print('Init ManageDeliveryManager');
+  }
+
   // Try to discover the services
   Future<String> discoverDeliveryFeature(Jid from, Jid to) {
     var completer = Completer<String>();
-    var iqStanza =
-        IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = Jid('', 'localhost', '');
     var queryElement = XmppElement();
     queryElement.name = 'query';
-    queryElement.addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info'));
+    queryElement.addAttribute(
+        XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info'));
     iqStanza.addChild(queryElement);
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
     print(iqStanza.buildXmlString());
@@ -67,7 +71,6 @@ class MessageDeliveryManager {
   }
 
   void _processStanza(AbstractStanza stanza) {
-
     print('Receive stanza:' + stanza.buildXmlString());
     if (stanza is IqStanza) {
       var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
@@ -79,11 +82,9 @@ class MessageDeliveryManager {
             unrespondedStanza.item2.complete(mucResult);
           }
         } else if (stanza.type == IqStanzaType.ERROR) {
-          unrespondedStanza.item2
-              .complete(null);
+          unrespondedStanza.item2.complete(null);
         }
       }
     }
   }
-
 }
