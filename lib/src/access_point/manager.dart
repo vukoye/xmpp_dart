@@ -14,6 +14,8 @@ import 'personel.dart';
 
 final String TAG = 'manager::general';
 
+enum MessageDelivery { UNKNOWN, DIRECT, STORED, ONLINE }
+
 class XMPPMessageParams {
   final xmpp.MessageStanza message;
   const XMPPMessageParams({this.message});
@@ -41,6 +43,18 @@ class XMPPMessageParams {
       return null;
     }
   }
+
+  xmpp.MessageStanza get ackDeliveryDevice {
+    if (message.body == null &&
+        !message.isAmpDeliverStore() &&
+        !message.isAmpDeliverDirect() &&
+        message.fromJid.isValid() &&
+        message.toJid.isValid()) {
+      return message;
+    } else {
+      return null;
+    }
+  }
 }
 
 class XMPPClientManager {
@@ -50,6 +64,8 @@ class XMPPClientManager {
   Function(XMPPClientManager _context) _onReady;
   Function(String timestamp, String logMessage) _onLog;
   Function(xmpp.MessageStanza message) _onMessage;
+  Function(xmpp.MessageStanza message, MessageDelivery delivery)
+      _onMessageDelivery;
   Function(xmpp.SubscriptionEvent event) _onPresenceSubscription;
   Function(xmpp.PresenceData event) _onPresence;
   xmpp.Connection _connection;
@@ -59,6 +75,8 @@ class XMPPClientManager {
       {void Function(XMPPClientManager _context) onReady,
       void Function(String _timestamp, String _message) onLog,
       void Function(xmpp.MessageStanza message) onMessage,
+      void Function(xmpp.MessageStanza message, MessageDelivery delivery)
+          onMessageDelivery,
       void Function(xmpp.SubscriptionEvent event) onPresenceSubscription,
       void Function(xmpp.PresenceData event) onPresence,
       String host}) {
@@ -67,6 +85,7 @@ class XMPPClientManager {
     _onReady = onReady;
     _onLog = onLog;
     _onMessage = onMessage;
+    _onMessageDelivery = onMessageDelivery;
     _onPresence = onPresence;
     _onPresenceSubscription = onPresenceSubscription;
     this.host = host;
@@ -242,16 +261,15 @@ class XMPPClientManager {
   }
 
   // Send 1-1 message
-  void sendMessage(String message, String receiver, {int time}) {
-    _messageHandler
-        .sendMessage(xmpp.Jid.fromFullJid(receiver), message,
-            millisecondTs: time, receipt: xmpp.ReceiptRequestType.REQUEST)
-        .then((value) {
-      print('xmpp_dart: message sent successfully for ${value.id}');
-    });
+  Future<xmpp.MessageStanza> sendMessage(String message, String receiver,
+      {int time, String messageId}) {
+    return _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
+        millisecondTs: time,
+        receipt: xmpp.ReceiptRequestType.REQUEST,
+        messageId: messageId);
   }
 
-  void receiveMessage(xmpp.MessageStanza message) {
+  void sendDeliveryAck(xmpp.MessageStanza message) {
     _messageHandler.sendMessage(message.fromJid, '',
         messageId: message.id, receipt: xmpp.ReceiptRequestType.RECEIVED);
   }
@@ -267,15 +285,26 @@ class XMPPClientManager {
       var _messageWrapped = XMPPMessageParams(message: message);
       if (_messageWrapped.response != null) {
         _onMessage(message);
-        receiveMessage(message);
+        sendDeliveryAck(message);
         Log.i(
             TAG,
             format(
                 'New Message from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end} - ${message.id}'));
       } else if (_messageWrapped.ackDeliveryDirect != null) {
         Log.d(TAG, 'Message delivered to client resource');
+        // Acknowledgement sent direct to client
+        _onMessageDelivery(
+            _messageWrapped.ackDeliveryDirect, MessageDelivery.DIRECT);
       } else if (_messageWrapped.ackDeliveryStored != null) {
         Log.d(TAG, 'Message delivered to offline storage resource');
+        // Acknowledgement after stored in offline storage
+        _onMessageDelivery(
+            _messageWrapped.ackDeliveryStored, MessageDelivery.STORED);
+      } else if (_messageWrapped.ackDeliveryDevice != null) {
+        Log.d(TAG, 'Message delivered to client device after online?');
+        // Acknowledgement sent by client device
+        _onMessageDelivery(
+            _messageWrapped.ackDeliveryDevice, MessageDelivery.ONLINE);
       }
     });
   }
