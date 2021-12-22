@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
@@ -254,6 +255,9 @@ xml:lang='en'
     return name == 'iq' || name == 'message' || name == 'presence';
   }
 
+  ///
+  /// Nonza example
+  /// Ack: a and r are the 'ack' nonza, which will process through here
   bool nonzaMatcher(xml.XmlElement element) {
     var name = element.name.local;
     return name != 'iq' && name != 'message' && name != 'presence';
@@ -282,6 +286,7 @@ xml:lang='en'
 
     if (fullResponse != null && fullResponse.isNotEmpty) {
       xml.XmlNode xmlResponse;
+      log(fullResponse, name: 'XmppStoneDebug');
       try {
         xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
       } catch (e) {
