@@ -1,3 +1,6 @@
+import 'dart:async';
+
+import 'package:tuple/tuple.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
@@ -8,6 +11,9 @@ import 'package:xmpp_stone/xmpp_stone.dart';
 class MessageHandler implements MessageApi {
   static Map<Connection, MessageHandler> instances =
       <Connection, MessageHandler>{};
+
+  final Map<String, Tuple2<MessageStanza, Completer>> _myUnrespondedIqStanzas =
+      <String, Tuple2<MessageStanza, Completer>>{};
 
   Stream<MessageStanza> get messagesStream {
     return _connection.inStanzasStream
@@ -29,21 +35,26 @@ class MessageHandler implements MessageApi {
 
   MessageHandler(Connection connection) {
     _connection = connection;
+
+    _connection.connectionStateStream.listen(_connectionStateHandler);
   }
 
   @override
-  void sendMessage(Jid to, String text,
+  Future<MessageStanza> sendMessage(Jid to, String text,
       {ReceiptRequestType receipt = ReceiptRequestType.NONE,
       String messageId = '',
-      int millisecondTs = 0}) {
-    _sendMessageStanza(to, text,
+      int millisecondTs = 0,
+      String customString = ''}) {
+    return _sendMessageStanza(to, text,
         receipt: receipt, messageId: messageId, millisecondTs: millisecondTs);
   }
 
-  void _sendMessageStanza(Jid jid, String text,
+  Future<MessageStanza> _sendMessageStanza(Jid jid, String text,
       {ReceiptRequestType receipt = ReceiptRequestType.NONE,
       String messageId = '',
-      int millisecondTs = 0}) {
+      int millisecondTs = 0,
+      String customString = ''}) {
+    var completer = Completer<MessageStanza>();
     final stanza = MessageStanza(
         messageId.isEmpty ? AbstractStanza.getRandomId() : messageId,
         MessageStanzaType.CHAT);
@@ -58,12 +69,40 @@ class MessageHandler implements MessageApi {
       stanza.addReceivedReceipt();
     } else if (receipt == ReceiptRequestType.REQUEST) {
       stanza.addRequestReceipt();
+      // Add request stanza from server?
+      stanza.addAmpDeliverDirect();
     }
 
     if (millisecondTs != 0) {
       stanza.addTime(millisecondTs);
     }
+
+    if (customString.isNotEmpty) {
+      stanza.addCustom(customString);
+    }
+
     print(stanza.buildXmlString());
     _connection.writeStanza(stanza);
+
+    _myUnrespondedIqStanzas[stanza.id] = Tuple2(stanza, completer);
+    return completer.future;
+  }
+
+  void _connectionStateHandler(XmppConnectionState state) {
+    if (state == XmppConnectionState.Authenticated) {
+      _connection.streamManagementModule.deliveredStanzasStream
+          .where((abstractStanza) => abstractStanza is MessageStanza)
+          .map((stanza) => stanza as MessageStanza)
+          .listen(_processDeliveryStanza);
+    }
+  }
+
+  void _processDeliveryStanza(AbstractStanza nonza) {
+    print('non za' + nonza.buildXmlString());
+    var unrespondedStanza = _myUnrespondedIqStanzas[nonza.id];
+    if (unrespondedStanza != null) {
+      unrespondedStanza.item2.complete(unrespondedStanza.item1);
+      _myUnrespondedIqStanzas.remove(unrespondedStanza.item1.id);
+    }
   }
 }
