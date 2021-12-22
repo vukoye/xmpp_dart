@@ -6,6 +6,8 @@ import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/elements/messages/Amp.dart';
 import 'package:xmpp_stone/src/elements/messages/AmpRuleElement.dart';
+import 'package:xmpp_stone/src/elements/messages/CustomElement.dart';
+import 'package:xmpp_stone/src/elements/messages/CustomSubElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptReceivedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptRequestElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
@@ -121,6 +123,12 @@ class StanzaParser {
       xmppElement = AmpElement();
     } else if (parentName == 'amp' && name.toLowerCase() == 'rule') {
       xmppElement = AmpRuleElement();
+    } // Custom for message
+    else if (parentName == 'message' && name.toLowerCase() == 'custom') {
+      xmppElement = CustomElement();
+    } else if (parentName.toLowerCase() == 'custom' &&
+        name.toLowerCase() == 'custom') {
+      xmppElement = CustomSubElement();
     } else {
       xmppElement = XmppElement();
     }

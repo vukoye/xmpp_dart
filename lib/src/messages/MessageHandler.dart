@@ -46,7 +46,10 @@ class MessageHandler implements MessageApi {
       int millisecondTs = 0,
       String customString = ''}) {
     return _sendMessageStanza(to, text,
-        receipt: receipt, messageId: messageId, millisecondTs: millisecondTs);
+        receipt: receipt,
+        messageId: messageId,
+        millisecondTs: millisecondTs,
+        customString: customString);
   }
 
   Future<MessageStanza> _sendMessageStanza(Jid jid, String text,
