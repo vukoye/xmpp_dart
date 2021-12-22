@@ -8,6 +8,7 @@ abstract class AbstractStanza extends XmppElement {
   String _id;
   Jid _fromJid;
   Jid _toJid;
+  String _status;
 
   Jid get fromJid => _fromJid;
 
@@ -29,6 +30,12 @@ abstract class AbstractStanza extends XmppElement {
     _id = value;
     addAttribute(XmppAttribute('id', _id));
   }
+
+  set status(String value) {
+    _status = value;
+  }
+
+  String get status => _status;
 
   static String getRandomId() {
     const ASCII_START = 65;

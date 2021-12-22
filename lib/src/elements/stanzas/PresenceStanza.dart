@@ -9,7 +9,8 @@ class PresenceStanza extends AbstractStanza {
 
   PresenceStanza.withType(PresenceType type) {
     name = 'presence';
-    addAttribute(XmppAttribute('type', type.toString().split('.').last.toLowerCase()));
+    addAttribute(
+        XmppAttribute('type', type.toString().split('.').last.toLowerCase()));
   }
 
   set type(PresenceType value) {
@@ -33,15 +34,19 @@ class PresenceStanza extends AbstractStanza {
   }
 
   //status with no language prefs
+  @override
   String get status {
-    var statusElement =
-        children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty, orElse: () => null);
+    var statusElement = children.firstWhere(
+        (element) => element.name == 'status' && element.attributes.isEmpty,
+        orElse: () => null);
     return statusElement?.textValue;
   }
 
+  @override
   set status(String value) {
-    var childElement =
-        children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty, orElse: () => null);
+    var childElement = children.firstWhere(
+        (element) => element.name == 'status' && element.attributes.isEmpty,
+        orElse: () => null);
     if (childElement == null) {
       var element = XmppElement();
       element.name = 'status';
@@ -98,8 +103,9 @@ class PresenceStanza extends AbstractStanza {
   }
 
   void _setChildValue(String childName, String value) {
-    var childElement =
-        children.firstWhere((element) => element.name == childName && element.attributes.isEmpty, orElse: () => null);
+    var childElement = children.firstWhere(
+        (element) => element.name == childName && element.attributes.isEmpty,
+        orElse: () => null);
     if (childElement == null) {
       var element = XmppElement();
       element.name = childName;
@@ -111,7 +117,8 @@ class PresenceStanza extends AbstractStanza {
   }
 
   void _setAttributeValue(String attrName, String value) {
-    var attr = attributes.firstWhere((attribute) => attribute.name == name, orElse: () => null);
+    var attr = attributes.firstWhere((attribute) => attribute.name == name,
+        orElse: () => null);
     if (attr == null) {
       var element = XmppElement();
       element.name = attrName;

@@ -1,9 +1,13 @@
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/messages/Amp.dart';
+import 'package:xmpp_stone/src/elements/messages/AmpRuleElement.dart';
+import 'package:xmpp_stone/src/elements/messages/CustomElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptReceivedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptRequestElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpInterface.dart';
 
 abstract class ReceiptInterface {
   ReceiptInterface addRequestReceipt();
@@ -17,12 +21,12 @@ abstract class TimeInterface {
 }
 
 abstract class CustomInterface {
-  ReceiptInterface addCustom();
-  String getCustom();
+  ReceiptInterface addCustom(String customString);
+  XmppElement getCustom();
 }
 
 class MessageStanza extends AbstractStanza
-    implements ReceiptInterface, TimeInterface {
+    implements ReceiptInterface, TimeInterface, AmpInterface, CustomInterface {
   MessageStanzaType _type;
 
   MessageStanzaType get type => _type;
@@ -103,6 +107,61 @@ class MessageStanza extends AbstractStanza
   @override
   XmppElement getTime() {
     return TimeElement.parse(this);
+  }
+
+  @override
+  AmpInterface addAmpDeliverDirect() {
+    addChild(AmpElement.build([
+      AmpRuleElement.build('deliver', 'direct', 'notify'),
+      AmpRuleElement.build('deliver', 'stored', 'notify')
+    ]));
+    return this;
+  }
+
+  @override
+  XmppElement getAmp() {
+    return AmpElement.parse(this);
+  }
+
+  @override
+  bool isAmpDeliverDirect() {
+    var amp = AmpElement.parse(this);
+    if (amp == null) {
+      return false;
+    }
+    var rule = AmpRuleElement.parse(AmpElement.parse(this));
+    if (amp == rule) {
+      return false;
+    }
+    return (amp.getAttribute('status').value == 'notify' &&
+        rule.getAttribute('condition').value == 'deliver' &&
+        rule.getAttribute('value').value == 'direct');
+  }
+
+  @override
+  bool isAmpDeliverStore() {
+    var amp = AmpElement.parse(this);
+    if (amp == null) {
+      return false;
+    }
+    var rule = AmpRuleElement.parse(AmpElement.parse(this));
+    if (amp == rule) {
+      return false;
+    }
+    return (amp.getAttribute('status').value == 'notify' &&
+        rule.getAttribute('condition').value == 'deliver' &&
+        rule.getAttribute('value').value == 'stored');
+  }
+
+  @override
+  ReceiptInterface addCustom(String customString) {
+    addChild(CustomElement.build(customString));
+    return this;
+  }
+
+  @override
+  XmppElement getCustom() {
+    return CustomElement.parse(this);
   }
 }
 
