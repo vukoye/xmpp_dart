@@ -8,10 +8,13 @@ import 'package:xmpp_stone/src/elements/messages/Amp.dart';
 import 'package:xmpp_stone/src/elements/messages/AmpRuleElement.dart';
 import 'package:xmpp_stone/src/elements/messages/CustomElement.dart';
 import 'package:xmpp_stone/src/elements/messages/CustomSubElement.dart';
+import 'package:xmpp_stone/src/elements/messages/DelayElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptReceivedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptRequestElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeStampElement.dart';
+import 'package:xmpp_stone/src/elements/messages/carbon/ForwardedElement.dart';
+import 'package:xmpp_stone/src/elements/messages/carbon/SentElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
@@ -24,6 +27,28 @@ import '../logger/Log.dart';
 
 class StanzaParser {
   static const TAG = 'StanzaParser';
+  // '_' means any parents
+  static final _elementMappings = <String, Function>{
+    'query#identity': () => Identity(),
+    'query#feature': () => Feature(),
+    '_#x': () => XElement(),
+    '_#field': () => FieldElement(),
+    'message#time': () => TimeElement(),
+    'time#ts': () => TimeStampElement(),
+    'message#request': () => ReceiptRequestElement(),
+    'message#received': () => ReceiptReceivedElement(),
+    'message#amp': () => AmpElement(),
+    'amp#rule': () => AmpRuleElement(),
+    'message#custom': () => CustomElement(),
+    'custom#custom': () => CustomSubElement(),
+    // Delayed - offline storage
+    'message#delay': () => DelayElement(),
+    // Carbon feature
+    'message#sent': () => SentElement(),
+    'sent#forwarded': () => ForwardedElement(),
+    'forwarded#message': () => MessageStanza('', ''),
+    'others': () => XmppElement(),
+  };
 
   //TODO: Improve this!
   static AbstractStanza parseStanza(xml.XmlElement element) {
@@ -101,37 +126,15 @@ class StanzaParser {
     XmppElement xmppElement;
     var parentName = (xmlElement.parent as xml.XmlElement)?.name?.local ?? '';
     var name = xmlElement?.name?.local;
-    if (parentName == 'query' && name == 'identity') {
-      xmppElement = Identity();
-    } else if (parentName == 'query' && name == 'feature') {
-      xmppElement = Feature();
-    } else if (name == 'x') {
-      xmppElement = XElement();
-    } else if (name == 'field') {
-      xmppElement = FieldElement();
-    } else if (parentName == 'message' && name.toLowerCase() == 'time') {
-      xmppElement = TimeElement();
-    } else if (parentName == 'time' && name.toLowerCase() == 'ts') {
-      xmppElement = TimeStampElement();
-    } else if (parentName == 'message' && name.toLowerCase() == 'request') {
-      xmppElement = ReceiptRequestElement();
-    } else if (parentName == 'message' && name.toLowerCase() == 'received') {
-      xmppElement = ReceiptReceivedElement();
+    final localKey = '$parentName#$name';
+    final genericKey = '_#$name';
+    var key = 'others';
+    if (_elementMappings.containsKey(localKey)) {
+      key = localKey;
+    } else if (_elementMappings.containsKey(genericKey)) {
+      key = genericKey;
     }
-    // Amp for message
-    else if (parentName == 'message' && name.toLowerCase() == 'amp') {
-      xmppElement = AmpElement();
-    } else if (parentName == 'amp' && name.toLowerCase() == 'rule') {
-      xmppElement = AmpRuleElement();
-    } // Custom for message
-    else if (parentName == 'message' && name.toLowerCase() == 'custom') {
-      xmppElement = CustomElement();
-    } else if (parentName.toLowerCase() == 'custom' &&
-        name.toLowerCase() == 'custom') {
-      xmppElement = CustomSubElement();
-    } else {
-      xmppElement = XmppElement();
-    }
+    xmppElement = _elementMappings[key]();
     xmppElement.name = xmlElement?.name?.local;
     xmlElement.attributes.forEach((xmlAttribute) {
       xmppElement.addAttribute(
