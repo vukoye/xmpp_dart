@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
-import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
-import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone_obelisk/src/elements/forms/FieldElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/forms/QueryElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/IqStanza.dart';
 import '../../Connection.dart';
 import '../../elements/nonzas/Nonza.dart';
 import '../Negotiator.dart';
@@ -88,7 +88,7 @@ class MAMNegotiator extends Negotiator {
       if (x != null) {
         x.children.forEach((element) {
           if (element is FieldElement) {
-            switch(element.varAttr) {
+            switch (element.varAttr) {
               case 'start':
                 _supportedParameters.add(MamQueryParameters.START);
                 break;

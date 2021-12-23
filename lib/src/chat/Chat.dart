@@ -1,16 +1,15 @@
 import 'dart:async';
 
-import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/chat/Message.dart';
-import 'package:xmpp_stone/src/data/Jid.dart';
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone/src/elements/XmppElement.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone_obelisk/src/Connection.dart';
+import 'package:xmpp_stone_obelisk/src/chat/Message.dart';
+import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/MessageStanza.dart';
 import 'Message.dart';
 
 class ChatImpl implements Chat {
-
   static String TAG = 'Chat';
 
   final Connection _connection;

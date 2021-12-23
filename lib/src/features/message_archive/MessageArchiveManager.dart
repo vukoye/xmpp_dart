@@ -1,6 +1,6 @@
-import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
-import 'package:xmpp_stone/src/elements/forms/XElement.dart';
-import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
+import 'package:xmpp_stone_obelisk/src/elements/forms/QueryElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/forms/XElement.dart';
+import 'package:xmpp_stone_obelisk/src/features/servicediscovery/MAMNegotiator.dart';
 import '../../Connection.dart';
 import '../../data/Jid.dart';
 import '../../elements/stanzas/AbstractStanza.dart';
@@ -28,11 +28,14 @@ class MessageArchiveManager {
 
   bool? get hasExtended => MAMNegotiator.getInstance(_connection).hasExtended;
 
-  bool get isQueryByDateSupported => MAMNegotiator.getInstance(_connection).isQueryByDateSupported;
+  bool get isQueryByDateSupported =>
+      MAMNegotiator.getInstance(_connection).isQueryByDateSupported;
 
-  bool get isQueryByIdSupported => MAMNegotiator.getInstance(_connection).isQueryByIdSupported;
+  bool get isQueryByIdSupported =>
+      MAMNegotiator.getInstance(_connection).isQueryByIdSupported;
 
-  bool get isQueryByJidSupported => MAMNegotiator.getInstance(_connection).isQueryByJidSupported;
+  bool get isQueryByJidSupported =>
+      MAMNegotiator.getInstance(_connection).isQueryByJidSupported;
 
   MessageArchiveManager(this._connection);
 
@@ -60,14 +63,16 @@ class MessageArchiveManager {
       x.addField(FieldElement.build(
           varAttr: 'FORM_TYPE', typeAttr: 'hidden', value: 'urn:xmpp:mam:2'));
       if (start != null) {
-        x.addField(
-            FieldElement.build(varAttr: 'start', value: start.toIso8601String()));
+        x.addField(FieldElement.build(
+            varAttr: 'start', value: start.toIso8601String()));
       }
       if (end != null) {
-        x.addField(FieldElement.build(varAttr: 'end', value: end.toIso8601String()));
+        x.addField(
+            FieldElement.build(varAttr: 'end', value: end.toIso8601String()));
       }
       if (jid != null) {
-        x.addField(FieldElement.build(varAttr: 'with', value: jid.userAtDomain));
+        x.addField(
+            FieldElement.build(varAttr: 'with', value: jid.userAtDomain));
       }
       _connection.writeStanza(iqStanza);
     }
@@ -94,7 +99,8 @@ class MessageArchiveManager {
         x.addField(FieldElement.build(varAttr: 'afterId', value: afterId));
       }
       if (jid != null) {
-        x.addField(FieldElement.build(varAttr: 'with', value: jid.userAtDomain));
+        x.addField(
+            FieldElement.build(varAttr: 'with', value: jid.userAtDomain));
       }
       _connection.writeStanza(iqStanza);
     }

@@ -5,19 +5,19 @@ import 'dart:io';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
-import 'package:xmpp_stone/src/ReconnectionManager.dart';
-import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
+import 'package:xmpp_stone_obelisk/src/ReconnectionManager.dart';
+import 'package:xmpp_stone_obelisk/src/account/XmppAccountSettings.dart';
 
-import 'package:xmpp_stone/src/data/Jid.dart';
-import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
-import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
-import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
-import 'package:xmpp_stone/src/parser/StanzaParser.dart';
-import 'package:xmpp_stone/src/presence/PresenceManager.dart';
-import 'package:xmpp_stone/src/roster/RosterManager.dart';
-import 'package:xmpp_stone/xmpp_stone.dart';
+import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
+import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone_obelisk/src/extensions/ping/PingManager.dart';
+import 'package:xmpp_stone_obelisk/src/features/ConnectionNegotatiorManager.dart';
+import 'package:xmpp_stone_obelisk/src/features/streammanagement/StreamManagmentModule.dart';
+import 'package:xmpp_stone_obelisk/src/parser/StanzaParser.dart';
+import 'package:xmpp_stone_obelisk/src/presence/PresenceManager.dart';
+import 'package:xmpp_stone_obelisk/src/roster/RosterManager.dart';
+import 'package:xmpp_stone_obelisk/xmpp_stone.dart';
 
 import 'logger/Log.dart';
 
@@ -404,10 +404,9 @@ xml:lang='en'
   }
 
   bool elementHasAttribute(xml.XmlElement element, xml.XmlAttribute attribute) {
-    var list = element.attributes.firstWhereOrNull(
-        (attr) =>
-            attr.name.local == attribute.name.local &&
-            attr.value == attribute.value);
+    var list = element.attributes.firstWhereOrNull((attr) =>
+        attr.name.local == attribute.name.local &&
+        attr.value == attribute.value);
     return list != null;
   }
 

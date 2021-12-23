@@ -1,6 +1,6 @@
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
-import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
+import 'package:xmpp_stone_obelisk/src/features/sasl/ScramSaslHandler.dart';
 import 'package:test/test.dart';
 
 void main() {

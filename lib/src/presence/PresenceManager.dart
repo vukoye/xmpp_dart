@@ -1,10 +1,10 @@
 import 'dart:async';
 
-import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/data/Jid.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
-import 'package:xmpp_stone/src/presence/PresenceApi.dart';
+import 'package:xmpp_stone_obelisk/src/Connection.dart';
+import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp_stone_obelisk/src/presence/PresenceApi.dart';
 
 class PresenceManager implements PresenceApi {
   final Connection _connection;

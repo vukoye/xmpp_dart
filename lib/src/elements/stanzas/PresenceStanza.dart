@@ -1,7 +1,7 @@
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone/src/elements/XmppElement.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
 
 class PresenceStanza extends AbstractStanza {
   PresenceStanza() {

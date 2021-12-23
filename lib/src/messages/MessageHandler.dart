@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:tuple/tuple.dart';
-import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/data/Jid.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
-import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
-import 'package:xmpp_stone/src/messages/MessageApi.dart';
-import 'package:xmpp_stone/xmpp_stone.dart';
+import 'package:xmpp_stone_obelisk/src/Connection.dart';
+import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone_obelisk/src/extensions/message_delivery/ReceiptInterface.dart';
+import 'package:xmpp_stone_obelisk/src/messages/MessageApi.dart';
+import 'package:xmpp_stone_obelisk/xmpp_stone.dart';
 
 class MessageHandler implements MessageApi {
   static Map<Connection?, MessageHandler> instances =
@@ -102,7 +102,6 @@ class MessageHandler implements MessageApi {
   }
 
   void _processDeliveryStanza(AbstractStanza nonza) {
-    print('non za' + nonza.buildXmlString());
     var unrespondedStanza = _myUnrespondedIqStanzas[nonza.id];
     if (unrespondedStanza != null) {
       unrespondedStanza.item2.complete(unrespondedStanza.item1);

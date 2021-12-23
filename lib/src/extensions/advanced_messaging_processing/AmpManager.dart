@@ -1,6 +1,6 @@
 // Inspired by this XEP-0079: https://xmpp.org/extensions/xep-0079.html
-import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/features/servicediscovery/AmpNegotiator.dart';
+import 'package:xmpp_stone_obelisk/src/Connection.dart';
+import 'package:xmpp_stone_obelisk/src/features/servicediscovery/AmpNegotiator.dart';
 
 class AmpManager {
   static Map<Connection, AmpManager> instances = <Connection, AmpManager>{};

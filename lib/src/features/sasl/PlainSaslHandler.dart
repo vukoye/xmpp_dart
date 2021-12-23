@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:cryptoutils/utils.dart';
-import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
+import 'package:xmpp_stone_obelisk/src/Connection.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone_obelisk/src/features/sasl/AbstractSaslHandler.dart';
 
 class PlainSaslHandler implements AbstractSaslHandler {
   Connection? _connection;

@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:tuple/tuple.dart';
-import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/data/Jid.dart';
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone/src/elements/XmppElement.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChat.dart';
+import 'package:xmpp_stone_obelisk/src/Connection.dart';
+import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChat.dart';
 
 class MultiUserChatManager {
   static Map<Connection, MultiUserChatManager> instances =
@@ -44,13 +44,13 @@ class MultiUserChatManager {
   // Try to discover the services
   Future<MultiUserChat> discoverMucService(Jid mucServiceDomain) {
     var completer = Completer<MultiUserChat>();
-    var iqStanza =
-        IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = mucServiceDomain;
     var queryElement = XmppElement();
     queryElement.name = 'query';
-    queryElement.addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info'));
+    queryElement.addAttribute(
+        XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info'));
     iqStanza.addChild(queryElement);
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
     print(iqStanza.buildXmlString());
@@ -61,21 +61,23 @@ class MultiUserChatManager {
   MultiUserChat? _handleDiscoverMucServiceResponse(IqStanza stanza) {
     var queryChild = stanza.getChild('query');
     if (queryChild != null) {
-
       var muc = MultiUserChat();
       muc.mucDomain = stanza.fromJid.toString();
       muc.chatrooms = [];
       muc.features = [];
       queryChild.children
-        .where((element) => element!.name == 'feature')
-        .forEach((element) {
-          muc.features.add(element!.getAttribute('var')!.value);
-        });
+          .where((element) => element!.name == 'feature')
+          .forEach((element) {
+        muc.features.add(element!.getAttribute('var')!.value);
+      });
       queryChild.children
-        .where((element) => element!.name == 'Chatrooms')
-        .forEach((element) {
-          muc.chatrooms.add(MUCChatroom(element!.getAttribute('category')!.value, element.getAttribute('type')!.value, element.getAttribute('name')!.value));
-        });
+          .where((element) => element!.name == 'Chatrooms')
+          .forEach((element) {
+        muc.chatrooms.add(MUCChatroom(
+            element!.getAttribute('category')!.value,
+            element.getAttribute('type')!.value,
+            element.getAttribute('name')!.value));
+      });
       return muc;
     }
     return null;
@@ -93,11 +95,9 @@ class MultiUserChatManager {
           }
           // vCardChild is null because of the result response of updating the card
         } else if (stanza.type == IqStanzaType.ERROR) {
-          unrespondedStanza!.item2
-              .complete(null);
+          unrespondedStanza!.item2.complete(null);
         }
       }
     }
   }
-
 }

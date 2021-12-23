@@ -1,4 +1,4 @@
-import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
 
 import '../../../xmpp_stone.dart';
 import '../../Connection.dart';

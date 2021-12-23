@@ -1,4 +1,4 @@
-import 'package:xmpp_stone/src/access_point/manager.dart';
+import 'package:xmpp_stone_obelisk/src/access_point/manager.dart';
 
 final String TAG = 'example';
 // Sean side - 0

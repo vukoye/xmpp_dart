@@ -1,17 +1,16 @@
 import 'dart:async';
 
 import 'package:tuple/tuple.dart';
-import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/data/Jid.dart';
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone/src/elements/XmppElement.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp_stone/src/extensions/vcard_temp/VCard.dart';
+import 'package:xmpp_stone_obelisk/src/Connection.dart';
+import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp_stone_obelisk/src/extensions/vcard_temp/VCard.dart';
 
 class VCardManager {
-  static Map<Connection, VCardManager> instances =
-      <Connection, VCardManager>{};
+  static Map<Connection, VCardManager> instances = <Connection, VCardManager>{};
 
   static VCardManager getInstance(Connection connection) {
     var manager = instances[connection];
@@ -37,8 +36,7 @@ class VCardManager {
 
   Future<VCard> getSelfVCard() {
     var completer = Completer<VCard>();
-    var iqStanza =
-        IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
     var vCardElement = XmppElement();
     vCardElement.name = 'vCard';
@@ -50,10 +48,8 @@ class VCardManager {
   }
 
   Future<VCard> updateSelfVCard(VCard selfCard) {
-
     var completer = Completer<VCard>();
-    var iqStanza =
-        IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     var vCardElement = selfCard.buildXMLWithAttributes();
     iqStanza.addChild(vCardElement);
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
@@ -65,8 +61,7 @@ class VCardManager {
 
   Future<VCard> getVCardFor(Jid jid) {
     var completer = Completer<VCard>();
-    var iqStanza =
-        IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = jid;
     var vCardElement = XmppElement();
@@ -109,5 +104,4 @@ class VCardManager {
       }
     }
   }
-
 }

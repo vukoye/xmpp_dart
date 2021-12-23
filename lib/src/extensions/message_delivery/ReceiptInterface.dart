@@ -1,4 +1,4 @@
-import 'package:xmpp_stone/xmpp_stone.dart';
+import 'package:xmpp_stone_obelisk/xmpp_stone.dart';
 
 enum ReceiptRequestType { NONE, REQUEST, RECEIVED }
 

@@ -1,12 +1,12 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:xmpp_stone/src/access_point/manager_message_params.dart';
-import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
-import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
-import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChat.dart';
-import 'package:xmpp_stone/src/logger/Log.dart';
-import 'package:xmpp_stone/src/messages/MessageHandler.dart';
-import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
+import 'package:xmpp_stone_obelisk/src/access_point/manager_message_params.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp_stone_obelisk/src/extensions/message_delivery/ReceiptInterface.dart';
+import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChat.dart';
+import 'package:xmpp_stone_obelisk/src/logger/Log.dart';
+import 'package:xmpp_stone_obelisk/src/messages/MessageHandler.dart';
+import 'package:xmpp_stone_obelisk/xmpp_stone.dart' as xmpp;
 import 'dart:io';
 import 'package:console/console.dart';
 import 'package:image/image.dart' as image;
@@ -78,6 +78,10 @@ class XMPPClientManager {
     _listenConnection();
     onLog('Start connecting');
     return this;
+  }
+
+  getState() {
+    return _connection!.state;
   }
 
   void onReady() {
@@ -375,6 +379,8 @@ class ConnectionManagerStateChangedListener
     if (state == xmpp.XmppConnectionState.Authenticated) {
       Log.i(_context.LOG_TAG, 'Connected');
       _context.onReady();
+    } else if (state == xmpp.XmppConnectionState.Closed) {
+      Log.i(_context.LOG_TAG, 'Disconnected');
     }
   }
 

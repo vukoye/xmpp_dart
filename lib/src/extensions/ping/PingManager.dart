@@ -1,12 +1,12 @@
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp_stone_obelisk/src/Connection.dart';
 
 class PingManager {
-
   final Connection _connection;
 
-  static final Map<Connection, PingManager> _instances = <Connection, PingManager>{};
+  static final Map<Connection, PingManager> _instances =
+      <Connection, PingManager>{};
 
   PingManager(this._connection) {
     _connection.connectionStateStream.listen(_connectionStateProcessor);
