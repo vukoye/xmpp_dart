@@ -9,22 +9,9 @@ import 'package:xmpp_stone/src/elements/messages/ReceiptRequestElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpInterface.dart';
-
-abstract class ReceiptInterface {
-  ReceiptInterface addRequestReceipt();
-  ReceiptInterface addReceivedReceipt();
-  String getReceipt();
-}
-
-abstract class TimeInterface {
-  ReceiptInterface addTime(int timeMilliseconds);
-  XmppElement getTime();
-}
-
-abstract class CustomInterface {
-  ReceiptInterface addCustom(String customString);
-  XmppElement getCustom();
-}
+import 'package:xmpp_stone/src/extensions/message_delivery/CustomInterface.dart';
+import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
+import 'package:xmpp_stone/src/extensions/message_delivery/TimeInterface.dart';
 
 class MessageStanza extends AbstractStanza
     implements ReceiptInterface, TimeInterface, AmpInterface, CustomInterface {
@@ -91,16 +78,14 @@ class MessageStanza extends AbstractStanza
   }
 
   @override
-  String getReceipt() {
-    return children
-        .firstWhere(
-            (child) => (child.name == 'request' || child.name == 'received'),
-            orElse: () => null)
-        ?.textValue;
+  XmppElement getReceipt() {
+    return children.firstWhere(
+        (child) => (child.name == 'request' || child.name == 'received'),
+        orElse: () => null);
   }
 
   @override
-  ReceiptInterface addTime(int timeMilliseconds) {
+  TimeInterface addTime(int timeMilliseconds) {
     addChild(TimeElement.build(timeMilliseconds.toString()));
     return this;
   }
@@ -155,7 +140,7 @@ class MessageStanza extends AbstractStanza
   }
 
   @override
-  ReceiptInterface addCustom(String customString) {
+  CustomInterface addCustom(String customString) {
     addChild(CustomElement.build(customString));
     return this;
   }
@@ -167,4 +152,3 @@ class MessageStanza extends AbstractStanza
 }
 
 enum MessageStanzaType { CHAT, ERROR, GROUPCHAT, HEADLINE, NORMAL, UNKOWN }
-enum ReceiptRequestType { NONE, REQUEST, RECEIVED }

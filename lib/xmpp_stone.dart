@@ -25,3 +25,4 @@ export 'src/elements/XmppElement.dart';
 export 'src/features/message_archive/MessageArchiveManager.dart';
 export 'src/extensions/multi_user_chat/MultiUserChatManager.dart';
 export 'src/extensions/message_delivery/MessageDeliveryManager.dart';
+export 'src/extensions/message_delivery/ReceiptInterface.dart';

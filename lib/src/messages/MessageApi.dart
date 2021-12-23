@@ -1,5 +1,5 @@
 import 'package:xmpp_stone/src/data/Jid.dart';
-import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 
 abstract class MessageApi {
   void sendMessage(Jid to, String text,
