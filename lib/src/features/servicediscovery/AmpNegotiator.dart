@@ -21,7 +21,7 @@ class AmpNegotiator extends Negotiator {
     return instance;
   }
 
-  bool enabled = false;
+  bool enabled = true;
 
   AmpNegotiator() {
     expectedName = 'http://jabber.org/protocol/amp';

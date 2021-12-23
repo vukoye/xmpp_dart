@@ -13,6 +13,7 @@ import 'package:xmpp_stone_obelisk/src/features/servicediscovery/AmpNegotiator.d
 import 'package:xmpp_stone_obelisk/src/features/servicediscovery/CarbonsNegotiator.dart';
 import 'package:xmpp_stone_obelisk/src/features/servicediscovery/Feature.dart';
 import 'package:xmpp_stone_obelisk/src/features/servicediscovery/MAMNegotiator.dart';
+import 'package:xmpp_stone_obelisk/src/features/servicediscovery/MultiUserChatNegotiator.dart';
 import 'package:xmpp_stone_obelisk/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xml/xml.dart' as xml;
 import 'package:xmpp_stone_obelisk/src/features/streammanagement/StreamManagmentModule.dart';
@@ -119,6 +120,8 @@ class ConnectionNegotiatorManager {
     supportedNegotiatorList.add(CarbonsNegotiator.getInstance(_connection));
     supportedNegotiatorList.add(MAMNegotiator.getInstance(_connection));
     supportedNegotiatorList.add(AmpNegotiator.getInstance(_connection));
+    supportedNegotiatorList
+        .add(MultiUserChatNegotiator.getInstance(_connection));
   }
 
   bool isNegotiateorSupport(Function checkType) {
@@ -146,7 +149,7 @@ class ConnectionNegotiatorManager {
     if (waitingNegotiators.isEmpty) return null;
     var negotiatorWithData = waitingNegotiators.firstWhere((element) {
       Log.d(TAG,
-          'Found matching negotiator ${element!.negotiator.isReady().toString()}');
+          'Found matching negotiator ${element!.negotiator.expectedName} ${element.negotiator.isReady().toString()}');
       return element.negotiator.isReady();
     }, orElse: () {
       Log.d(TAG, 'No matching negotiator');
@@ -165,6 +168,9 @@ class ConnectionNegotiatorManager {
         Log.d(TAG, 'Adding negotiator: $negotiator $matchingNonzas');
         waitingNegotiators
             .add(NegotiatorWithSupportedNonzas(negotiator, matchingNonzas));
+      } else {
+        // Discover detail if needed
+        negotiator.discover();
       }
     });
   }

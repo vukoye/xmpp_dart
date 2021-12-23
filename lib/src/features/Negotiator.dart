@@ -40,6 +40,7 @@ abstract class Negotiator {
   List<Nonza> match(List<Nonza> request);
 
   void negotiate(List<Nonza> nonza);
+  void discover() {}
 
   void backToIdle() {
     state = NegotiatorState.IDLE;

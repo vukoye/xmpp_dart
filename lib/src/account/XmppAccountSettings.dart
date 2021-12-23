@@ -7,6 +7,7 @@ class XmppAccountSettings {
   String? resource = '';
   String password;
   String? host;
+  String? mucDomain = '';
   int port;
   int totalReconnections = 3;
   int reconnectionTimeout = 1000;
@@ -14,7 +15,7 @@ class XmppAccountSettings {
 
   XmppAccountSettings(
       this.name, this.username, this.domain, this.password, this.port,
-      {this.host, this.resource});
+      {this.host, this.resource, this.mucDomain});
 
   Jid get fullJid => Jid(username, domain, resource);
 

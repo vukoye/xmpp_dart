@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:xmpp_stone_obelisk/src/access_point/manager_message_params.dart';
 import 'package:xmpp_stone_obelisk/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone_obelisk/src/extensions/message_delivery/ReceiptInterface.dart';
-import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChat.dart';
+import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone_obelisk/src/logger/Log.dart';
 import 'package:xmpp_stone_obelisk/src/messages/MessageHandler.dart';
 import 'package:xmpp_stone_obelisk/xmpp_stone.dart' as xmpp;
@@ -36,6 +36,7 @@ enum ListenerType {
 class XMPPClientManager {
   String LOG_TAG = 'XMPPClientManager';
   String? host;
+  String? mucDomain = '';
   late XMPPClientPersonel personel;
   Function(XMPPClientManager _context)? _onReady;
   Function(String timestamp, String logMessage)? _onLog;
@@ -54,7 +55,8 @@ class XMPPClientManager {
           onMessage,
       void Function(xmpp.SubscriptionEvent event)? onPresenceSubscription,
       void Function(xmpp.PresenceData event)? onPresence,
-      String? host}) {
+      String? host,
+      String? this.mucDomain}) {
     personel = XMPPClientPersonel(jid, password);
     LOG_TAG = '$LOG_TAG/$jid';
     _onReady = onReady;
@@ -72,7 +74,7 @@ class XMPPClientManager {
     Log.d(LOG_TAG, 'Connecting to $host');
     var account = xmpp.XmppAccountSettings(
         personel.jid, jid.local, jid.domain, personel.password, 5222,
-        host: host);
+        mucDomain: mucDomain, host: host);
     _connection = xmpp.Connection(account);
     _connection!.connect();
     _listenConnection();
@@ -82,6 +84,18 @@ class XMPPClientManager {
 
   getState() {
     return _connection!.state;
+  }
+
+  lookForConnection() {
+    if (_connection!.state == xmpp.XmppConnectionState.ForcefullyClosed) {
+      _connection!.reconnect();
+    } else if (_connection!.state == xmpp.XmppConnectionState.Closed) {
+      _connection!.connect();
+    } else if (_connection!.state == xmpp.XmppConnectionState.Closing) {
+      _connection!.close();
+      _connection!.connect();
+    }
+    return getState();
   }
 
   void onReady() {
@@ -210,17 +224,30 @@ class XMPPClientManager {
   // Multi user chat
 
   // Add the callback or await?
-  void mucDiscover(String domain) {
+  Future<GroupChatroom> getRoom(String roomName) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
-    mucManager
-        .discoverMucService(xmpp.Jid('', domain, ''))
-        .then((MultiUserChat muc) {
-      if (muc != null) {
-        onLog('MUC response success');
-      } else {
-        onLog('MUC response not found or error');
-      }
-    });
+    return mucManager.discoverRoom(xmpp.Jid(roomName, mucDomain, ''));
+  }
+
+  // Add the callback or await?
+  Future<GroupChatroom> getReservedRoomConfig(String roomName) {
+    var mucManager = xmpp.MultiUserChatManager(_connection!);
+    return mucManager
+        .requestReservedRoomConfig(xmpp.Jid(roomName, mucDomain, ''));
+  }
+
+  // Create room
+  Future<GroupChatroom> setRoomConfig(
+      String roomName, GroupChatroomConfig config) {
+    var mucManager = xmpp.MultiUserChatManager(_connection!);
+    return mucManager.setRoomConfig(xmpp.Jid(roomName, mucDomain, ''), config);
+  }
+
+  // Create room
+  Future<GroupChatroom> createInstantRoom(
+      String roomName, GroupChatroomConfig config) {
+    var mucManager = xmpp.MultiUserChatManager(_connection!);
+    return mucManager.createRoom(xmpp.Jid(roomName, mucDomain, ''), config);
   }
 
   // Send 1-1 feature discovery
@@ -381,6 +408,7 @@ class ConnectionManagerStateChangedListener
       _context.onReady();
     } else if (state == xmpp.XmppConnectionState.Closed) {
       Log.i(_context.LOG_TAG, 'Disconnected');
+      _context._connection!.connect();
     }
   }
 
