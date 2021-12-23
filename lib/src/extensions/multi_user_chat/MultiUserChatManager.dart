@@ -131,20 +131,32 @@ class MultiUserChatManager {
     xElement
         .addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc'));
     presenceStanza.addChild(xElement);
-    // var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    // iqStanza.fromJid = _connection.fullJid;
-    // iqStanza.toJid = roomtDotMucDomain;
-
-    // var form = GroupChatroomConfigForm(config: config);
-
-    // var queryElement = form.buildInstantRoom();
-
-    // iqStanza.addChild(queryElement);
     print(presenceStanza.buildXmlString());
     _myUnrespondedPresenceStanzas[presenceStanza.id] =
         Tuple2(presenceStanza, completer);
     _myUnrespondedIqStanzasActions[presenceStanza.id] =
         GroupChatroomAction.CREATE_ROOM;
+    _connection.writeStanza(presenceStanza);
+    return completer.future;
+  }
+
+  Future<GroupChatroom> joinRoom(
+      Jid _roomtDotMucDomain, JoinGroupChatroomConfig config) {
+    var completer = Completer<GroupChatroom>();
+    var presenceStanza = PresenceStanza();
+
+    Jid roomtDotMucDomain = Jid(_roomtDotMucDomain.local,
+        _roomtDotMucDomain.domain, _connection.fullJid.resource);
+    presenceStanza.fromJid = _connection.fullJid;
+    presenceStanza.addAttribute(XmppAttribute('to', roomtDotMucDomain.fullJid));
+
+    presenceStanza.addChild(config.buildJoinRoomXElement());
+    print(presenceStanza.buildXmlString());
+
+    _myUnrespondedPresenceStanzas[presenceStanza.id] =
+        Tuple2(presenceStanza, completer);
+    _myUnrespondedIqStanzasActions[presenceStanza.id] =
+        GroupChatroomAction.JOIN_ROOM;
     _connection.writeStanza(presenceStanza);
     return completer.future;
   }

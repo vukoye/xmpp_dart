@@ -1,3 +1,4 @@
+import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone_obelisk/src/elements/XmppElement.dart';
 import 'package:xmpp_stone_obelisk/src/elements/forms/FieldElement.dart';
 import 'package:xmpp_stone_obelisk/src/elements/forms/QueryElement.dart';
@@ -203,5 +204,45 @@ class GroupChatroomConfigForm {
     //     values: config.presencebroadcast));
     query.addChild(xElement);
     return query;
+  }
+}
+
+class JoinGroupChatroomConfig {
+  final String affiliation;
+  final String role;
+  final DateTime historySince;
+  final bool shouldGetHistory;
+
+  const JoinGroupChatroomConfig({
+    required this.affiliation,
+    required this.role,
+    required this.historySince,
+    required this.shouldGetHistory,
+  });
+
+  static JoinGroupChatroomConfig build({
+    required DateTime historySince,
+    required bool shouldGetHistory,
+  }) {
+    return JoinGroupChatroomConfig(
+      affiliation: 'member',
+      role: 'participant',
+      historySince: historySince,
+      shouldGetHistory: shouldGetHistory,
+    );
+  }
+
+  XmppElement buildJoinRoomXElement() {
+    XElement xElement = XElement.build();
+    xElement.addAttribute(
+        XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#user'));
+
+    XmppElement itemRole = XmppElement();
+    itemRole.name = 'item';
+    itemRole.addAttribute(XmppAttribute('affiliation', affiliation));
+    itemRole.addAttribute(XmppAttribute('role', role));
+    xElement.addChild(itemRole);
+
+    return xElement;
   }
 }

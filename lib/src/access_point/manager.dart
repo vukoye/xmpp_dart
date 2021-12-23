@@ -250,6 +250,12 @@ class XMPPClientManager {
     return mucManager.createRoom(xmpp.Jid(roomName, mucDomain, ''), config);
   }
 
+  // Join room
+  Future<GroupChatroom> join(String roomName, JoinGroupChatroomConfig config) {
+    var mucManager = xmpp.MultiUserChatManager(_connection!);
+    return mucManager.joinRoom(xmpp.Jid(roomName, mucDomain, ''), config);
+  }
+
   // Send 1-1 feature discovery
   void discoverMessageDelivery(String sender, String receiver) {
     var mucManager = xmpp.MessageDeliveryManager(_connection!);
