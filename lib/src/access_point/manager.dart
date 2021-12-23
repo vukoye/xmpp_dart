@@ -39,7 +39,7 @@ class XMPPClientManager {
   late XMPPClientPersonel personel;
   Function(XMPPClientManager _context)? _onReady;
   Function(String timestamp, String logMessage)? _onLog;
-  Function(xmpp.MessageStanza? message, ListenerType listenerType)? _onMessage;
+  Function(xmpp.MessageStanza message, ListenerType listenerType)? _onMessage;
   Function(xmpp.SubscriptionEvent event)? _onPresenceSubscription;
   Function(xmpp.PresenceData event)? _onPresence;
   xmpp.Connection? _connection;
@@ -50,7 +50,7 @@ class XMPPClientManager {
   XMPPClientManager(jid, password,
       {void Function(XMPPClientManager _context)? onReady,
       void Function(String _timestamp, String _message)? onLog,
-      void Function(xmpp.MessageStanza? message, ListenerType listenerType)?
+      void Function(xmpp.MessageStanza message, ListenerType listenerType)?
           onMessage,
       void Function(xmpp.SubscriptionEvent event)? onPresenceSubscription,
       void Function(xmpp.PresenceData event)? onPresence,
@@ -265,46 +265,47 @@ class XMPPClientManager {
 
       // TODO: Simplify the condition
       if (_messageWrapped.isCarbon) {
-        _onMessage!(_messageWrapped.message, ListenerType.onMessage_Carbon);
+        _onMessage!(_messageWrapped.message!, ListenerType.onMessage_Carbon);
         Log.i(
             LOG_TAG, 'New `ListenerType.onMessage_Carbon` from ${message!.id}');
       }
       if (_messageWrapped.isDelay) {
-        _onMessage!(_messageWrapped.message, ListenerType.onMessage_Delayed);
-        Log.i(
-            LOG_TAG, 'New `ListenerType.onMessage_Delayed` from ${message!.id}');
+        _onMessage!(_messageWrapped.message!, ListenerType.onMessage_Delayed);
+        Log.i(LOG_TAG,
+            'New `ListenerType.onMessage_Delayed` from ${message!.id}');
       }
       if (_messageWrapped.isAckDeliveryDirect) {
         _onMessage!(
-            _messageWrapped.message, ListenerType.onMessage_Delivered_Direct);
+            _messageWrapped.message!, ListenerType.onMessage_Delivered_Direct);
         Log.i(LOG_TAG,
             'New `ListenerType.onMessage_Delivered_Direct` from ${message!.id}');
       }
       if (_messageWrapped.isAckDeliveryStored) {
         _onMessage!(
-            _messageWrapped.message, ListenerType.onMessage_Delivered_Stored);
+            _messageWrapped.message!, ListenerType.onMessage_Delivered_Stored);
         Log.i(LOG_TAG,
             'New `ListenerType.onMessage_Delivered_Stored` from ${message!.id}');
       }
       if (_messageWrapped.isAckDeliveryClient) {
         _onMessage!(
-            _messageWrapped.message, ListenerType.onMessage_Delivered_Client);
+            _messageWrapped.message!, ListenerType.onMessage_Delivered_Client);
         Log.i(LOG_TAG,
             'New `ListenerType.onMessage_Delivered_Client` from ${message!.id}');
       }
       if (_messageWrapped.isAckReadClient) {
-        _onMessage!(_messageWrapped.message, ListenerType.onMessage_Read_Client);
+        _onMessage!(
+            _messageWrapped.message!, ListenerType.onMessage_Read_Client);
         Log.i(LOG_TAG,
             'New `ListenerType.onMessage_Read_Client` from ${message!.id}');
       }
       if (_messageWrapped.isOnlyMessage) {
         if (_messageWrapped.isMessageCustom) {
-          _onMessage!(_messageWrapped.message, ListenerType.onMessage_Custom);
+          _onMessage!(_messageWrapped.message!, ListenerType.onMessage_Custom);
           Log.i(LOG_TAG,
               'New `ListenerType.onMessage_Custom` from ${message!.id}');
         }
         if (_messageWrapped.isMessage) {
-          _onMessage!(_messageWrapped.message, ListenerType.onMessage);
+          _onMessage!(_messageWrapped.message!, ListenerType.onMessage);
           Log.i(LOG_TAG, 'New `ListenerType.onMessage` from ${message!.id}');
         }
       }
