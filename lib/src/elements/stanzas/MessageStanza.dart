@@ -4,17 +4,27 @@ import 'package:xmpp_stone/src/elements/messages/Amp.dart';
 import 'package:xmpp_stone/src/elements/messages/AmpRuleElement.dart';
 import 'package:xmpp_stone/src/elements/messages/CustomElement.dart';
 import 'package:xmpp_stone/src/elements/messages/CustomSubElement.dart';
+import 'package:xmpp_stone/src/elements/messages/DelayElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptReceivedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptRequestElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
+import 'package:xmpp_stone/src/elements/messages/carbon/SentElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpInterface.dart';
+import 'package:xmpp_stone/src/extensions/message_carbon/SentInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/CustomInterface.dart';
+import 'package:xmpp_stone/src/extensions/message_delivery/DelayInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/TimeInterface.dart';
 
 class MessageStanza extends AbstractStanza
-    implements ReceiptInterface, TimeInterface, AmpInterface, CustomInterface {
+    implements
+        ReceiptInterface,
+        TimeInterface,
+        AmpInterface,
+        CustomInterface,
+        DelayInterface,
+        SentInterface {
   MessageStanzaType _type;
 
   MessageStanzaType get type => _type;
@@ -78,10 +88,13 @@ class MessageStanza extends AbstractStanza
   }
 
   @override
-  XmppElement getReceipt() {
-    return children.firstWhere(
-        (child) => (child.name == 'request' || child.name == 'received'),
-        orElse: () => null);
+  XmppElement getRequestReceipt() {
+    return ReceiptRequestElement.parse(this);
+  }
+
+  @override
+  XmppElement getReceivedReceipt() {
+    return ReceiptReceivedElement.parse(this);
   }
 
   @override
@@ -148,6 +161,16 @@ class MessageStanza extends AbstractStanza
   @override
   XmppElement getCustom() {
     return CustomSubElement.parse(CustomElement.parse(this));
+  }
+
+  @override
+  XmppElement getDelay() {
+    return DelayElement.parse(this);
+  }
+
+  @override
+  XmppElement getSent() {
+    return SentElement.parse(this);
   }
 }
 
