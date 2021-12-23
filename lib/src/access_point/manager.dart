@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:xmpp_stone/src/access_point/manager_message_params.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChat.dart';
@@ -17,106 +18,48 @@ final String TAG = 'manager::general';
 
 enum MessageDelivery { UNKNOWN, DIRECT, STORED, ONLINE }
 
-class XMPPMessageParams {
-  final xmpp.MessageStanza original;
-  const XMPPMessageParams({this.original});
-
-  xmpp.MessageStanza get message {
-    if (original.body != null) {
-      return original;
-    } else {
-      return null;
-    }
-  }
-
-  xmpp.MessageStanza get customMessage {
-    if (original.body == null && original.getCustom() != null) {
-      return original;
-    } else {
-      return null;
-    }
-  }
-
-  xmpp.MessageStanza get ackDeliveryDirect {
-    if (original.body == null && original.isAmpDeliverDirect()) {
-      return original;
-    } else {
-      return null;
-    }
-  }
-
-  xmpp.MessageStanza get ackDeliveryStored {
-    if (original.body == null && original.isAmpDeliverStore()) {
-      return original;
-    } else {
-      return null;
-    }
-  }
-
-  xmpp.MessageStanza get ackDeliveryClient {
-    if (original.body == null &&
-        original.getCustom() == null &&
-        !original.isAmpDeliverStore() &&
-        !original.isAmpDeliverDirect() &&
-        original.fromJid.isValid() &&
-        original.toJid.isValid()) {
-      return original;
-    } else {
-      return null;
-    }
-  }
-
-  xmpp.MessageStanza get ackReadClient {
-    if (original.body == null &&
-        original.getCustom() != null &&
-        getCustomData['iqType'] == 'Read-Ack') {
-      return original;
-    } else {
-      return null;
-    }
-  }
-
-  Map<String, dynamic> get getCustomData {
-    if (customMessage != null && customMessage.getCustom() != null) {
-      return json.decode(customMessage.getCustom().textValue);
-    } else {
-      return {};
-    }
-  }
+enum ListenerType {
+  onReady,
+  onLog,
+  onPresence,
+  onMessage,
+  onMessage_Custom,
+  onMessage_Sent,
+  onMessage_Delivered_Direct,
+  onMessage_Delivered_Stored,
+  onMessage_Delivered_Client,
+  onMessage_Read_Client,
+  onMessage_Carbon,
+  onMessage_Delayed,
 }
 
 class XMPPClientManager {
-  String LOG_TAG = 'manager';
+  String LOG_TAG = 'XMPPClientManager';
   String host;
   XMPPClientPersonel personel;
   Function(XMPPClientManager _context) _onReady;
   Function(String timestamp, String logMessage) _onLog;
-  Function(xmpp.MessageStanza message) _onMessage;
-  Function(xmpp.MessageStanza message, MessageDelivery delivery)
-      _onMessageDelivery;
-  Function(xmpp.MessageStanza message) _onMessageRead;
+  Function(xmpp.MessageStanza message, ListenerType listenerType) _onMessage;
   Function(xmpp.SubscriptionEvent event) _onPresenceSubscription;
   Function(xmpp.PresenceData event) _onPresence;
   xmpp.Connection _connection;
   MessageHandler _messageHandler;
 
+  StreamSubscription messageListener;
+
   XMPPClientManager(jid, password,
       {void Function(XMPPClientManager _context) onReady,
       void Function(String _timestamp, String _message) onLog,
-      void Function(xmpp.MessageStanza message) onMessage,
-      void Function(xmpp.MessageStanza message, MessageDelivery delivery)
-          onMessageDelivery,
-      void Function(xmpp.MessageStanza message) onMessageRead,
+      void Function(xmpp.MessageStanza message, ListenerType listenerType)
+          onMessage,
       void Function(xmpp.SubscriptionEvent event) onPresenceSubscription,
       void Function(xmpp.PresenceData event) onPresence,
       String host}) {
     personel = XMPPClientPersonel(jid, password);
-    LOG_TAG = 'manager::$jid';
+    LOG_TAG = '$LOG_TAG/$jid';
     _onReady = onReady;
     _onLog = onLog;
     _onMessage = onMessage;
-    _onMessageDelivery = onMessageDelivery;
-    _onMessageRead = onMessageRead;
     _onPresence = onPresence;
     _onPresenceSubscription = onPresenceSubscription;
     this.host = host;
@@ -126,10 +69,10 @@ class XMPPClientManager {
     Log.logLevel = LogLevel.DEBUG;
     Log.logXmpp = false;
     var jid = xmpp.Jid.fromFullJid(personel.jid);
-    print('connecting to' + host);
+    Log.d(LOG_TAG, 'Connecting to $host');
     var account = xmpp.XmppAccountSettings(
         personel.jid, jid.local, jid.domain, personel.password, 5222,
-        host: host); // , resource: 'xmppstone'
+        host: host);
     _connection = xmpp.Connection(account);
     _connection.connect();
     _listenConnection();
@@ -164,13 +107,13 @@ class XMPPClientManager {
     var vCardManager = xmpp.VCardManager(_connection);
     vCardManager.getSelfVCard().then((vCard) {
       if (vCard != null) {
-        onLog('manager.vCardUpdate::my info ' + vCard.buildXmlString());
+        onLog('manager.vCardUpdate::my info ${vCard.buildXmlString()}');
       }
       // Update vcard information
       var _vCardUpdated = _onUpdate(vCard);
 
-      onLog('manager.vCardUpdate::my updated info ' +
-          _vCardUpdated.buildXmlString());
+      onLog(
+          'manager.vCardUpdate::my updated info ${_vCardUpdated.buildXmlString()}');
       vCardManager.updateSelfVCard(_vCardUpdated).then((updatedAckVCard) {
         personel.profile = _vCardUpdated;
         onLog('manager.vCardUpdate::my updated info - Updated info success');
@@ -301,8 +244,8 @@ class XMPPClientManager {
         customString: customString);
   }
 
-  void sendDeliveryAck(xmpp.MessageStanza message) {
-    _messageHandler.sendMessage(message.fromJid, '',
+  Future<xmpp.MessageStanza> sendDeliveryAck(xmpp.MessageStanza message) {
+    return _messageHandler.sendMessage(message.fromJid, '',
         messageId: message.id, receipt: xmpp.ReceiptRequestType.RECEIVED);
   }
 
@@ -312,42 +255,63 @@ class XMPPClientManager {
   }
 
   void _listenMessage() {
-    print('================start listine');
-    _messageHandler.messagesStream.listen((xmpp.MessageStanza message) {
-      var _messageWrapped = XMPPMessageParams(original: message);
-      if (_messageWrapped.message != null) {
-        _onMessage(message);
-        // Check if delivery receipt request?
-        sendDeliveryAck(message);
+    Log.d(LOG_TAG, 'Start listening');
+    if (messageListener != null) {
+      messageListener.cancel();
+    }
+    messageListener =
+        _messageHandler.messagesStream.listen((xmpp.MessageStanza message) {
+      var _messageWrapped = XMPPMessageParams(message: message);
+
+      // TODO: Simplify the condition
+      if (_messageWrapped.isCarbon) {
+        _onMessage(_messageWrapped.message, ListenerType.onMessage_Carbon);
         Log.i(
-            TAG,
-            format(
-                'New Message from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end} - ${message.id}'));
-      } else if (_messageWrapped.ackDeliveryDirect != null) {
-        Log.d(TAG, 'Message delivered to client resource');
-        // Acknowledgement sent direct to client
-        _onMessageDelivery(
-            _messageWrapped.ackDeliveryDirect, MessageDelivery.DIRECT);
-      } else if (_messageWrapped.ackDeliveryStored != null) {
-        Log.d(TAG, 'Message delivered to offline storage resource');
-        // Acknowledgement after stored in offline storage
-        _onMessageDelivery(
-            _messageWrapped.ackDeliveryStored, MessageDelivery.STORED);
-      } else if (_messageWrapped.ackDeliveryClient != null) {
-        Log.d(TAG, 'Message delivered to client device after online?');
-        // Acknowledgement sent by client device
-        _onMessageDelivery(
-            _messageWrapped.ackDeliveryClient, MessageDelivery.ONLINE);
-      } else if (_messageWrapped.customMessage != null) {
-        sendDeliveryAck(message);
-        if (_messageWrapped.ackReadClient != null) {
-          Log.d(TAG,
-              'Read ack received - ${_messageWrapped.customMessage.getCustom().buildXmlString()}');
-          _onMessageRead(_messageWrapped.ackReadClient);
-        } else {
-          Log.d(TAG,
-              'Custom Message received - ${_messageWrapped.customMessage.getCustom().buildXmlString()}');
+            LOG_TAG, 'New `ListenerType.onMessage_Carbon` from ${message.id}');
+      }
+      if (_messageWrapped.isDelay) {
+        _onMessage(_messageWrapped.message, ListenerType.onMessage_Delayed);
+        Log.i(
+            LOG_TAG, 'New `ListenerType.onMessage_Delayed` from ${message.id}');
+      }
+      if (_messageWrapped.isAckDeliveryDirect) {
+        _onMessage(
+            _messageWrapped.message, ListenerType.onMessage_Delivered_Direct);
+        Log.i(LOG_TAG,
+            'New `ListenerType.onMessage_Delivered_Direct` from ${message.id}');
+      }
+      if (_messageWrapped.isAckDeliveryStored) {
+        _onMessage(
+            _messageWrapped.message, ListenerType.onMessage_Delivered_Stored);
+        Log.i(LOG_TAG,
+            'New `ListenerType.onMessage_Delivered_Stored` from ${message.id}');
+      }
+      if (_messageWrapped.isAckDeliveryClient) {
+        _onMessage(
+            _messageWrapped.message, ListenerType.onMessage_Delivered_Client);
+        Log.i(LOG_TAG,
+            'New `ListenerType.onMessage_Delivered_Client` from ${message.id}');
+      }
+      if (_messageWrapped.isAckReadClient) {
+        _onMessage(_messageWrapped.message, ListenerType.onMessage_Read_Client);
+        Log.i(LOG_TAG,
+            'New `ListenerType.onMessage_Read_Client` from ${message.id}');
+      }
+      if (_messageWrapped.isOnlyMessage) {
+        if (_messageWrapped.isMessageCustom) {
+          _onMessage(_messageWrapped.message, ListenerType.onMessage_Custom);
+          Log.i(LOG_TAG,
+              'New `ListenerType.onMessage_Custom` from ${message.id}');
         }
+        if (_messageWrapped.isMessage) {
+          _onMessage(_messageWrapped.message, ListenerType.onMessage);
+          Log.i(LOG_TAG, 'New `ListenerType.onMessage` from ${message.id}');
+        }
+      }
+
+      // Send receipt if request
+      if (_messageWrapped.isRequestingReceipt) {
+        sendDeliveryAck(message);
       }
     });
   }
@@ -367,8 +331,6 @@ class XMPPClientManager {
           presenceTypeEvent.showElement.toString());
     });
     presenceManager.subscriptionStream.listen((streamEvent) {
-      print(streamEvent.type.toString() + 'stream type');
-
       _onPresenceSubscription(streamEvent);
       if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
         onLog('Accepting presence request');

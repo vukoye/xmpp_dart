@@ -45,7 +45,7 @@ enum XmppConnectionState {
 class Connection {
   var lock = Lock(reentrant: true);
 
-  static String TAG = 'Connection';
+  static String TAG = 'XmppStone/Connection';
 
   static Map<String, Connection> instances = <String, Connection>{};
 
@@ -278,7 +278,6 @@ xml:lang='en'
       } else {
         fullResponse = _unparsedXmlResponse;
       }
-      Log.v(TAG, 'full response = ${fullResponse}');
       _unparsedXmlResponse = '';
     } else {
       fullResponse = response;
@@ -286,7 +285,7 @@ xml:lang='en'
 
     if (fullResponse != null && fullResponse.isNotEmpty) {
       xml.XmlNode xmlResponse;
-      log(fullResponse, name: 'XmppStoneDebug');
+      Log.d(TAG, fullResponse);
       try {
         xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
       } catch (e) {
