@@ -2,24 +2,21 @@ import 'package:xmpp_stone/src/access_point/manager.dart';
 
 final String TAG = 'example';
 // Sean side - 0
-final String C_SENDER = 'sean@localhost';
+final String C_SENDER = 'boo@localhost';
 final String C_RECEIVER = 'alice@localhost';
 final String C_RECEIVER_BOB = 'bob@localhost';
-
-// Alice side - 1
-// final String C_SENDER = 'alice@localhost';
-// final String C_RECEIVER = 'sean@localhost';
+final String HOST = 'localhost';
 
 void main(List<String> arguments) {
-  var seanClient = XMPPClientManager('sean@localhost', 'qwerty', onReady: onManagerForSeanReady, host: '13.229.165.123', onLog: onLog);
+  var seanClient = XMPPClientManager('boo@localhost', 'qwerty',
+      onReady: onManagerForSeanReady, host: HOST, onLog: onLog);
   seanClient.createSession();
-  var aliceClient = XMPPClientManager('alice@localhost', 'qwerty', onReady: onManagerForAliceReady, host: '13.229.165.123', onLog: onLog);
+  var aliceClient = XMPPClientManager('alice@localhost', 'qwerty',
+      onReady: onManagerForAliceReady, host: HOST, onLog: onLog);
   aliceClient.createSession();
 }
 
-void onLog(String time, String message) {
-
-}
+void onLog(String time, String message) {}
 
 void onManagerForSeanReady(XMPPClientManager _context) {
   _context.listens();
@@ -50,12 +47,12 @@ void onManagerForSeanReady(XMPPClientManager _context) {
   _context.presenceFrom(friendAlice);
 
   // send text message
-  _context.sendMessage('good morning Alice', friendAlice);
-
+  _context.sendMessage('good morning Alice', friendAlice,
+      messageId: DateTime.now().millisecondsSinceEpoch.toString());
 }
 
 void onManagerForAliceReady(XMPPClientManager _context) {
-  var friendSean = 'sean@localhost';
+  var friendSean = 'boo@localhost';
   _context.presenceSend();
   // Read your vcard profile
   _context.vCardRead();
@@ -79,5 +76,4 @@ void onManagerForAliceReady(XMPPClientManager _context) {
   _context.rosterList();
   // Get presence from alice
   _context.presenceFrom(friendSean);
-
 }

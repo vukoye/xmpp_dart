@@ -5,8 +5,8 @@ import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 abstract class Negotiator {
   static int defaultPriorityLevel = 1000;
 
-  String _expectedName;
-  String _expectedNameSpace;
+  String? _expectedName;
+  String? _expectedNameSpace;
   NegotiatorState _state = NegotiatorState.IDLE;
   int priorityLevel = defaultPriorityLevel;
 
@@ -24,15 +24,15 @@ abstract class Negotiator {
     negotiatorStateStreamController.add(state);
   }
 
-  String get expectedNameSpace => _expectedNameSpace;
+  String? get expectedNameSpace => _expectedNameSpace;
 
-  set expectedNameSpace(String value) {
+  set expectedNameSpace(String? value) {
     _expectedNameSpace = value;
   }
 
-  String get expectedName => _expectedName;
+  String? get expectedName => _expectedName;
 
-  set expectedName(String value) {
+  set expectedName(String? value) {
     _expectedName = value;
   }
 

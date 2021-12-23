@@ -11,11 +11,13 @@ class PresenceManager implements PresenceApi {
 
   List<PresenceStanza> requests = <PresenceStanza>[];
 
-  final StreamController<PresenceData> _presenceStreamController = StreamController<PresenceData>.broadcast();
+  final StreamController<PresenceData> _presenceStreamController =
+      StreamController<PresenceData>.broadcast();
 
   final StreamController<SubscriptionEvent> _subscribeStreamController =
       StreamController<SubscriptionEvent>.broadcast();
-  final StreamController<PresenceErrorEvent> _errorStreamController = StreamController<PresenceErrorEvent>.broadcast();
+  final StreamController<PresenceErrorEvent> _errorStreamController =
+      StreamController<PresenceErrorEvent>.broadcast();
 
   PresenceData _selfPresence = PresenceData(PresenceShowElement.CHAT, '', null);
 
@@ -40,12 +42,13 @@ class PresenceManager implements PresenceApi {
     return _errorStreamController.stream;
   }
 
-  static Map<Connection, PresenceManager> instances = <Connection, PresenceManager>{};
+  static Map<Connection?, PresenceManager> instances =
+      <Connection?, PresenceManager>{};
 
-  static PresenceManager getInstance(Connection connection) {
+  static PresenceManager getInstance(Connection? connection) {
     var manager = instances[connection];
     if (manager == null) {
-      manager = PresenceManager(connection);
+      manager = PresenceManager(connection!);
       instances[connection] = manager;
     }
     return manager;
@@ -54,13 +57,13 @@ class PresenceManager implements PresenceApi {
   PresenceManager(this._connection) {
     _connection.inStanzasStream
         .where((abstractStanza) => abstractStanza is PresenceStanza)
-        .map((stanza) => stanza as PresenceStanza)
+        .map((stanza) => stanza as PresenceStanza?)
         .listen(_processPresenceStanza);
     _connection.connectionStateStream.listen(_connectionStateHandler);
   }
 
   @override
-  void acceptSubscription(Jid to) {
+  void acceptSubscription(Jid? to) {
     var presenceStanza = PresenceStanza.withType(PresenceType.SUBSCRIBED);
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
@@ -122,12 +125,13 @@ class PresenceManager implements PresenceApi {
     _connection.writeStanza(presenceStanza);
   }
 
-  void _processPresenceStanza(PresenceStanza presenceStanza) {
-    if (presenceStanza.type == null) {
+  void _processPresenceStanza(PresenceStanza? presenceStanza) {
+    if (presenceStanza!.type == null) {
       //presence event
-      _presenceStreamController.add(PresenceData(presenceStanza.show, presenceStanza.status, presenceStanza.fromJid));
+      _presenceStreamController.add(PresenceData(
+          presenceStanza.show, presenceStanza.status, presenceStanza.fromJid));
     } else {
-      switch (presenceStanza.type) {
+      switch (presenceStanza.type!) {
         case PresenceType.SUBSCRIBE:
           var subscriptionEvent = SubscriptionEvent();
           subscriptionEvent.type = SubscriptionEventType.REQUEST;
@@ -155,7 +159,8 @@ class PresenceManager implements PresenceApi {
           break;
         case PresenceType.UNAVAILABLE:
           //presence event
-          _presenceStreamController.add(PresenceData(PresenceShowElement.XA, 'Unavailable', presenceStanza.fromJid));
+          _presenceStreamController.add(PresenceData(
+              PresenceShowElement.XA, 'Unavailable', presenceStanza.fromJid));
           break;
       }
     }
@@ -181,7 +186,8 @@ class PresenceManager implements PresenceApi {
     //TODO Add more handling
     var errorEvent = PresenceErrorEvent();
     errorEvent.presenceStanza = presenceStanza;
-    var errorTypeString = presenceStanza.getChild('error')?.getAttribute('type')?.value;
+    var errorTypeString =
+        presenceStanza.getChild('error')?.getAttribute('type')?.value;
     if (errorTypeString != null && errorTypeString == 'modify') {
       errorEvent.type = PresenceErrorType.MODIFY;
     }

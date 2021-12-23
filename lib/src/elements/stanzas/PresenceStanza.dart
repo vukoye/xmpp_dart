@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
@@ -13,39 +14,39 @@ class PresenceStanza extends AbstractStanza {
         XmppAttribute('type', type.toString().split('.').last.toLowerCase()));
   }
 
-  set type(PresenceType value) {
+  set type(PresenceType? value) {
     var typeValue = value.toString().split('.').last.toLowerCase();
     _setAttributeValue('type', typeValue);
   }
 
-  PresenceType get type {
+  PresenceType? get type {
     var typeValue = getAttribute('type')?.value;
     return typeFromString(typeValue);
   }
 
-  set show(PresenceShowElement value) {
+  set show(PresenceShowElement? value) {
     var showValue = value.toString().split('.').last.toLowerCase();
     _setChildValue('show', showValue);
   }
 
-  PresenceShowElement get show {
+  PresenceShowElement? get show {
     var showValue = getChild('show')?.textValue;
     return showFromString(showValue);
   }
 
   //status with no language prefs
   @override
-  String get status {
+  String? get status {
     var statusElement = children.firstWhere(
-        (element) => element.name == 'status' && element.attributes.isEmpty,
+        (element) => element!.name == 'status' && element.attributes.isEmpty,
         orElse: () => null);
     return statusElement?.textValue;
   }
 
   @override
-  set status(String value) {
+  set status(String? value) {
     var childElement = children.firstWhere(
-        (element) => element.name == 'status' && element.attributes.isEmpty,
+        (element) => element!.name == 'status' && element.attributes.isEmpty,
         orElse: () => null);
     if (childElement == null) {
       var element = XmppElement();
@@ -57,15 +58,15 @@ class PresenceStanza extends AbstractStanza {
     }
   }
 
-  int get priority {
-    return int.tryParse(getChild('priority')?.textValue);
+  int? get priority {
+    return int.tryParse(getChild('priority')?.textValue! ?? '0');
   }
 
-  set priority(int value) {
+  set priority(int? value) {
     _setChildValue('priority', value.toString());
   }
 
-  PresenceShowElement showFromString(String showString) {
+  PresenceShowElement? showFromString(String? showString) {
     //AWAY, CHAT, DND, XA
     switch (showString) {
       case 'away':
@@ -81,7 +82,7 @@ class PresenceStanza extends AbstractStanza {
     return null;
   }
 
-  PresenceType typeFromString(String typeString) {
+  PresenceType? typeFromString(String? typeString) {
     switch (typeString) {
       case 'error':
         return PresenceType.ERROR;
@@ -104,7 +105,7 @@ class PresenceStanza extends AbstractStanza {
 
   void _setChildValue(String childName, String value) {
     var childElement = children.firstWhere(
-        (element) => element.name == childName && element.attributes.isEmpty,
+        (element) => element!.name == childName && element.attributes.isEmpty,
         orElse: () => null);
     if (childElement == null) {
       var element = XmppElement();
@@ -117,8 +118,8 @@ class PresenceStanza extends AbstractStanza {
   }
 
   void _setAttributeValue(String attrName, String value) {
-    var attr = attributes.firstWhere((attribute) => attribute.name == name,
-        orElse: () => null);
+    var attr =
+        attributes.firstWhereOrNull((attribute) => attribute.name == name);
     if (attr == null) {
       var element = XmppElement();
       element.name = attrName;

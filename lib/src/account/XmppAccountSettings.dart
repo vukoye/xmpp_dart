@@ -2,11 +2,11 @@ import 'package:xmpp_stone/src/data/Jid.dart';
 
 class XmppAccountSettings {
   String name;
-  String username;
-  String domain;
-  String resource = '';
+  String? username;
+  String? domain;
+  String? resource = '';
   String password;
-  String host;
+  String? host;
   int port;
   int totalReconnections = 3;
   int reconnectionTimeout = 1000;

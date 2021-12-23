@@ -11,7 +11,7 @@ class CustomSubElement extends XmppElement {
     textValue = value;
   }
 
-  static XmppElement parse(parent) {
+  static XmppElement? parse(parent) {
     if (parent == null) {
       return null;
     }

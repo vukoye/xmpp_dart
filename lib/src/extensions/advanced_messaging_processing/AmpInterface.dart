@@ -5,7 +5,7 @@ import 'package:xmpp_stone/xmpp_stone.dart';
 
 abstract class AmpInterface {
   AmpInterface addAmpDeliverDirect();
-  XmppElement getAmp();
+  XmppElement? getAmp();
   bool isAmpDeliverDirect();
   bool isAmpDeliverStore();
 }

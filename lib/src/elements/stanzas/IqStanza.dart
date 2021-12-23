@@ -11,7 +11,7 @@ class IqStanza extends AbstractStanza {
     _type = value;
   }
 
-  IqStanza(String id, IqStanzaType type) {
+  IqStanza(String? id, IqStanzaType type) {
     name = 'iq';
     this.id = id;
     _type = type;
@@ -23,7 +23,7 @@ class IqStanza extends AbstractStanza {
 enum IqStanzaType { ERROR, SET, RESULT, GET, INVALID, TIMEOUT }
 
 class IqStanzaResult {
-  IqStanzaType type;
-  String description;
-  String iqStanzaId;
+  IqStanzaType? type;
+  String? description;
+  String? iqStanzaId;
 }

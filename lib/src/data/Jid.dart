@@ -1,11 +1,11 @@
 import 'package:quiver/core.dart';
 
 class Jid {
-  String _local = '';
-  String _domain = '';
-  String _resource = '';
+  String? _local = '';
+  String? _domain = '';
+  String? _resource = '';
 
-  Jid(String local, String domain, String resource) {
+  Jid(String? local, String? domain, String? resource) {
     _local = local;
     _domain = domain;
     _resource = resource;
@@ -16,37 +16,37 @@ class Jid {
     return other is Jid && local == other.local && domain == other.domain && resource == other.resource;
   }
 
-  String get local => _local;
+  String? get local => _local;
 
-  String get domain => _domain;
+  String? get domain => _domain;
 
-  String get resource => _resource;
+  String? get resource => _resource;
 
-  String get fullJid {
+  String? get fullJid {
     if (local != null &&
         domain != null &&
         resource != null &&
-        local.isNotEmpty &&
-        domain.isNotEmpty &&
-        resource.isNotEmpty) {
+        local!.isNotEmpty &&
+        domain!.isNotEmpty &&
+        resource!.isNotEmpty) {
       return '$_local@$_domain/$_resource';
     }
-    if (local == null || local.isEmpty) {
+    if (local == null || local!.isEmpty) {
       return _domain;
     }
-    if (resource == null || resource.isEmpty) {
+    if (resource == null || resource!.isEmpty) {
       return '$_local@$_domain';
     }
     return '';
   }
 
-  String get userAtDomain {
-    if (local != null && local.isNotEmpty) return '$_local@$_domain';
+  String? get userAtDomain {
+    if (local != null && local!.isNotEmpty) return '$_local@$_domain';
     return _domain;
   }
 
   bool isValid() {
-    return local != null && local.isNotEmpty && domain != null && domain.isNotEmpty;
+    return local != null && local!.isNotEmpty && domain != null && domain!.isNotEmpty;
   }
 
   static Jid fromFullJid(String fullJid) {

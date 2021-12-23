@@ -5,37 +5,37 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
 abstract class AbstractStanza extends XmppElement {
-  String _id;
-  Jid _fromJid;
-  Jid _toJid;
-  String _status;
+  String? _id;
+  Jid? _fromJid;
+  Jid? _toJid;
+  String? _status;
 
-  Jid get fromJid => _fromJid;
+  Jid? get fromJid => _fromJid;
 
-  set fromJid(Jid value) {
+  set fromJid(Jid? value) {
     _fromJid = value;
-    addAttribute(XmppAttribute('from', _fromJid.fullJid));
+    addAttribute(XmppAttribute('from', _fromJid!.fullJid));
   }
 
-  Jid get toJid => _toJid;
+  Jid? get toJid => _toJid;
 
-  set toJid(Jid value) {
+  set toJid(Jid? value) {
     _toJid = value;
-    addAttribute(XmppAttribute('to', _toJid.userAtDomain));
+    addAttribute(XmppAttribute('to', _toJid!.userAtDomain));
   }
 
-  String get id => _id;
+  String? get id => _id;
 
-  set id(String value) {
+  set id(String? value) {
     _id = value;
     addAttribute(XmppAttribute('id', _id));
   }
 
-  set status(String value) {
+  set status(String? value) {
     _status = value;
   }
 
-  String get status => _status;
+  String? get status => _status;
 
   static String getRandomId() {
     const ASCII_START = 65;

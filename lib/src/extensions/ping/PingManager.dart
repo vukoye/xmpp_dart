@@ -26,7 +26,7 @@ class PingManager {
     // connection state processor.
   }
 
-  void _processStanza(AbstractStanza stanza) {
+  void _processStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       if (stanza.type == IqStanzaType.GET) {
         var ping = stanza.getChild('ping');

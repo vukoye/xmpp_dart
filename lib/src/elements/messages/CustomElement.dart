@@ -15,7 +15,7 @@ class CustomElement extends XmppElement {
     addChild(CustomSubElement.build(value));
   }
 
-  static XmppElement parse(parent) {
+  static XmppElement? parse(parent) {
     return parent.children.firstWhere(
         (child) => (child.name == CustomElement.elementName),
         orElse: () => null);

@@ -12,7 +12,7 @@ class ReceiptReceivedElement extends XmppElement {
     addAttribute(XmppAttribute('xmlns', 'urn:xmpp:receipts'));
   }
 
-  static XmppElement parse(parent) {
+  static XmppElement? parse(parent) {
     return parent.children.firstWhere(
         (child) => (child.name == ReceiptReceivedElement.elementName),
         orElse: () => null);

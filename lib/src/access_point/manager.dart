@@ -35,26 +35,26 @@ enum ListenerType {
 
 class XMPPClientManager {
   String LOG_TAG = 'XMPPClientManager';
-  String host;
-  XMPPClientPersonel personel;
-  Function(XMPPClientManager _context) _onReady;
-  Function(String timestamp, String logMessage) _onLog;
-  Function(xmpp.MessageStanza message, ListenerType listenerType) _onMessage;
-  Function(xmpp.SubscriptionEvent event) _onPresenceSubscription;
-  Function(xmpp.PresenceData event) _onPresence;
-  xmpp.Connection _connection;
-  MessageHandler _messageHandler;
+  String? host;
+  late XMPPClientPersonel personel;
+  Function(XMPPClientManager _context)? _onReady;
+  Function(String timestamp, String logMessage)? _onLog;
+  Function(xmpp.MessageStanza? message, ListenerType listenerType)? _onMessage;
+  Function(xmpp.SubscriptionEvent event)? _onPresenceSubscription;
+  Function(xmpp.PresenceData event)? _onPresence;
+  xmpp.Connection? _connection;
+  late MessageHandler _messageHandler;
 
-  StreamSubscription messageListener;
+  StreamSubscription? messageListener;
 
   XMPPClientManager(jid, password,
-      {void Function(XMPPClientManager _context) onReady,
-      void Function(String _timestamp, String _message) onLog,
-      void Function(xmpp.MessageStanza message, ListenerType listenerType)
+      {void Function(XMPPClientManager _context)? onReady,
+      void Function(String _timestamp, String _message)? onLog,
+      void Function(xmpp.MessageStanza? message, ListenerType listenerType)?
           onMessage,
-      void Function(xmpp.SubscriptionEvent event) onPresenceSubscription,
-      void Function(xmpp.PresenceData event) onPresence,
-      String host}) {
+      void Function(xmpp.SubscriptionEvent event)? onPresenceSubscription,
+      void Function(xmpp.PresenceData event)? onPresence,
+      String? host}) {
     personel = XMPPClientPersonel(jid, password);
     LOG_TAG = '$LOG_TAG/$jid';
     _onReady = onReady;
@@ -74,7 +74,7 @@ class XMPPClientManager {
         personel.jid, jid.local, jid.domain, personel.password, 5222,
         host: host);
     _connection = xmpp.Connection(account);
-    _connection.connect();
+    _connection!.connect();
     _listenConnection();
     onLog('Start connecting');
     return this;
@@ -83,17 +83,17 @@ class XMPPClientManager {
   void onReady() {
     onLog('Connected');
     _messageHandler = xmpp.MessageHandler.getInstance(_connection);
-    _onReady(this);
+    _onReady!(this);
   }
 
   void onLog(String message) {
-    _onLog(DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()), message);
+    _onLog!(DateFormat('yyyy-MM-dd kk:mm').format(DateTime.now()), message);
     Log.i(LOG_TAG, message);
   }
 
   // My Profile
   void vCardRead() {
-    var vCardManager = xmpp.VCardManager(_connection);
+    var vCardManager = xmpp.VCardManager(_connection!);
     vCardManager.getSelfVCard().then((vCard) {
       if (vCard != null) {
         personel.profile = vCard;
@@ -104,7 +104,7 @@ class XMPPClientManager {
   }
 
   void vCardUpdate(xmpp.VCard Function(xmpp.VCard vCardToUpdate) _onUpdate) {
-    var vCardManager = xmpp.VCardManager(_connection);
+    var vCardManager = xmpp.VCardManager(_connection!);
     vCardManager.getSelfVCard().then((vCard) {
       if (vCard != null) {
         onLog('manager.vCardUpdate::my info ${vCard.buildXmlString()}');
@@ -138,7 +138,7 @@ class XMPPClientManager {
   // My contact/buddy
   void vCardFrom(receiver) {
     var receiverJid = xmpp.Jid.fromFullJid(receiver);
-    var vCardManager = xmpp.VCardManager(_connection);
+    var vCardManager = xmpp.VCardManager(_connection!);
     vCardManager.getVCardFor(receiverJid).then((vCard) {
       if (vCard != null) {
         onLog('Receiver info' + vCard.buildXmlString());
@@ -172,7 +172,7 @@ class XMPPClientManager {
     var rosterManager = xmpp.RosterManager.getInstance(_connection);
     rosterManager.addRosterItem(xmpp.Buddy(receiverJid)).then((result) {
       if (result.description != null) {
-        onLog('add roster' + result.description);
+        onLog('add roster' + result.description!);
         // Refresh the list
         rosterList().then((rosterList) {
           completer.complete(rosterList);
@@ -191,7 +191,7 @@ class XMPPClientManager {
     var rosterManager = xmpp.RosterManager.getInstance(_connection);
     rosterManager.removeRosterItem(xmpp.Buddy(receiverJid)).then((result) {
       if (result.description != null) {
-        onLog('remove roster' + result.description);
+        onLog('remove roster' + result.description!);
         // Refresh the list
         rosterList().then((rosterList) {
           completer.complete(rosterList);
@@ -207,7 +207,7 @@ class XMPPClientManager {
 
   // Add the callback or await?
   void mucDiscover(String domain) {
-    var mucManager = xmpp.MultiUserChatManager(_connection);
+    var mucManager = xmpp.MultiUserChatManager(_connection!);
     mucManager
         .discoverMucService(xmpp.Jid('', domain, ''))
         .then((MultiUserChat muc) {
@@ -221,7 +221,7 @@ class XMPPClientManager {
 
   // Send 1-1 feature discovery
   void discoverMessageDelivery(String sender, String receiver) {
-    var mucManager = xmpp.MessageDeliveryManager(_connection);
+    var mucManager = xmpp.MessageDeliveryManager(_connection!);
     mucManager
         .discoverDeliveryFeature(
             xmpp.Jid.fromFullJid(sender), xmpp.Jid.fromFullJid(receiver))
@@ -236,7 +236,7 @@ class XMPPClientManager {
 
   // Send 1-1 message
   Future<xmpp.MessageStanza> sendMessage(String message, String receiver,
-      {int time, String messageId, String customString = ''}) {
+      {int? time, required String messageId, String customString = ''}) {
     return _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
         millisecondTs: time,
         receipt: xmpp.ReceiptRequestType.REQUEST,
@@ -246,7 +246,7 @@ class XMPPClientManager {
 
   Future<xmpp.MessageStanza> sendDeliveryAck(xmpp.MessageStanza message) {
     return _messageHandler.sendMessage(message.fromJid, '',
-        messageId: message.id, receipt: xmpp.ReceiptRequestType.RECEIVED);
+        messageId: message.id!, receipt: xmpp.ReceiptRequestType.RECEIVED);
   }
 
   void listens() {
@@ -257,61 +257,61 @@ class XMPPClientManager {
   void _listenMessage() {
     Log.d(LOG_TAG, 'Start listening');
     if (messageListener != null) {
-      messageListener.cancel();
+      messageListener!.cancel();
     }
     messageListener =
-        _messageHandler.messagesStream.listen((xmpp.MessageStanza message) {
+        _messageHandler.messagesStream.listen((xmpp.MessageStanza? message) {
       var _messageWrapped = XMPPMessageParams(message: message);
 
       // TODO: Simplify the condition
       if (_messageWrapped.isCarbon) {
-        _onMessage(_messageWrapped.message, ListenerType.onMessage_Carbon);
+        _onMessage!(_messageWrapped.message, ListenerType.onMessage_Carbon);
         Log.i(
-            LOG_TAG, 'New `ListenerType.onMessage_Carbon` from ${message.id}');
+            LOG_TAG, 'New `ListenerType.onMessage_Carbon` from ${message!.id}');
       }
       if (_messageWrapped.isDelay) {
-        _onMessage(_messageWrapped.message, ListenerType.onMessage_Delayed);
+        _onMessage!(_messageWrapped.message, ListenerType.onMessage_Delayed);
         Log.i(
-            LOG_TAG, 'New `ListenerType.onMessage_Delayed` from ${message.id}');
+            LOG_TAG, 'New `ListenerType.onMessage_Delayed` from ${message!.id}');
       }
       if (_messageWrapped.isAckDeliveryDirect) {
-        _onMessage(
+        _onMessage!(
             _messageWrapped.message, ListenerType.onMessage_Delivered_Direct);
         Log.i(LOG_TAG,
-            'New `ListenerType.onMessage_Delivered_Direct` from ${message.id}');
+            'New `ListenerType.onMessage_Delivered_Direct` from ${message!.id}');
       }
       if (_messageWrapped.isAckDeliveryStored) {
-        _onMessage(
+        _onMessage!(
             _messageWrapped.message, ListenerType.onMessage_Delivered_Stored);
         Log.i(LOG_TAG,
-            'New `ListenerType.onMessage_Delivered_Stored` from ${message.id}');
+            'New `ListenerType.onMessage_Delivered_Stored` from ${message!.id}');
       }
       if (_messageWrapped.isAckDeliveryClient) {
-        _onMessage(
+        _onMessage!(
             _messageWrapped.message, ListenerType.onMessage_Delivered_Client);
         Log.i(LOG_TAG,
-            'New `ListenerType.onMessage_Delivered_Client` from ${message.id}');
+            'New `ListenerType.onMessage_Delivered_Client` from ${message!.id}');
       }
       if (_messageWrapped.isAckReadClient) {
-        _onMessage(_messageWrapped.message, ListenerType.onMessage_Read_Client);
+        _onMessage!(_messageWrapped.message, ListenerType.onMessage_Read_Client);
         Log.i(LOG_TAG,
-            'New `ListenerType.onMessage_Read_Client` from ${message.id}');
+            'New `ListenerType.onMessage_Read_Client` from ${message!.id}');
       }
       if (_messageWrapped.isOnlyMessage) {
         if (_messageWrapped.isMessageCustom) {
-          _onMessage(_messageWrapped.message, ListenerType.onMessage_Custom);
+          _onMessage!(_messageWrapped.message, ListenerType.onMessage_Custom);
           Log.i(LOG_TAG,
-              'New `ListenerType.onMessage_Custom` from ${message.id}');
+              'New `ListenerType.onMessage_Custom` from ${message!.id}');
         }
         if (_messageWrapped.isMessage) {
-          _onMessage(_messageWrapped.message, ListenerType.onMessage);
-          Log.i(LOG_TAG, 'New `ListenerType.onMessage` from ${message.id}');
+          _onMessage!(_messageWrapped.message, ListenerType.onMessage);
+          Log.i(LOG_TAG, 'New `ListenerType.onMessage` from ${message!.id}');
         }
       }
 
       // Send receipt if request
       if (_messageWrapped.isRequestingReceipt) {
-        sendDeliveryAck(message);
+        sendDeliveryAck(message!);
       }
     });
   }
@@ -324,14 +324,14 @@ class XMPPClientManager {
   void _listenPresence() {
     var presenceManager = xmpp.PresenceManager.getInstance(_connection);
     presenceManager.presenceStream.listen((presenceTypeEvent) {
-      _onPresence(presenceTypeEvent);
+      _onPresence!(presenceTypeEvent);
       onLog('Presence status: ' +
-          presenceTypeEvent.jid.fullJid +
+          presenceTypeEvent.jid!.fullJid! +
           ': ' +
           presenceTypeEvent.showElement.toString());
     });
     presenceManager.subscriptionStream.listen((streamEvent) {
-      _onPresenceSubscription(streamEvent);
+      _onPresenceSubscription!(streamEvent);
       if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
         onLog('Accepting presence request');
         presenceManager.acceptSubscription(streamEvent.jid);
@@ -357,15 +357,15 @@ class XMPPClientManager {
 
 class ConnectionManagerStateChangedListener
     implements xmpp.ConnectionStateChangedListener {
-  xmpp.Connection _connection;
-  XMPPClientManager _context;
+  xmpp.Connection? _connection;
+  late XMPPClientManager _context;
 
-  StreamSubscription<String> subscription;
+  StreamSubscription<String>? subscription;
 
-  ConnectionManagerStateChangedListener(xmpp.Connection connection,
+  ConnectionManagerStateChangedListener(xmpp.Connection? connection,
       xmpp.MessagesListener messagesListener, XMPPClientManager context) {
     _connection = connection;
-    _connection.connectionStateStream.listen(onConnectionStateChanged);
+    _connection!.connectionStateStream.listen(onConnectionStateChanged);
     _context = context;
   }
 
@@ -381,7 +381,7 @@ class ConnectionManagerStateChangedListener
     Log.i(
         _context.LOG_TAG,
         'presence Event from ' +
-            event.jid.fullJid +
+            event.jid!.fullJid! +
             ' PRESENCE: ' +
             event.showElement.toString());
   }
@@ -397,12 +397,12 @@ Stream<String> getConsoleStream() {
 
 class ClientMessagesListener implements xmpp.MessagesListener {
   @override
-  void onNewMessage(xmpp.MessageStanza message) {
-    if (message.body != null) {
+  void onNewMessage(xmpp.MessageStanza? message) {
+    if (message!.body != null) {
       Log.i(
           TAG,
           format(
-              'New Message from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end}'));
+              'New Message from {color.blue}${message.fromJid!.userAtDomain}{color.end} message: {color.red}${message.body}{color.end}'));
     }
   }
 }

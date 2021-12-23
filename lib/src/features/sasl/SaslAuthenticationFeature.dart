@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
@@ -8,14 +9,14 @@ import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
 import '../../elements/nonzas/Nonza.dart';
 
 class SaslAuthenticationFeature extends Negotiator {
-  Connection _connection;
+  Connection? _connection;
 
   final Set<SaslMechanism> _offeredMechanisms = <SaslMechanism>{};
   final Set<SaslMechanism> _supportedMechanisms = <SaslMechanism>{};
 
-  String _password;
+  String? _password;
 
-  SaslAuthenticationFeature(Connection connection, String password) {
+  SaslAuthenticationFeature(Connection? connection, String password) {
     _password = password;
     _connection = connection;
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_1);
@@ -27,7 +28,7 @@ class SaslAuthenticationFeature extends Negotiator {
   // improve this
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere((element) => element.name == 'mechanisms', orElse: () => null);
+    var nonza = requests.firstWhereOrNull((element) => element.name == 'mechanisms');
     return nonza != null? [nonza] : [];
   }
 
@@ -43,14 +44,14 @@ class SaslAuthenticationFeature extends Negotiator {
     var mechanism = _supportedMechanisms.firstWhere(
         (mch) => _offeredMechanisms.contains(mch),
         orElse: _handleAuthNotSupported);
-    AbstractSaslHandler saslHandler;
+    AbstractSaslHandler? saslHandler;
     switch (mechanism) {
       case SaslMechanism.PLAIN:
         saslHandler = PlainSaslHandler(_connection, _password);
         break;
       case SaslMechanism.SCRAM_SHA_256:
       case SaslMechanism.SCRAM_SHA_1:
-        saslHandler = ScramSaslHandler(_connection, _password, mechanism);
+        saslHandler = ScramSaslHandler(_connection!, _password, mechanism);
         break;
       case SaslMechanism.SCRAM_SHA_1_PLUS:
         break;
@@ -63,11 +64,11 @@ class SaslAuthenticationFeature extends Negotiator {
       state = NegotiatorState.NEGOTIATING;
       saslHandler.start().then((result) {
         if (result.successful) {
-          _connection.setState(XmppConnectionState.Authenticated);
+          _connection!.setState(XmppConnectionState.Authenticated);
         } else {
-          _connection.setState(XmppConnectionState.AuthenticationFailure);
-          _connection.errorMessage = result.message;
-          _connection.close();
+          _connection!.setState(XmppConnectionState.AuthenticationFailure);
+          _connection!.errorMessage = result.message;
+          _connection!.close();
         }
         state = NegotiatorState.DONE;
       });
@@ -76,9 +77,9 @@ class SaslAuthenticationFeature extends Negotiator {
 
   void _populateOfferedMechanism(Nonza nonza) {
     nonza.children
-        .where((element) => element.name == 'mechanism')
+        .where((element) => element!.name == 'mechanism')
         .forEach((mechanism) {
-      switch (mechanism.textValue) {
+      switch (mechanism!.textValue) {
         case 'EXTERNAL':
           _offeredMechanisms.add(SaslMechanism.EXTERNAL);
           break;
@@ -99,8 +100,8 @@ class SaslAuthenticationFeature extends Negotiator {
   }
 
   SaslMechanism _handleAuthNotSupported() {
-    _connection.setState(XmppConnectionState.AuthenticationNotSupported);
-    _connection.close();
+    _connection!.setState(XmppConnectionState.AuthenticationNotSupported);
+    _connection!.close();
     state = NegotiatorState.DONE;
     return SaslMechanism.NOT_SUPPORTED;
   }

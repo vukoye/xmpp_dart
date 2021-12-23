@@ -25,11 +25,11 @@ class MessageStanza extends AbstractStanza
         CustomInterface,
         DelayInterface,
         SentInterface {
-  MessageStanzaType _type;
+  MessageStanzaType? _type;
 
-  MessageStanzaType get type => _type;
+  MessageStanzaType? get type => _type;
 
-  set type(MessageStanzaType value) {
+  set type(MessageStanzaType? value) {
     _type = value;
   }
 
@@ -41,34 +41,34 @@ class MessageStanza extends AbstractStanza
         XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
   }
 
-  String get body => children
-      .firstWhere((child) => (child.name == 'body' && child.attributes.isEmpty),
+  String? get body => children
+      .firstWhere((child) => (child!.name == 'body' && child.attributes.isEmpty),
           orElse: () => null)
       ?.textValue;
 
-  set body(String value) {
+  set body(String? value) {
     var element = XmppElement();
     element.name = 'body';
     element.textValue = value;
     addChild(element);
   }
 
-  String get subject => children
-      .firstWhere((child) => (child.name == 'subject'), orElse: () => null)
+  String? get subject => children
+      .firstWhere((child) => (child!.name == 'subject'), orElse: () => null)
       ?.textValue;
 
-  set subject(String value) {
+  set subject(String? value) {
     var element = XmppElement();
     element.name = 'subject';
     element.textValue = value;
     addChild(element);
   }
 
-  String get thread => children
-      .firstWhere((child) => (child.name == 'thread'), orElse: () => null)
+  String? get thread => children
+      .firstWhere((child) => (child!.name == 'thread'), orElse: () => null)
       ?.textValue;
 
-  set thread(String value) {
+  set thread(String? value) {
     var element = XmppElement();
     element.name = 'thread';
     element.textValue = value;
@@ -88,23 +88,23 @@ class MessageStanza extends AbstractStanza
   }
 
   @override
-  XmppElement getRequestReceipt() {
+  XmppElement? getRequestReceipt() {
     return ReceiptRequestElement.parse(this);
   }
 
   @override
-  XmppElement getReceivedReceipt() {
+  XmppElement? getReceivedReceipt() {
     return ReceiptReceivedElement.parse(this);
   }
 
   @override
-  TimeInterface addTime(int timeMilliseconds) {
+  TimeInterface addTime(int? timeMilliseconds) {
     addChild(TimeElement.build(timeMilliseconds.toString()));
     return this;
   }
 
   @override
-  XmppElement getTime() {
+  XmppElement? getTime() {
     return TimeElement.parse(this);
   }
 
@@ -118,7 +118,7 @@ class MessageStanza extends AbstractStanza
   }
 
   @override
-  XmppElement getAmp() {
+  XmppElement? getAmp() {
     return AmpElement.parse(this);
   }
 
@@ -132,9 +132,9 @@ class MessageStanza extends AbstractStanza
     if (amp == rule) {
       return false;
     }
-    return (amp.getAttribute('status').value == 'notify' &&
-        rule.getAttribute('condition').value == 'deliver' &&
-        rule.getAttribute('value').value == 'direct');
+    return (amp.getAttribute('status')!.value == 'notify' &&
+        rule!.getAttribute('condition')!.value == 'deliver' &&
+        rule.getAttribute('value')!.value == 'direct');
   }
 
   @override
@@ -147,9 +147,9 @@ class MessageStanza extends AbstractStanza
     if (amp == rule) {
       return false;
     }
-    return (amp.getAttribute('status').value == 'notify' &&
-        rule.getAttribute('condition').value == 'deliver' &&
-        rule.getAttribute('value').value == 'stored');
+    return (amp.getAttribute('status')!.value == 'notify' &&
+        rule!.getAttribute('condition')!.value == 'deliver' &&
+        rule.getAttribute('value')!.value == 'stored');
   }
 
   @override
@@ -159,17 +159,17 @@ class MessageStanza extends AbstractStanza
   }
 
   @override
-  XmppElement getCustom() {
+  XmppElement? getCustom() {
     return CustomSubElement.parse(CustomElement.parse(this));
   }
 
   @override
-  XmppElement getDelay() {
+  XmppElement? getDelay() {
     return DelayElement.parse(this);
   }
 
   @override
-  XmppElement getSent() {
+  XmppElement? getSent() {
     return SentElement.parse(this);
   }
 }

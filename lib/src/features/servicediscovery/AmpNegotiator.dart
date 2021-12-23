@@ -9,10 +9,10 @@ import 'Feature.dart';
 class AmpNegotiator extends Negotiator {
   static const TAG = 'AmpNegotiator';
 
-  static final Map<Connection, AmpNegotiator> _instances =
-      <Connection, AmpNegotiator>{};
+  static final Map<Connection?, AmpNegotiator> _instances =
+      <Connection?, AmpNegotiator>{};
 
-  static AmpNegotiator getInstance(Connection connection) {
+  static AmpNegotiator getInstance(Connection? connection) {
     var instance = _instances[connection];
     if (instance == null) {
       instance = AmpNegotiator();

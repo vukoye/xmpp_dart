@@ -37,22 +37,22 @@ void main(List<String> arguments) {
 }
 
 class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChangedListener {
-  xmpp.Connection _connection;
-  xmpp.MessagesListener _messagesListener;
+  xmpp.Connection? _connection;
+  late xmpp.MessagesListener _messagesListener;
 
-  StreamSubscription<String> subscription;
+  StreamSubscription<String>? subscription;
 
   ExampleConnectionStateChangedListener(xmpp.Connection connection, xmpp.MessagesListener messagesListener) {
     _connection = connection;
     _messagesListener = messagesListener;
-    _connection.connectionStateStream.listen(onConnectionStateChanged);
+    _connection!.connectionStateStream.listen(onConnectionStateChanged);
   }
 
   @override
   void onConnectionStateChanged(xmpp.XmppConnectionState state) {
     if (state == xmpp.XmppConnectionState.Ready) {
       Log.d(TAG, 'Connected');
-      var vCardManager = xmpp.VCardManager(_connection);
+      var vCardManager = xmpp.VCardManager(_connection!);
       vCardManager.getSelfVCard().then((vCard) {
         if (vCard != null) {
           Log.d(TAG, 'Your info' + vCard.buildXmlString());
@@ -66,7 +66,7 @@ class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChang
       var receiverJid = xmpp.Jid.fromFullJid(receiver);
       rosterManager.addRosterItem(xmpp.Buddy(receiverJid)).then((result) {
         if (result.description != null) {
-          Log.d(TAG, 'add roster' + result.description);
+          Log.d(TAG, 'add roster' + result.description!);
         }
       });
       sleep(const Duration(seconds: 1));
@@ -74,7 +74,7 @@ class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChang
         if (vCard != null) {
           Log.d(TAG, 'Receiver info' + vCard.buildXmlString());
           if (vCard != null && vCard.image != null) {
-            var file = File('test456789.jpg')..writeAsBytesSync(image.encodeJpg(vCard.image));
+            var file = File('test456789.jpg')..writeAsBytesSync(image.encodeJpg(vCard.image!));
             Log.d(TAG, 'IMAGE SAVED TO: ${file.path}');
           }
         }
@@ -85,7 +85,7 @@ class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChang
   }
 
   void onPresence(xmpp.PresenceData event) {
-    Log.d(TAG, 'presence Event from ' + event.jid.fullJid + ' PRESENCE: ' + event.showElement.toString());
+    Log.d(TAG, 'presence Event from ' + event.jid!.fullJid! + ' PRESENCE: ' + event.showElement.toString());
   }
 }
 
@@ -99,10 +99,10 @@ Stream<String> getConsoleStream() {
 
 class ExampleMessagesListener implements xmpp.MessagesListener {
   @override
-  void onNewMessage(xmpp.MessageStanza message) {
-    if (message.body != null) {
+  void onNewMessage(xmpp.MessageStanza? message) {
+    if (message!.body != null) {
       Log.d(TAG, format(
-          'New Message from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end}'));
+          'New Message from {color.blue}${message.fromJid!.userAtDomain}{color.end} message: {color.red}${message.body}{color.end}'));
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/elements/nonzas/ANonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/EnableNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/EnabledNonza.dart';
@@ -19,26 +20,26 @@ class StreamManagementModule extends Negotiator {
 
   static const TAG = 'StreamManagementModule';
 
-  static Map<Connection, StreamManagementModule> instances =
-      <Connection, StreamManagementModule>{};
+  static Map<Connection?, StreamManagementModule> instances =
+      <Connection?, StreamManagementModule>{};
 
-  static StreamManagementModule getInstance(Connection connection) {
+  static StreamManagementModule getInstance(Connection? connection) {
     var module = instances[connection];
     if (module == null) {
-      module = StreamManagementModule(connection);
+      module = StreamManagementModule(connection!);
       instances[connection] = module;
     }
     return module;
   }
 
   StreamState streamState = StreamState();
-  Connection _connection;
-  StreamSubscription<AbstractStanza> inStanzaSubscription;
-  StreamSubscription<AbstractStanza> outStanzaSubscription;
-  StreamSubscription<Nonza> inNonzaSubscription;
+  late Connection _connection;
+  StreamSubscription<AbstractStanza?>? inStanzaSubscription;
+  StreamSubscription<AbstractStanza>? outStanzaSubscription;
+  StreamSubscription<Nonza>? inNonzaSubscription;
 
   bool ackTurnedOn = true;
-  Timer timer;
+  Timer? timer;
 
   final StreamController<AbstractStanza> _deliveredStanzasStreamController =
       StreamController.broadcast();
@@ -80,7 +81,7 @@ class StreamManagementModule extends Negotiator {
           if (state == XmppConnectionState.Reconnecting) {
             backToIdle();
           }
-          if (!_connection.isOpened() && timer != null) {timer.cancel();};
+          if (!_connection.isOpened() && timer != null) {timer!.cancel();};
           if (state == XmppConnectionState.Closed) {
             streamState = StreamState();
             //state = XmppConnectionState.Idle;
@@ -90,7 +91,7 @@ class StreamManagementModule extends Negotiator {
 
   @override
   List<Nonza> match(List<Nonza> requests) {
-  var nonza = requests.firstWhere((request) => SMNonza.match(request), orElse: () => null);
+  var nonza = requests.firstWhereOrNull((request) => SMNonza.match(request));
   return nonza != null ? [nonza] : [];
   }
 
@@ -110,7 +111,7 @@ class StreamManagementModule extends Negotiator {
 
   @override
   bool isReady() {
-    return super.isReady() && (isResumeAvailable() || (_connection.fullJid.resource != null && _connection.fullJid.resource.isNotEmpty));
+    return super.isReady() && (isResumeAvailable() || (_connection.fullJid.resource != null && _connection.fullJid.resource!.isNotEmpty));
   }
 
   void parseNonza(Nonza nonza) {
@@ -133,7 +134,7 @@ class StreamManagementModule extends Negotiator {
       }
     } else if (state == NegotiatorState.DONE) {
       if (ANonza.match(nonza)) {
-        parseAckResponse(nonza.getAttribute('h').value);
+        parseAckResponse(nonza.getAttribute('h')!.value!);
       } else if (RNonza.match(nonza)) {
         sendAckResponse();
       }
@@ -145,7 +146,7 @@ class StreamManagementModule extends Negotiator {
     streamState.nonConfirmedSentStanzas.addLast(stanza);
   }
 
-  void parseInStanza(AbstractStanza stanza) {
+  void parseInStanza(AbstractStanza? stanza) {
     streamState.lastReceivedStanza++;
   }
 
@@ -154,11 +155,11 @@ class StreamManagementModule extends Negotiator {
     var resume = nonza.getAttribute('resume');
     if (resume != null && resume.value == 'true') {
       streamState.streamResumeEnabled = true;
-      streamState.id = nonza.getAttribute('id').value;
+      streamState.id = nonza.getAttribute('id')!.value;
     }
     state = NegotiatorState.DONE;
     if (timer != null) {
-      timer.cancel();
+      timer!.cancel();
     }
     timer = Timer.periodic(
         Duration(milliseconds: 5000), (Timer t) => sendAckRequest());
@@ -167,11 +168,11 @@ class StreamManagementModule extends Negotiator {
   }
 
   void handleResumed(Nonza nonza) {
-    parseAckResponse(nonza.getAttribute('h').value);
+    parseAckResponse(nonza.getAttribute('h')!.value!);
 
     state = NegotiatorState.DONE;
     if (timer != null) {
-      timer.cancel();
+      timer!.cancel();
     }
     timer = Timer.periodic(
         Duration(milliseconds: 5000), (Timer t) => sendAckRequest());

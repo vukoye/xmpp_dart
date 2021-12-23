@@ -1,26 +1,27 @@
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xml/xml.dart' as xml;
 
 class XmppElement {
-  String _name;
-  String get name => _name;
-  set name(String value) {
+  String? _name;
+  String? get name => _name;
+  set name(String? value) {
     _name = value;
   }
 
-  String _textValue;
-  String get textValue => _textValue;
+  String? _textValue;
+  String? get textValue => _textValue;
 
-  set textValue(String value) {
+  set textValue(String? value) {
     _textValue = value;
   }
 
-  final List<XmppElement> _children = <XmppElement>[];
-  List<XmppElement> get children => _children;
+  final List<XmppElement?> _children = <XmppElement?>[];
+  List<XmppElement?> get children => _children;
 
   final List<XmppAttribute> _attributes = <XmppAttribute>[];
-  XmppAttribute getAttribute(String name) {
-    return _attributes.firstWhere((attr) => attr.name == name, orElse: () => null);
+  XmppAttribute? getAttribute(String? name) {
+    return _attributes.firstWhereOrNull((attr) => attr.name == name);
   }
 
   void addAttribute(XmppAttribute attribute) {
@@ -31,12 +32,12 @@ class XmppElement {
     _attributes.add(attribute);
   }
 
-  void addChild(XmppElement element) {
+  void addChild(XmppElement? element) {
     _children.add(element);
   }
 
-  XmppElement getChild(String name) {
-    return _children.firstWhere((element) => element.name == name, orElse: () => null);
+  XmppElement? getChild(String name) {
+    return _children.firstWhere((element) => element!.name == name, orElse: () => null);
   }
 
   String buildXmlString() {
@@ -48,20 +49,20 @@ class XmppElement {
     var xmlNodes = <xml.XmlNode>[];
     _attributes.forEach((xmppAttribute) {
       if (xmppAttribute.value != null) {
-        xmlAttributes.add(xml.XmlAttribute(xml.XmlName(xmppAttribute.name), xmppAttribute.value));
+        xmlAttributes.add(xml.XmlAttribute(xml.XmlName(xmppAttribute.name!), xmppAttribute.value!));
       }
     });
     _children.forEach((xmppChild) {
-      xmlNodes.add(xmppChild.buildXml());
+      xmlNodes.add(xmppChild!.buildXml());
     });
     if (textValue != null) {
-      xmlNodes.add(xml.XmlText(textValue));
+      xmlNodes.add(xml.XmlText(textValue!));
     }
-    var xmlElement = xml.XmlElement(xml.XmlName(name), xmlAttributes, xmlNodes);
+    var xmlElement = xml.XmlElement(xml.XmlName(name!), xmlAttributes, xmlNodes);
     return xmlElement;
   }
 
-  String getNameSpace() {
+  String? getNameSpace() {
     return getAttribute('xmlns')?.value;
   }
 

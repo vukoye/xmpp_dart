@@ -30,8 +30,8 @@ class MultiUserChatManager {
     _connection.inStanzasStream.listen(_processStanza);
   }
 
-  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas =
-      <String, Tuple2<IqStanza, Completer>>{};
+  final Map<String?, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas =
+      <String?, Tuple2<IqStanza, Completer>>{};
 
   final Map<String, MultiUserChat> _mucList = <String, MultiUserChat>{};
 
@@ -58,7 +58,7 @@ class MultiUserChatManager {
     return completer.future;
   }
 
-  MultiUserChat _handleDiscoverMucServiceResponse(IqStanza stanza) {
+  MultiUserChat? _handleDiscoverMucServiceResponse(IqStanza stanza) {
     var queryChild = stanza.getChild('query');
     if (queryChild != null) {
 
@@ -67,21 +67,21 @@ class MultiUserChatManager {
       muc.chatrooms = [];
       muc.features = [];
       queryChild.children
-        .where((element) => element.name == 'feature')
+        .where((element) => element!.name == 'feature')
         .forEach((element) {
-          muc.features.add(element.getAttribute('var').value);
+          muc.features.add(element!.getAttribute('var')!.value);
         });
       queryChild.children
-        .where((element) => element.name == 'Chatrooms')
+        .where((element) => element!.name == 'Chatrooms')
         .forEach((element) {
-          muc.chatrooms.add(MUCChatroom(element.getAttribute('category').value, element.getAttribute('type').value, element.getAttribute('name').value));
+          muc.chatrooms.add(MUCChatroom(element!.getAttribute('category')!.value, element.getAttribute('type')!.value, element.getAttribute('name')!.value));
         });
       return muc;
     }
     return null;
   }
 
-  void _processStanza(AbstractStanza stanza) {
+  void _processStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
       if (_myUnrespondedIqStanzas[stanza.id] != null) {
@@ -89,11 +89,11 @@ class MultiUserChatManager {
         if (stanza.type == IqStanzaType.RESULT) {
           var mucResult = _handleDiscoverMucServiceResponse(stanza);
           if (mucResult != null) {
-            unrespondedStanza.item2.complete(mucResult);
+            unrespondedStanza!.item2.complete(mucResult);
           }
           // vCardChild is null because of the result response of updating the card
         } else if (stanza.type == IqStanzaType.ERROR) {
-          unrespondedStanza.item2
+          unrespondedStanza!.item2
               .complete(null);
         }
       }

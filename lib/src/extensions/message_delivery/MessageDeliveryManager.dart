@@ -29,8 +29,8 @@ class MessageDeliveryManager {
     _connection.inStanzasStream.listen(_processStanza);
   }
 
-  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas =
-      <String, Tuple2<IqStanza, Completer>>{};
+  final Map<String?, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas =
+      <String?, Tuple2<IqStanza, Completer>>{};
 
   // final Map<String, MultiUserChat> _mucList = <String, MultiUserChat>{};
 
@@ -61,7 +61,7 @@ class MessageDeliveryManager {
     return completer.future;
   }
 
-  String _handlediscoverDeliveryFeatureResponse(IqStanza stanza) {
+  String? _handlediscoverDeliveryFeatureResponse(IqStanza stanza) {
     var queryChild = stanza.getChild('query');
     if (queryChild != null) {
       var result = stanza.buildXmlString();
@@ -70,8 +70,8 @@ class MessageDeliveryManager {
     return null;
   }
 
-  void _processStanza(AbstractStanza stanza) {
-    print('Receive stanza:' + stanza.buildXmlString());
+  void _processStanza(AbstractStanza? stanza) {
+    print('Receive stanza:' + stanza!.buildXmlString());
     if (stanza is IqStanza) {
       var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
       if (_myUnrespondedIqStanzas[stanza.id] != null) {
@@ -79,10 +79,10 @@ class MessageDeliveryManager {
         if (stanza.type == IqStanzaType.RESULT) {
           var mucResult = _handlediscoverDeliveryFeatureResponse(stanza);
           if (mucResult != null) {
-            unrespondedStanza.item2.complete(mucResult);
+            unrespondedStanza!.item2.complete(mucResult);
           }
         } else if (stanza.type == IqStanzaType.ERROR) {
-          unrespondedStanza.item2.complete(null);
+          unrespondedStanza!.item2.complete(null);
         }
       }
     }

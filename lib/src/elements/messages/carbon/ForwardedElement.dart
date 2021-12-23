@@ -12,7 +12,7 @@ class ForwardedElement extends XmppElement {
     addAttribute(XmppAttribute('xmlns', 'urn:xmpp:forward:0'));
   }
 
-  static XmppElement parse(parent) {
+  static XmppElement? parse(parent) {
     return parent.children.firstWhere(
         (child) => (child.name == ForwardedElement.elementName),
         orElse: () => null);

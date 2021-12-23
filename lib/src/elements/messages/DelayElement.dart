@@ -14,7 +14,7 @@ class DelayElement extends XmppElement {
     addAttribute(XmppAttribute('from', from));
   }
 
-  static XmppElement parse(parent) {
+  static XmppElement? parse(parent) {
     return parent.children.firstWhere(
         (child) => (child.name == DelayElement.elementName),
         orElse: () => null);

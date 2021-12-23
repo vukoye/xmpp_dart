@@ -21,7 +21,7 @@ class AmpElement extends XmppElement {
     addChild(ruleElement);
   }
 
-  static XmppElement parse(parent) {
+  static XmppElement? parse(parent) {
     return parent.children.firstWhere(
         (child) => (child.name == AmpElement.elementName),
         orElse: () => null);

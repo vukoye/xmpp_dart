@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:developer';
 import 'dart:io';
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
 import 'package:xmpp_stone/src/ReconnectionManager.dart';
@@ -47,21 +48,21 @@ class Connection {
 
   static String TAG = 'XmppStone/Connection';
 
-  static Map<String, Connection> instances = <String, Connection>{};
+  static Map<String?, Connection> instances = <String?, Connection>{};
 
   XmppAccountSettings account;
 
-  StreamManagementModule streamManagementModule;
+  late StreamManagementModule streamManagementModule;
 
   Jid get serverName {
     if (_serverName != null) {
-      return Jid.fromFullJid(_serverName);
+      return Jid.fromFullJid(_serverName!);
     } else {
-      return Jid.fromFullJid(fullJid.domain); //todo move to account.domain!
+      return Jid.fromFullJid(fullJid.domain!); //todo move to account.domain!
     }
   } //move this somewhere
 
-  String _serverName;
+  String? _serverName;
 
   static Connection getInstance(XmppAccountSettings account) {
     var connection = instances[account.fullJid.userAtDomain];
@@ -72,17 +73,17 @@ class Connection {
     return connection;
   }
 
-  String _errorMessage;
+  String? _errorMessage;
 
-  String get errorMessage => _errorMessage;
+  String? get errorMessage => _errorMessage;
 
-  set errorMessage(String value) {
+  set errorMessage(String? value) {
     _errorMessage = value;
   }
 
   bool authenticated = false;
 
-  final StreamController<AbstractStanza> _inStanzaStreamController =
+  final StreamController<AbstractStanza?> _inStanzaStreamController =
       StreamController.broadcast();
 
   final StreamController<AbstractStanza> _outStanzaStreamController =
@@ -97,7 +98,7 @@ class Connection {
   final StreamController<XmppConnectionState> _connectionStateStreamController =
       StreamController.broadcast();
 
-  Stream<AbstractStanza> get inStanzasStream {
+  Stream<AbstractStanza?> get inStanzasStream {
     return _inStanzaStreamController.stream;
   }
 
@@ -119,13 +120,13 @@ class Connection {
 
   Jid get fullJid => account.fullJid;
 
-  ConnectionNegotiatorManager connectionNegotatiorManager;
+  late ConnectionNegotiatorManager connectionNegotatiorManager;
 
   void fullJidRetrieved(Jid jid) {
     account.resource = jid.resource;
   }
 
-  Socket _socket;
+  Socket? _socket;
 
   // for testing purpose
   set socket(Socket value) {
@@ -134,7 +135,7 @@ class Connection {
 
   XmppConnectionState _state = XmppConnectionState.Idle;
 
-  ReconnectionManager reconnectionManager;
+  ReconnectionManager? reconnectionManager;
 
   Connection(this.account) {
     RosterManager.getInstance(this);
@@ -236,7 +237,7 @@ xml:lang='en'
       if (_socket != null) {
         try {
           setState(XmppConnectionState.Closing);
-          _socket.write('</stream:stream>');
+          _socket!.write('</stream:stream>');
         } on Exception {
           Log.d(TAG, 'Socket already closed');
         }
@@ -284,7 +285,7 @@ xml:lang='en'
     }
 
     if (fullResponse != null && fullResponse.isNotEmpty) {
-      xml.XmlNode xmlResponse;
+      xml.XmlNode? xmlResponse;
       Log.d(TAG, fullResponse);
       try {
         xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
@@ -297,7 +298,7 @@ xml:lang='en'
 //        Log.d("element: " + element.name.local);
 //      });
       //TODO: Improve parser for children only
-      xmlResponse.descendants
+      xmlResponse!.descendants
           .whereType<xml.XmlElement>()
           .where((element) => startMatcher(element))
           .forEach((element) => processInitialStream(element));
@@ -341,7 +342,7 @@ xml:lang='en'
   void write(message) {
     Log.xmppp_sending(message);
     if (isOpened()) {
-      _socket.write(message);
+      _socket!.write(message);
     }
   }
 
@@ -379,10 +380,10 @@ xml:lang='en'
 
   void startSecureSocket() {
     Log.d(TAG, 'startSecureSocket');
-    SecureSocket.secure(_socket, onBadCertificate: _validateBadCertificate)
+    SecureSocket.secure(_socket!, onBadCertificate: _validateBadCertificate)
         .then((secureSocket) {
       _socket = secureSocket;
-      _socket
+      _socket!
           .cast<List<int>>()
           .transform(utf8.decoder)
           .map(prepareStreamResponse)
@@ -403,11 +404,10 @@ xml:lang='en'
   }
 
   bool elementHasAttribute(xml.XmlElement element, xml.XmlAttribute attribute) {
-    var list = element.attributes.firstWhere(
+    var list = element.attributes.firstWhereOrNull(
         (attr) =>
             attr.name.local == attribute.name.local &&
-            attr.value == attribute.value,
-        orElse: () => null);
+            attr.value == attribute.value);
     return list != null;
   }
 

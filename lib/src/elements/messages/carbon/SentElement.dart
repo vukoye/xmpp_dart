@@ -12,7 +12,7 @@ class SentElement extends XmppElement {
     addAttribute(XmppAttribute('xmlns', 'urn:xmpp:carbons:2'));
   }
 
-  static XmppElement parse(parent) {
+  static XmppElement? parse(parent) {
     return parent.children.firstWhere(
         (child) => (child.name == SentElement.elementName),
         orElse: () => null);

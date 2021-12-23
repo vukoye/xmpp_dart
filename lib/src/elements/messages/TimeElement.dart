@@ -22,7 +22,7 @@ class TimeElement extends XmppElement {
     addChild(fieldElement);
   }
 
-  static XmppElement parse(parent) {
+  static XmppElement? parse(parent) {
     return parent.children.firstWhere(
         (child) => (child.name == TimeElement.elementName),
         orElse: () => null);
