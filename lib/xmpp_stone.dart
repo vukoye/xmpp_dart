@@ -28,3 +28,4 @@ export 'src/extensions/multi_user_chat/MultiUserChatManager.dart';
 export 'src/extensions/message_delivery/MessageDeliveryManager.dart';
 export 'src/extensions/message_delivery/ReceiptInterface.dart';
 export 'src/access_point/manager.dart';
+export 'src/access_point/manager_message_params.dart';
