@@ -45,23 +45,26 @@ class MessageHandler implements MessageApi {
       {ReceiptRequestType receipt = ReceiptRequestType.NONE,
       String messageId = '',
       int? millisecondTs = 0,
-      String customString = ''}) {
+      String customString = '',
+      MessageStanzaType messageType = MessageStanzaType.CHAT}) {
     return _sendMessageStanza(to, text,
         receipt: receipt,
         messageId: messageId,
         millisecondTs: millisecondTs,
-        customString: customString);
+        customString: customString,
+        messageType: messageType);
   }
 
   Future<MessageStanza> _sendMessageStanza(Jid? jid, String text,
       {ReceiptRequestType receipt = ReceiptRequestType.NONE,
       String messageId = '',
       int? millisecondTs = 0,
-      String customString = ''}) {
+      String customString = '',
+      MessageStanzaType messageType = MessageStanzaType.CHAT}) {
     var completer = Completer<MessageStanza>();
     final stanza = MessageStanza(
         messageId.isEmpty ? AbstractStanza.getRandomId() : messageId,
-        MessageStanzaType.CHAT);
+        messageType);
     stanza.toJid = jid;
     stanza.fromJid = _connection!.fullJid;
     if (text.isNotEmpty) {
