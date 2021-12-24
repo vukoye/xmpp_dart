@@ -2,14 +2,11 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:xmpp_stone_obelisk/src/access_point/manager_message_params.dart';
 import 'package:xmpp_stone_obelisk/src/elements/stanzas/PresenceStanza.dart';
-import 'package:xmpp_stone_obelisk/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone_obelisk/src/logger/Log.dart';
 import 'package:xmpp_stone_obelisk/src/messages/MessageHandler.dart';
 import 'package:xmpp_stone_obelisk/xmpp_stone.dart' as xmpp;
-import 'dart:io';
 import 'package:console/console.dart';
-import 'package:image/image.dart' as image;
 import 'package:intl/intl.dart';
 
 import 'personel.dart';
@@ -45,6 +42,7 @@ class XMPPClientManager {
   Function(xmpp.PresenceData event)? _onPresence;
   xmpp.Connection? _connection;
   late MessageHandler _messageHandler;
+  late ConnectionManagerStateChangedListener _connectionStateListener;
 
   StreamSubscription? messageListener;
 
@@ -80,6 +78,11 @@ class XMPPClientManager {
     _listenConnection();
     onLog('Start connecting');
     return this;
+  }
+
+  void close() {
+    _connection!.close();
+    _connectionStateListener.close();
   }
 
   getState() {
@@ -154,20 +157,10 @@ class XMPPClientManager {
   }
 
   // My contact/buddy
-  void vCardFrom(receiver) {
+  Future<xmpp.VCard> vCardFrom(receiver) {
     var receiverJid = xmpp.Jid.fromFullJid(receiver);
     var vCardManager = xmpp.VCardManager(_connection!);
-    vCardManager.getVCardFor(receiverJid).then((vCard) {
-      if (vCard != null) {
-        onLog('Receiver info' + vCard.buildXmlString());
-        // if (vCard != null && vCard.image != null) {
-        //   var file = File('test456789.jpg')..writeAsBytesSync(image.encodeJpg(vCard.image));
-        //   Log.i(LOG_TAG, 'IMAGE SAVED TO: ${file.path}');
-        // }
-      } else {
-        onLog('manager.vCardFrom: failed');
-      }
-    });
+    return vCardManager.getVCardFor(receiverJid);
   }
 
   // Get roster list
@@ -223,13 +216,11 @@ class XMPPClientManager {
 
   // Multi user chat
 
-  // Add the callback or await?
   Future<GroupChatroom> getRoom(String roomName) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     return mucManager.discoverRoom(xmpp.Jid(roomName, mucDomain, ''));
   }
 
-  // Add the callback or await?
   Future<GroupChatroom> getReservedRoomConfig(String roomName) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     return mucManager
@@ -254,21 +245,6 @@ class XMPPClientManager {
   Future<GroupChatroom> join(String roomName, JoinGroupChatroomConfig config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     return mucManager.joinRoom(xmpp.Jid(roomName, mucDomain, ''), config);
-  }
-
-  // Send 1-1 feature discovery
-  void discoverMessageDelivery(String sender, String receiver) {
-    var mucManager = xmpp.MessageDeliveryManager(_connection!);
-    mucManager
-        .discoverDeliveryFeature(
-            xmpp.Jid.fromFullJid(sender), xmpp.Jid.fromFullJid(receiver))
-        .then((String result) {
-      if (result != null) {
-        onLog('Discovery failed response success');
-      } else {
-        onLog('Discover success: ' + result);
-      }
-    });
   }
 
   // Send 1-1 message
@@ -300,7 +276,6 @@ class XMPPClientManager {
         _messageHandler.messagesStream.listen((xmpp.MessageStanza? message) {
       var _messageWrapped = XMPPMessageParams(message: message);
 
-      // TODO: Simplify the condition
       if (_messageWrapped.isCarbon) {
         _onMessage!(_messageWrapped.message!, ListenerType.onMessage_Carbon);
         Log.i(
@@ -356,7 +331,8 @@ class XMPPClientManager {
 
   void _listenConnection() {
     xmpp.MessagesListener messagesListener = ClientMessagesListener();
-    ConnectionManagerStateChangedListener(_connection, messagesListener, this);
+    _connectionStateListener = ConnectionManagerStateChangedListener(
+        _connection, messagesListener, this);
   }
 
   void _listenPresence() {
@@ -379,18 +355,6 @@ class XMPPClientManager {
       }
     });
   }
-
-  // void readSessionLogs() {
-
-  //   var receiver = C_RECEIVER;
-  //   var receiverJid = xmpp.Jid.fromFullJid(receiver);
-  //   var messageHandler = xmpp.MessageHandler.getInstance(_connection);
-  //   print(receiverJid.local + ', ' + receiverJid.domain);
-  //   getConsoleStream().asBroadcastStream().listen((String str) {
-  //     print('receive jid: ' + str);
-  //     messageHandler.sendMessage(receiverJid, str);
-  //   });
-  // }
 }
 
 class ConnectionManagerStateChangedListener
@@ -398,13 +362,18 @@ class ConnectionManagerStateChangedListener
   xmpp.Connection? _connection;
   late XMPPClientManager _context;
 
-  StreamSubscription<String>? subscription;
+  StreamSubscription<xmpp.XmppConnectionState>? subscription;
 
   ConnectionManagerStateChangedListener(xmpp.Connection? connection,
       xmpp.MessagesListener messagesListener, XMPPClientManager context) {
     _connection = connection;
-    _connection!.connectionStateStream.listen(onConnectionStateChanged);
+    subscription =
+        _connection!.connectionStateStream.listen(onConnectionStateChanged);
     _context = context;
+  }
+
+  void close() {
+    subscription!.cancel();
   }
 
   @override
