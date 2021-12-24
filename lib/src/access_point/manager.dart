@@ -75,7 +75,7 @@ class XMPPClientManager {
     Log.d(LOG_TAG, 'Connecting to $host');
     var account = xmpp.XmppAccountSettings(
         personel.jid, jid.local, jid.domain, personel.password, 5222,
-        mucDomain: mucDomain, host: host);
+        mucDomain: mucDomain, host: host, resource: jid.resource);
     _connection = xmpp.Connection(account);
     _connection!.connect();
     _listenConnection();
