@@ -46,7 +46,7 @@ class StanzaParser {
     // Carbon feature
     'message#sent': () => SentElement(),
     'sent#forwarded': () => ForwardedElement(),
-    'forwarded#message': () => MessageStanza('', ''),
+    'forwarded#message': () => MessageStanza('', MessageStanzaType.CHAT),
     'others': () => XmppElement(),
   };
 
