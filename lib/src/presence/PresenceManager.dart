@@ -4,9 +4,11 @@ import 'package:xmpp_stone_obelisk/src/Connection.dart';
 import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
 import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone_obelisk/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp_stone_obelisk/src/logger/Log.dart';
 import 'package:xmpp_stone_obelisk/src/presence/PresenceApi.dart';
 
 class PresenceManager implements PresenceApi {
+  static final LOG_TAG = 'PresenceManager';
   final Connection _connection;
 
   List<PresenceStanza> requests = <PresenceStanza>[];
@@ -103,7 +105,11 @@ class PresenceManager implements PresenceApi {
     var presenceStanza = PresenceStanza();
     presenceStanza.show = presence.showElement;
     presenceStanza.status = presence.status;
-    print(presenceStanza.buildXmlString());
+    if (presence.priority != -1) {
+      presenceStanza.priority = presence.priority;
+      presenceStanza.fromJid = _connection.fullJid;
+    }
+    Log.d(LOG_TAG, presenceStanza.buildXmlString());
     _connection.writeStanza(presenceStanza);
   }
 

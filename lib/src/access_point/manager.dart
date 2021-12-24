@@ -156,10 +156,12 @@ class XMPPClientManager {
   }
 
   // Update presence and status
-  void presenceSend() {
+  void presenceSend(PresenceShowElement presenceShowElement,
+      {String description = 'Working'}) {
     var presenceManager = xmpp.PresenceManager.getInstance(_connection);
-    var presenceData = xmpp.PresenceData(PresenceShowElement.CHAT, 'Working',
-        xmpp.Jid.fromFullJid(personel.jid));
+    var presenceData = xmpp.PresenceData(
+        presenceShowElement, description, xmpp.Jid.fromFullJid(personel.jid),
+        priority: presenceShowElement == PresenceShowElement.CHAT ? 1 : 0);
     presenceManager.sendPresence(presenceData);
   }
 
@@ -391,7 +393,7 @@ class ConnectionManagerStateChangedListener
 
   @override
   void onConnectionStateChanged(xmpp.XmppConnectionState state) {
-    if (state == xmpp.XmppConnectionState.Authenticated) {
+    if (state == xmpp.XmppConnectionState.SessionInitialized) {
       Log.i(_context.LOG_TAG, 'Connected');
       _context.onReady();
     } else if (state == xmpp.XmppConnectionState.Closed) {
