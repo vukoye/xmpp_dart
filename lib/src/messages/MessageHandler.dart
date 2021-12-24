@@ -17,9 +17,9 @@ class MessageHandler implements MessageApi {
       <String?, Tuple2<MessageStanza, Completer>>{};
 
   Stream<MessageStanza?> get messagesStream {
-    return _connection!.inStanzasStream
-        .where((abstractStanza) => abstractStanza is MessageStanza)
-        .map((stanza) => stanza as MessageStanza?);
+    return _connection!.inStanzasStream.where((abstractStanza) {
+      return abstractStanza is MessageStanza;
+    }).map((stanza) => stanza as MessageStanza?);
   }
 
   static MessageHandler getInstance(Connection? connection) {
@@ -96,7 +96,7 @@ class MessageHandler implements MessageApi {
   }
 
   void _connectionStateHandler(XmppConnectionState state) {
-    if (state == XmppConnectionState.Authenticated) {
+    if (state == XmppConnectionState.SessionInitialized) {
       _connection!.streamManagementModule.deliveredStanzasStream
           .where((abstractStanza) => abstractStanza is MessageStanza)
           .map((stanza) => stanza as MessageStanza)

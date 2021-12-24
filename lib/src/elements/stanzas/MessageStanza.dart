@@ -8,6 +8,7 @@ import 'package:xmpp_stone_obelisk/src/elements/messages/DelayElement.dart';
 import 'package:xmpp_stone_obelisk/src/elements/messages/ReceiptReceivedElement.dart';
 import 'package:xmpp_stone_obelisk/src/elements/messages/ReceiptRequestElement.dart';
 import 'package:xmpp_stone_obelisk/src/elements/messages/TimeElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/TimeStampElement.dart';
 import 'package:xmpp_stone_obelisk/src/elements/messages/carbon/SentElement.dart';
 import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone_obelisk/src/extensions/advanced_messaging_processing/AmpInterface.dart';
@@ -106,7 +107,7 @@ class MessageStanza extends AbstractStanza
 
   @override
   XmppElement? getTime() {
-    return TimeElement.parse(this);
+    return TimeStampElement.parse(TimeElement.parse(this));
   }
 
   @override
