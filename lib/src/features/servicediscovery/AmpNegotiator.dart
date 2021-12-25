@@ -1,6 +1,6 @@
 import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
 
-import '../../../xmpp_stone.dart';
+import '../../../xmpp_stone_obelisk.dart';
 import '../../Connection.dart';
 import '../../elements/nonzas/Nonza.dart';
 import '../Negotiator.dart';

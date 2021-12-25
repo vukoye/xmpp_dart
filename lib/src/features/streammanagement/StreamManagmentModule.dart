@@ -13,7 +13,7 @@ import 'package:xmpp_stone_obelisk/src/elements/nonzas/SMNonza.dart';
 import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone_obelisk/src/features/streammanagement/StreamState.dart';
 
-import '../../../xmpp_stone.dart';
+import '../../../xmpp_stone_obelisk.dart';
 import '../Negotiator.dart';
 
 class StreamManagementModule extends Negotiator {

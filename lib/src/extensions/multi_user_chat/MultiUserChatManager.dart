@@ -12,7 +12,7 @@ import 'package:xmpp_stone_obelisk/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatParams.dart';
 import 'package:xmpp_stone_obelisk/src/features/servicediscovery/MultiUserChatNegotiator.dart';
-import 'package:xmpp_stone_obelisk/xmpp_stone.dart';
+import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart';
 
 class MultiUserChatManager {
   static Map<Connection, MultiUserChatManager> instances =

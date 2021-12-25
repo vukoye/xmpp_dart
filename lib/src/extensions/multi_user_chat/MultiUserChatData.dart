@@ -3,7 +3,7 @@ import 'package:xmpp_stone_obelisk/src/elements/XmppElement.dart';
 import 'package:xmpp_stone_obelisk/src/elements/forms/FieldElement.dart';
 import 'package:xmpp_stone_obelisk/src/elements/forms/QueryElement.dart';
 import 'package:xmpp_stone_obelisk/src/elements/forms/XElement.dart';
-import 'package:xmpp_stone_obelisk/xmpp_stone.dart';
+import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart';
 
 /// <query xmlns='http://jabber.org/protocol/disco#info'/>
 ///       <error code='404' type='cancel'>

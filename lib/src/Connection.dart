@@ -17,7 +17,7 @@ import 'package:xmpp_stone_obelisk/src/features/streammanagement/StreamManagment
 import 'package:xmpp_stone_obelisk/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone_obelisk/src/presence/PresenceManager.dart';
 import 'package:xmpp_stone_obelisk/src/roster/RosterManager.dart';
-import 'package:xmpp_stone_obelisk/xmpp_stone.dart';
+import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart';
 
 import 'logger/Log.dart';
 

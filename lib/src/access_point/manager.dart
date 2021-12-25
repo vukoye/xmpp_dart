@@ -10,7 +10,7 @@ import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatP
 import 'package:xmpp_stone_obelisk/src/logger/Log.dart';
 import 'package:xmpp_stone_obelisk/src/messages/MessageHandler.dart';
 import 'package:xmpp_stone_obelisk/src/messages/MessageParams.dart';
-import 'package:xmpp_stone_obelisk/xmpp_stone.dart' as xmpp;
+import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart' as xmpp;
 import 'package:console/console.dart';
 import 'package:intl/intl.dart';
 

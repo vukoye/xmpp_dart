@@ -9,7 +9,7 @@ import 'package:xmpp_stone_obelisk/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone_obelisk/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone_obelisk/src/messages/MessageApi.dart';
 import 'package:xmpp_stone_obelisk/src/messages/MessageParams.dart';
-import 'package:xmpp_stone_obelisk/xmpp_stone.dart';
+import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart';
 
 class MessageHandler implements MessageApi {
   static Map<Connection?, MessageHandler> instances =
