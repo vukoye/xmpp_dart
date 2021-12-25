@@ -36,8 +36,7 @@ void onManagerForSeanReady(XMPPClientManager _context) {
   _context.presenceFrom(friendAlice);
 
   // send text message
-  _context.sendMessage('good morning Alice', friendAlice,
-      messageId: DateTime.now().millisecondsSinceEpoch.toString());
+  _context.sendMessage('good morning Alice', friendAlice);
 }
 
 void onManagerForAliceReady(XMPPClientManager _context) {
