@@ -3,6 +3,7 @@ library xmpp_stone;
 export 'src/Connection.dart';
 export 'src/messages/MessageHandler.dart';
 export 'src/messages/MessageApi.dart';
+export 'src/messages/MessagesListener.dart';
 export 'src/messages/MessageParams.dart';
 export 'src/ConnectionStateChangedListener.dart';
 export 'src/data/Jid.dart';
