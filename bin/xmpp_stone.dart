@@ -1,10 +1,6 @@
 import 'package:xmpp_stone_obelisk/src/access_point/manager.dart';
+import 'package:xmpp_stone_obelisk/xmpp_stone.dart';
 
-final String TAG = 'example';
-// Sean side - 0
-final String C_SENDER = 'boo@localhost';
-final String C_RECEIVER = 'alice@localhost';
-final String C_RECEIVER_BOB = 'bob@localhost';
 final String HOST = 'localhost';
 
 void main(List<String> arguments) {
@@ -21,7 +17,7 @@ void onLog(String time, String message) {}
 void onManagerForSeanReady(XMPPClientManager _context) {
   _context.listens();
   var friendAlice = 'alice@localhost';
-  _context.presenceSend();
+  _context.presenceSend(PresenceShowElement.AWAY, description: 'Working');
   // Read your vcard profile
   _context.vCardRead();
   // Update your vcard profile
@@ -31,13 +27,6 @@ void onManagerForSeanReady(XMPPClientManager _context) {
     vCardToUpdate.fullName = 'Promsopheak8';
     return vCardToUpdate;
   });
-
-  // Query the service information
-  // _context.mucDiscover('muc.localhost');
-  // _context.mucDiscover('mudddc.localhost'); // incorrect service discover
-  // query card from buddy
-  // _context.vCardFrom(C_RECEIVER);
-  // _context.rosterAdd(C_RECEIVER);
 
   _context.vCardFrom(friendAlice);
   // _context.rosterAdd(friendAlice);
@@ -53,7 +42,7 @@ void onManagerForSeanReady(XMPPClientManager _context) {
 
 void onManagerForAliceReady(XMPPClientManager _context) {
   var friendSean = 'boo@localhost';
-  _context.presenceSend();
+  _context.presenceSend(PresenceShowElement.CHAT, description: 'Working');
   // Read your vcard profile
   _context.vCardRead();
   // Update Alice profile
@@ -63,12 +52,6 @@ void onManagerForAliceReady(XMPPClientManager _context) {
     vCardToUpdate.fullName = 'Alice77';
     return vCardToUpdate;
   });
-  // Query the service information
-  // _context.mucDiscover('muc.localhost');
-  // _context.mucDiscover('mudddc.localhost'); // incorrect service discover
-  // query card from buddy
-  // _context.vCardFrom(C_RECEIVER);
-  // _context.rosterAdd(C_RECEIVER);
 
   _context.vCardFrom(friendSean);
   // _context.rosterAdd(friendSean);
