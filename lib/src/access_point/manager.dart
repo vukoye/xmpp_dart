@@ -1,10 +1,15 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:xmpp_stone_obelisk/src/access_point/communication_config.dart';
 import 'package:xmpp_stone_obelisk/src/access_point/manager_message_params.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone_obelisk/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp_stone_obelisk/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatData.dart';
+import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatParams.dart';
 import 'package:xmpp_stone_obelisk/src/logger/Log.dart';
 import 'package:xmpp_stone_obelisk/src/messages/MessageHandler.dart';
+import 'package:xmpp_stone_obelisk/src/messages/MessageParams.dart';
 import 'package:xmpp_stone_obelisk/xmpp_stone.dart' as xmpp;
 import 'package:console/console.dart';
 import 'package:intl/intl.dart';
@@ -246,14 +251,19 @@ class XMPPClientManager {
   Future<GroupChatroom> setRoomConfig(
       String roomName, GroupChatroomConfig config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
-    return mucManager.setRoomConfig(xmpp.Jid(roomName, mucDomain, ''), config);
+    return mucManager.setRoomConfig(
+        xmpp.Jid(roomName, mucDomain, ''),
+        MultiUserChatCreateParams(
+            config: config,
+            options: XmppCommunicationConfig(shallWaitStanza: false)));
   }
 
   // Create room
   Future<GroupChatroom> createInstantRoom(
       String roomName, GroupChatroomConfig config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
-    return mucManager.createRoom(xmpp.Jid(roomName, mucDomain, ''), config);
+    return mucManager.createRoom(xmpp.Jid(roomName, mucDomain, ''),
+        options: XmppCommunicationConfig(shallWaitStanza: false));
   }
 
   // Join room
@@ -264,21 +274,26 @@ class XMPPClientManager {
 
   // Send 1-1 message
   Future<xmpp.MessageStanza> sendMessage(String message, String receiver,
-      {int? time,
-      required String messageId,
-      String customString = '',
-      xmpp.MessageStanzaType messageType = xmpp.MessageStanzaType.CHAT}) {
+      {MessageParams additional = const MessageParams(
+          millisecondTs: 0,
+          customString: '',
+          messageId: '',
+          receipt: ReceiptRequestType.NONE,
+          messageType: MessageStanzaType.CHAT,
+          options: XmppCommunicationConfig(shallWaitStanza: false))}) {
     return _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
-        millisecondTs: time,
-        receipt: xmpp.ReceiptRequestType.REQUEST,
-        messageId: messageId,
-        customString: customString,
-        messageType: messageType);
+        additional: additional);
   }
 
   Future<xmpp.MessageStanza> sendDeliveryAck(xmpp.MessageStanza message) {
     return _messageHandler.sendMessage(message.fromJid, '',
-        messageId: message.id!, receipt: xmpp.ReceiptRequestType.RECEIVED);
+        additional: MessageParams(
+            receipt: xmpp.ReceiptRequestType.RECEIVED,
+            messageId: message.id!,
+            millisecondTs: 0,
+            customString: '',
+            messageType: MessageStanzaType.CHAT,
+            options: XmppCommunicationConfig(shallWaitStanza: false)));
   }
 
   void listens() {
