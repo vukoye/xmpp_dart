@@ -1,5 +1,7 @@
 ## XmppStone
 
+Below Original Readme forked from: https://github.com/vukoye/xmpp_dart
+
 Lightweight XMPP client library written completely in Dart.
 My intention is to write simple to use library for future XMPP client based on Flutter.
 
@@ -14,6 +16,7 @@ __Supported documents:__
 __Partly supported:__
   - __XEP-0030__: Service Discovery
   - __XEP-0313__: Message Archive Management
+  - __XEP-0079__: Adavanced Message Processing
 
 __Actively working on:__ 
   - __XEP-0059__: Result Set Management
@@ -21,6 +24,7 @@ __Actively working on:__
 
 ## Latest news
 
+ - 2021-12-23: Updated supported for XEP-0079: Advance Message Processing, Update additional supporting element for MessageStanza (receive, request, time, custom), Add exposing message handler on received ack, delivered, sent, Fixed null safety
  - 2020-10-30: Added support for XEP-0280: Message Carbons
  - 2020-10-30: Added initial support for XEP-0313: Message Archive Management
  - 2020-10-30: Added logging mechanism
@@ -33,7 +37,7 @@ __Actively working on:__
 ## Usage
 
 ```dart
-import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
+import 'package:xmpp_stone_obelisk/xmpp_stone.dart' as xmpp;
 
 main() {
   xmpp.Connection connection = new xmpp.Connection("user@domain", "password", 5222);

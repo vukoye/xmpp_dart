@@ -13,12 +13,14 @@ class Log {
 
   static void d(String tag, String message) {
     if (logLevel.index <= LogLevel.DEBUG.index) {
+      print('D/[$tag]: $message');
       log('D/[$tag]: $message');
     }
   }
 
   static void i(String tag, String message) {
     if (logLevel.index <= LogLevel.INFO.index) {
+      print('D/[$tag]: $message');
       log('I/[$tag]: $message');
     }
   }

@@ -1,11 +1,11 @@
 import 'dart:async';
 
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
-import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
-import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone_obelisk/src/elements/forms/FieldElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/forms/QueryElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/IqStanza.dart';
 import '../../Connection.dart';
 import '../../elements/nonzas/Nonza.dart';
 import '../Negotiator.dart';
@@ -14,10 +14,10 @@ import 'Feature.dart';
 class MAMNegotiator extends Negotiator {
   static const TAG = 'MAMNegotiator';
 
-  static final Map<Connection, MAMNegotiator> _instances =
-      <Connection, MAMNegotiator>{};
+  static final Map<Connection?, MAMNegotiator> _instances =
+      <Connection?, MAMNegotiator>{};
 
-  static MAMNegotiator getInstance(Connection connection) {
+  static MAMNegotiator getInstance(Connection? connection) {
     var instance = _instances[connection];
     if (instance == null) {
       instance = MAMNegotiator(connection);
@@ -26,17 +26,17 @@ class MAMNegotiator extends Negotiator {
     return instance;
   }
 
-  IqStanza _myUnrespondedIqStanza;
+  late IqStanza _myUnrespondedIqStanza;
 
-  StreamSubscription<AbstractStanza> _subscription;
+  late StreamSubscription<AbstractStanza?> _subscription;
 
-  final Connection _connection;
+  final Connection? _connection;
 
   final List<MamQueryParameters> _supportedParameters = [];
 
   bool enabled = false;
 
-  bool hasExtended;
+  bool? hasExtended;
 
   MAMNegotiator(this._connection) {
     expectedName = 'urn:xmpp:mam';
@@ -69,7 +69,7 @@ class MAMNegotiator extends Negotiator {
       enabled = true;
       state = NegotiatorState.NEGOTIATING;
       sendRequest();
-      _subscription = _connection.inStanzasStream.listen(checkStanzas);
+      _subscription = _connection!.inStanzasStream.listen(checkStanzas);
     }
   }
 
@@ -79,16 +79,16 @@ class MAMNegotiator extends Negotiator {
     query.addAttribute(XmppAttribute('xmlns', 'urn:xmpp:mam:2'));
     iqStanza.addChild(query);
     _myUnrespondedIqStanza = iqStanza;
-    _connection.writeStanza(iqStanza);
+    _connection!.writeStanza(iqStanza);
   }
 
-  void checkStanzas(AbstractStanza stanza) {
+  void checkStanzas(AbstractStanza? stanza) {
     if (stanza is IqStanza && stanza.id == _myUnrespondedIqStanza.id) {
       var x = stanza.getChild('query')?.getChild('x');
       if (x != null) {
         x.children.forEach((element) {
           if (element is FieldElement) {
-            switch(element.varAttr) {
+            switch (element.varAttr) {
               case 'start':
                 _supportedParameters.add(MamQueryParameters.START);
                 break;

@@ -1,25 +1,58 @@
 import 'package:xml/xml.dart' as xml;
-import 'package:xmpp_stone/src/data/Jid.dart';
-import 'package:xmpp_stone/src/elements/XmppElement.dart';
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
-import 'package:xmpp_stone/src/elements/forms/XElement.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
-import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
-import 'package:xmpp_stone/src/features/servicediscovery/Identity.dart';
-import 'package:xmpp_stone/src/parser/IqParser.dart';
+import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone_obelisk/src/elements/forms/FieldElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/forms/XElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/Amp.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/AmpRuleElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/CustomElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/CustomSubElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/DelayElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/ReceiptReceivedElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/ReceiptRequestElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/TimeElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/TimeStampElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/carbon/ForwardedElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/messages/carbon/SentElement.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp_stone_obelisk/src/features/servicediscovery/Feature.dart';
+import 'package:xmpp_stone_obelisk/src/features/servicediscovery/Identity.dart';
+import 'package:xmpp_stone_obelisk/src/parser/IqParser.dart';
 
 import '../elements/stanzas/MessageStanza.dart';
 import '../logger/Log.dart';
 
 class StanzaParser {
   static const TAG = 'StanzaParser';
+  // '_' means any parents
+  static final _elementMappings = <String, Function>{
+    'query#identity': () => Identity(),
+    'query#feature': () => Feature(),
+    '_#x': () => XElement(),
+    '_#field': () => FieldElement(),
+    'message#time': () => TimeElement(),
+    'time#ts': () => TimeStampElement(),
+    'message#request': () => ReceiptRequestElement(),
+    'message#received': () => ReceiptReceivedElement(),
+    'message#amp': () => AmpElement(),
+    'amp#rule': () => AmpRuleElement(),
+    'message#custom': () => CustomElement(),
+    'custom#custom': () => CustomSubElement(),
+    // Delayed - offline storage
+    'message#delay': () => DelayElement(),
+    // Carbon feature
+    'message#sent': () => SentElement(),
+    'sent#forwarded': () => ForwardedElement(),
+    'forwarded#message': () => MessageStanza('', MessageStanzaType.CHAT),
+    'others': () => XmppElement(),
+  };
 
   //TODO: Improve this!
-  static AbstractStanza parseStanza(xml.XmlElement element) {
-    AbstractStanza stanza;
+  static AbstractStanza? parseStanza(xml.XmlElement element) {
+    AbstractStanza? stanza;
     var id = element.getAttribute('id');
     if (id == null) {
       Log.d(TAG, 'No id found for stanza');
@@ -35,27 +68,28 @@ class StanzaParser {
     var fromString = element.getAttribute('from');
     if (fromString != null) {
       var from = Jid.fromFullJid(fromString);
-      stanza.fromJid = from;
+      stanza!.fromJid = from;
     }
     var toString = element.getAttribute('to');
     if (toString != null) {
       var to = Jid.fromFullJid(toString);
-      stanza.toJid = to;
+      stanza!.toJid = to;
     }
     element.attributes.forEach((xmlAttribute) {
-      stanza.addAttribute(
+      stanza!.addAttribute(
           XmppAttribute(xmlAttribute.name.local, xmlAttribute.value));
     });
     element.children.forEach((child) {
-      if (child is xml.XmlElement) stanza.addChild(parseElement(child));
+      if (child is xml.XmlElement) stanza!.addChild(parseElement(child));
     });
     return stanza;
   }
 
-  static MessageStanza _parseMessageStanza(String id, xml.XmlElement element) {
+  static MessageStanza _parseMessageStanza(String? id, xml.XmlElement element) {
     var typeString = element.getAttribute('type');
-    MessageStanzaType type;
+    MessageStanzaType? type;
     if (typeString == null) {
+      type = MessageStanzaType.UNKOWN;
       Log.w(TAG, 'No type found for message stanza');
     } else {
       switch (typeString) {
@@ -82,37 +116,35 @@ class StanzaParser {
   }
 
   static PresenceStanza _parsePresenceStanza(
-      String id, xml.XmlElement element) {
+      String? id, xml.XmlElement element) {
     var presenceStanza = PresenceStanza();
     presenceStanza.id = id;
     return presenceStanza;
   }
 
-  static XmppElement parseElement(xml.XmlElement xmlElement) {
-    XmppElement xmppElement;
-    var parentName = (xmlElement.parent as xml.XmlElement)?.name?.local ?? '';
-    var name = xmlElement?.name?.local;
-    if (parentName == 'query' && name == 'identity') {
-      xmppElement = Identity();
-    } else if (parentName == 'query' && name == 'feature') {
-      xmppElement = Feature();
-    } else if (name == 'x') {
-      xmppElement = XElement();
-    } else if (name == 'field') {
-      xmppElement = FieldElement();
-    } else {
-      xmppElement = XmppElement();
+  static XmppElement? parseElement(xml.XmlElement xmlElement) {
+    XmppElement? xmppElement;
+    var parentName = (xmlElement.parent as xml.XmlElement?)?.name.local ?? '';
+    var name = xmlElement.name.local;
+    final localKey = '$parentName#$name';
+    final genericKey = '_#$name';
+    var key = 'others';
+    if (_elementMappings.containsKey(localKey)) {
+      key = localKey;
+    } else if (_elementMappings.containsKey(genericKey)) {
+      key = genericKey;
     }
-    xmppElement.name = xmlElement?.name?.local;
+    xmppElement = _elementMappings[key]!();
+    xmppElement!.name = xmlElement.name.local;
     xmlElement.attributes.forEach((xmlAttribute) {
-      xmppElement.addAttribute(
-          XmppAttribute(xmlAttribute?.name?.local, xmlAttribute?.value));
+      xmppElement!.addAttribute(
+          XmppAttribute(xmlAttribute.name.local, xmlAttribute.value));
     });
     xmlElement.children.forEach((xmlChild) {
       if (xmlChild is xml.XmlElement) {
-        xmppElement.addChild(parseElement(xmlChild));
+        xmppElement!.addChild(parseElement(xmlChild));
       } else if (xmlChild is xml.XmlText) {
-        xmppElement.textValue = xmlChild.text;
+        xmppElement!.textValue = xmlChild.text;
       }
     });
     return xmppElement;

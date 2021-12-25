@@ -1,12 +1,12 @@
 import 'dart:async';
 
-import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
 
 abstract class Negotiator {
   static int defaultPriorityLevel = 1000;
 
-  String _expectedName;
-  String _expectedNameSpace;
+  String? _expectedName;
+  String? _expectedNameSpace;
   NegotiatorState _state = NegotiatorState.IDLE;
   int priorityLevel = defaultPriorityLevel;
 
@@ -24,15 +24,15 @@ abstract class Negotiator {
     negotiatorStateStreamController.add(state);
   }
 
-  String get expectedNameSpace => _expectedNameSpace;
+  String? get expectedNameSpace => _expectedNameSpace;
 
-  set expectedNameSpace(String value) {
+  set expectedNameSpace(String? value) {
     _expectedNameSpace = value;
   }
 
-  String get expectedName => _expectedName;
+  String? get expectedName => _expectedName;
 
-  set expectedName(String value) {
+  set expectedName(String? value) {
     _expectedName = value;
   }
 
@@ -40,13 +40,15 @@ abstract class Negotiator {
   List<Nonza> match(List<Nonza> request);
 
   void negotiate(List<Nonza> nonza);
+  void discover() {}
 
   void backToIdle() {
     state = NegotiatorState.IDLE;
   }
 
   bool isReady() {
-    return _state != NegotiatorState.DONE && state != NegotiatorState.DONE_CLEAN_OTHERS;
+    return _state != NegotiatorState.DONE &&
+        state != NegotiatorState.DONE_CLEAN_OTHERS;
   }
 
   @override
