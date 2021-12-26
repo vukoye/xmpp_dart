@@ -127,7 +127,7 @@ class GroupChatroomConfig {
         enablelogging: false,
         changesubject: false,
         allowinvites: true,
-        allowPm: false,
+        allowPm: true,
         maxUser: 20,
         presencebroadcast: ['moderator', 'participant', 'visitor'],
         getmemberlist: ['moderator', 'participant', 'visitor'],
@@ -184,8 +184,8 @@ class GroupChatroomConfigForm {
     // xElement.addField(FieldElement.build(
     //     varAttr: 'muc#roomconfig_allowinvites',
     //     value: config.allowinvites ? '1' : '0'));
-    // xElement.addField(FieldElement.build(
-    //     varAttr: 'muc#roomconfig_allowpm', value: config.allowPm ? '1' : '0'));
+    xElement.addField(FieldElement.build(
+        varAttr: 'muc#roomconfig_allowpm', value: config.allowPm ? '1' : '0'));
     // xElement.addField(FieldElement.build(
     //     varAttr: 'muc#roomconfig_maxusers', value: config.maxUser.toString()));
     // xElement.addField(FieldElement.build(
