@@ -2,11 +2,13 @@ import 'dart:async';
 
 import 'package:tuple/tuple.dart';
 import 'package:xmpp_stone_obelisk/src/Connection.dart';
+import 'package:xmpp_stone_obelisk/src/access_point/communication_config.dart';
 import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
 import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone_obelisk/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone_obelisk/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone_obelisk/src/messages/MessageApi.dart';
+import 'package:xmpp_stone_obelisk/src/messages/MessageParams.dart';
 import 'package:xmpp_stone_obelisk/xmpp_stone.dart';
 
 class MessageHandler implements MessageApi {
@@ -42,29 +44,24 @@ class MessageHandler implements MessageApi {
 
   @override
   Future<MessageStanza> sendMessage(Jid? to, String text,
-      {ReceiptRequestType receipt = ReceiptRequestType.NONE,
-      String messageId = '',
-      int? millisecondTs = 0,
-      String customString = '',
-      MessageStanzaType messageType = MessageStanzaType.CHAT}) {
-    return _sendMessageStanza(to, text,
-        receipt: receipt,
-        messageId: messageId,
-        millisecondTs: millisecondTs,
-        customString: customString,
-        messageType: messageType);
+      {MessageParams additional = const MessageParams(
+          millisecondTs: 0,
+          customString: '',
+          messageId: '',
+          receipt: ReceiptRequestType.NONE,
+          messageType: MessageStanzaType.CHAT,
+          options: XmppCommunicationConfig(shallWaitStanza: false))}) {
+    return _sendMessageStanza(to, text, additional);
   }
 
-  Future<MessageStanza> _sendMessageStanza(Jid? jid, String text,
-      {ReceiptRequestType receipt = ReceiptRequestType.NONE,
-      String messageId = '',
-      int? millisecondTs = 0,
-      String customString = '',
-      MessageStanzaType messageType = MessageStanzaType.CHAT}) {
+  Future<MessageStanza> _sendMessageStanza(
+      Jid? jid, String text, MessageParams additional) {
     var completer = Completer<MessageStanza>();
     final stanza = MessageStanza(
-        messageId.isEmpty ? AbstractStanza.getRandomId() : messageId,
-        messageType);
+        additional.messageId.isEmpty
+            ? AbstractStanza.getRandomId()
+            : additional.messageId,
+        additional.messageType);
     stanza.toJid = jid;
     stanza.fromJid = _connection!.fullJid;
     if (text.isNotEmpty) {
@@ -72,26 +69,36 @@ class MessageHandler implements MessageApi {
     }
 
     // Add receipt delivery
-    if (receipt == ReceiptRequestType.RECEIVED) {
+    if (additional.receipt == ReceiptRequestType.RECEIVED) {
       stanza.addReceivedReceipt();
-    } else if (receipt == ReceiptRequestType.REQUEST) {
+    } else if (additional.receipt == ReceiptRequestType.REQUEST) {
       stanza.addRequestReceipt();
       // Add request stanza from server?
       stanza.addAmpDeliverDirect();
     }
 
-    if (millisecondTs != 0) {
-      stanza.addTime(millisecondTs);
+    if (additional.millisecondTs != 0) {
+      stanza.addTime(additional.millisecondTs);
     }
 
-    if (customString.isNotEmpty) {
-      stanza.addCustom(customString);
+    if (additional.customString.isNotEmpty) {
+      stanza.addCustom(additional.customString);
     }
 
     print(stanza.buildXmlString());
     _connection!.writeStanza(stanza);
 
     _myUnrespondedIqStanzas[stanza.id] = Tuple2(stanza, completer);
+
+    if (!additional.options.shallWaitStanza) {
+      Timer(Duration(milliseconds: 200), () {
+        _myUnrespondedIqStanzas[stanza.id]!
+            .item2
+            .complete(_myUnrespondedIqStanzas[stanza.id]!.item1);
+        _myUnrespondedIqStanzas
+            .remove(_myUnrespondedIqStanzas[stanza.id]!.item1.id);
+      });
+    }
     return completer.future;
   }
 
