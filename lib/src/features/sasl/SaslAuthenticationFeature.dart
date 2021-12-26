@@ -5,6 +5,7 @@ import 'package:xmpp_stone/src/features/Negotiator.dart';
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/PlainSaslHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
+import 'package:xmpp_stone/src/features/sasl/AnonymousHandler.dart';
 
 import '../../elements/nonzas/Nonza.dart';
 
@@ -19,6 +20,7 @@ class SaslAuthenticationFeature extends Negotiator {
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_1);
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_256);
     _supportedMechanisms.add(SaslMechanism.PLAIN);
+    _supportedMechanisms.add(SaslMechanism.ANONYMOUS);
     expectedName = 'SaslAuthenticationFeature';
   }
 
@@ -53,6 +55,9 @@ class SaslAuthenticationFeature extends Negotiator {
       case SaslMechanism.SCRAM_SHA_1_PLUS:
         break;
       case SaslMechanism.EXTERNAL:
+        break;
+      case SaslMechanism.ANONYMOUS:
+        saslHandler = AnonymousHandler(_connection, mechanism);
         break;
       case SaslMechanism.NOT_SUPPORTED:
         break;
@@ -89,6 +94,9 @@ class SaslAuthenticationFeature extends Negotiator {
         case 'SCRAM-SHA-1':
           _offeredMechanisms.add(SaslMechanism.SCRAM_SHA_1);
           break;
+        case 'ANONYMOUS':
+          _offeredMechanisms.add(SaslMechanism.ANONYMOUS);
+          break;
         case 'PLAIN':
           _offeredMechanisms.add(SaslMechanism.PLAIN);
           break;
@@ -110,5 +118,6 @@ enum SaslMechanism {
   SCRAM_SHA_1,
   SCRAM_SHA_256,
   PLAIN,
+  ANONYMOUS,
   NOT_SUPPORTED
 }
