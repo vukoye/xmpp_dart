@@ -286,7 +286,7 @@ xml:lang='en'
 
     if (fullResponse != null && fullResponse.isNotEmpty) {
       xml.XmlNode? xmlResponse;
-      Log.d(TAG, fullResponse);
+      Log.d(TAG, 'Receiving full response:\n: ${fullResponse}');
       try {
         xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
       } catch (e) {
@@ -348,6 +348,7 @@ xml:lang='en'
 
   void writeStanza(AbstractStanza stanza) {
     _outStanzaStreamController.add(stanza);
+    Log.d(TAG, 'Writing to stanza:\n${stanza.buildXmlString()}');
     write(stanza.buildXmlString());
   }
 

@@ -21,6 +21,7 @@ final String TAG = 'manager::general';
 enum MessageDelivery { UNKNOWN, DIRECT, STORED, ONLINE }
 
 enum ListenerType {
+  unknown,
   onReady,
   onLog,
   onPresence,
@@ -278,7 +279,7 @@ class XMPPClientManager {
           millisecondTs: 0,
           customString: '',
           messageId: '',
-          receipt: ReceiptRequestType.NONE,
+          receipt: ReceiptRequestType.RECEIVED,
           messageType: MessageStanzaType.CHAT,
           options: XmppCommunicationConfig(shallWaitStanza: false))}) {
     return _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
