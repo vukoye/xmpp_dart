@@ -82,16 +82,20 @@ class MultiUserChatManager {
       XmppCommunicationConfig communicationConfig, String stanzaId) {
     if (!communicationConfig.shallWaitStanza) {
       Timer(Duration(milliseconds: 200), () {
+        var action = GroupChatroomAction.NONE;
+        if (_myUnrespondedIqStanzasActions.containsKey(stanzaId)) {
+          action = _myUnrespondedIqStanzasActions[stanzaId]!;
+          _myUnrespondedIqStanzasActions
+              .remove(_myUnrespondedPresenceStanzas[stanzaId]!.item1.id);
+        }
         var mucResponse = GroupChatroom(
-            action: _myUnrespondedIqStanzasActions[stanzaId]!,
-            info: _myUnrespondedIqStanzas[stanzaId]!.item1,
+            action: action,
+            info: _myUnrespondedPresenceStanzas[stanzaId]!.item1,
             roomName: '',
             isAvailable: true,
             error: GroupChatroomError.empty());
         _myUnrespondedPresenceStanzas[stanzaId]!.item2.complete(mucResponse);
         _myUnrespondedPresenceStanzas
-            .remove(_myUnrespondedPresenceStanzas[stanzaId]!.item1.id);
-        _myUnrespondedIqStanzasActions
             .remove(_myUnrespondedPresenceStanzas[stanzaId]!.item1.id);
       });
     }
@@ -175,6 +179,7 @@ class MultiUserChatManager {
           const XmppCommunicationConfig(shallWaitStanza: false)}) {
     var completer = Completer<GroupChatroom>();
     var presenceStanza = PresenceStanza();
+    presenceStanza.id = AbstractStanza.getRandomId();
 
     Jid roomtDotMucDomain = Jid(_roomtDotMucDomain.local,
         _roomtDotMucDomain.domain, _connection.fullJid.resource);
@@ -202,9 +207,13 @@ class MultiUserChatManager {
           const XmppCommunicationConfig(shallWaitStanza: false)}) {
     var completer = Completer<GroupChatroom>();
     var presenceStanza = PresenceStanza();
+    presenceStanza.id = AbstractStanza.getRandomId();
 
-    Jid roomtDotMucDomain = Jid(_roomtDotMucDomain.local,
-        _roomtDotMucDomain.domain, _connection.fullJid.resource);
+    // Change nickname
+    Jid roomtDotMucDomain = Jid(
+        _roomtDotMucDomain.local,
+        _roomtDotMucDomain.domain,
+        '${_connection.fullJid.userAtDomain}#${_connection.fullJid.resource}');
     presenceStanza.fromJid = _connection.fullJid;
     presenceStanza.addAttribute(XmppAttribute('to', roomtDotMucDomain.fullJid));
 
@@ -264,7 +273,7 @@ class MultiUserChatManager {
   }
 
   void _processIqStanza(AbstractStanza? stanza) {
-    if (stanza is IqStanza) {
+    if (stanza is IqStanza && _myUnrespondedIqStanzas.containsKey(stanza.id)) {
       if (_myUnrespondedIqStanzas[stanza.id] != null) {
         var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
         GroupChatroomAction _action =
@@ -282,7 +291,8 @@ class MultiUserChatManager {
   }
 
   void _processPresenceStanza(AbstractStanza? stanza) {
-    if (stanza is PresenceStanza) {
+    if (stanza is PresenceStanza &&
+        _myUnrespondedPresenceStanzas.containsKey(stanza.id)) {
       if (_myUnrespondedPresenceStanzas[stanza.id] != null) {
         var unrespondedPresence = _myUnrespondedPresenceStanzas[stanza.id];
         GroupChatroomAction _action =
