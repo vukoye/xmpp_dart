@@ -92,11 +92,13 @@ class MessageHandler implements MessageApi {
 
     if (!additional.options.shallWaitStanza) {
       Timer(Duration(milliseconds: 200), () {
-        _myUnrespondedIqStanzas[stanza.id]!
-            .item2
-            .complete(_myUnrespondedIqStanzas[stanza.id]!.item1);
-        _myUnrespondedIqStanzas
-            .remove(_myUnrespondedIqStanzas[stanza.id]!.item1.id);
+        if (_myUnrespondedIqStanzas.containsKey(stanza.id)) {
+          _myUnrespondedIqStanzas[stanza.id]!
+              .item2
+              .complete(_myUnrespondedIqStanzas[stanza.id]!.item1);
+          _myUnrespondedIqStanzas
+              .remove(_myUnrespondedIqStanzas[stanza.id]!.item1.id);
+        }
       });
     }
     return completer.future;
