@@ -1,15 +1,15 @@
 import 'dart:async';
 
 import 'package:tuple/tuple.dart';
-import 'package:xmpp_stone_obelisk/src/Connection.dart';
-import 'package:xmpp_stone_obelisk/src/access_point/communication_config.dart';
-import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/MessageStanza.dart';
-import 'package:xmpp_stone_obelisk/src/extensions/message_delivery/ReceiptInterface.dart';
-import 'package:xmpp_stone_obelisk/src/messages/MessageApi.dart';
-import 'package:xmpp_stone_obelisk/src/messages/MessageParams.dart';
-import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/access_point/communication_config.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
+import 'package:xmpp_stone/src/messages/MessageApi.dart';
+import 'package:xmpp_stone/src/messages/MessageParams.dart';
+import 'package:xmpp_stone/xmpp_stone.dart';
 
 class MessageHandler implements MessageApi {
   static Map<Connection?, MessageHandler> instances =

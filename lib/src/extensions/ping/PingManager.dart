@@ -1,6 +1,6 @@
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp_stone_obelisk/src/Connection.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp_stone/src/Connection.dart';
 
 class PingManager {
   final Connection _connection;

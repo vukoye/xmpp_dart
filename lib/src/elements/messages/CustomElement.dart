@@ -1,4 +1,4 @@
-import 'package:xmpp_stone_obelisk/src/elements/messages/CustomSubElement.dart';
+import 'package:xmpp_stone/src/elements/messages/CustomSubElement.dart';
 
 import '../XmppAttribute.dart';
 import '../XmppElement.dart';

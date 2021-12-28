@@ -1,16 +1,16 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:xmpp_stone_obelisk/src/Connection.dart';
-import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone_obelisk/src/elements/XmppElement.dart';
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp_stone_obelisk/src/features/Negotiator.dart';
-import 'package:xmpp_stone_obelisk/src/features/servicediscovery/Feature.dart';
-import 'package:xmpp_stone_obelisk/src/features/servicediscovery/Identity.dart';
-import 'package:xmpp_stone_obelisk/src/features/servicediscovery/ServiceDiscoverySupport.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp_stone/src/features/Negotiator.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/Identity.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoverySupport.dart';
 import 'Feature.dart';
 
 class ServiceDiscoveryNegotiator extends Negotiator {

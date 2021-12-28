@@ -1,5 +1,5 @@
-import 'package:xmpp_stone_obelisk/src/access_point/manager.dart';
-import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart';
+import 'package:xmpp_stone/src/access_point/manager.dart';
+import 'package:xmpp_stone/xmpp_stone.dart';
 
 final String HOST = 'localhost';
 

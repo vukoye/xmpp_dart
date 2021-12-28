@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:xmpp_stone_obelisk/src/Connection.dart';
-import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone_obelisk/src/features/Negotiator.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/features/Negotiator.dart';
 
 import '../elements/nonzas/Nonza.dart';
 import '../logger/Log.dart';

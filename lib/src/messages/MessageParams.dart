@@ -1,6 +1,6 @@
-import 'package:xmpp_stone_obelisk/src/access_point/communication_config.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/MessageStanza.dart';
-import 'package:xmpp_stone_obelisk/src/extensions/message_delivery/ReceiptInterface.dart';
+import 'package:xmpp_stone/src/access_point/communication_config.dart';
+import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 
 class MessageParams {
   final ReceiptRequestType receipt; // = ReceiptRequestType.NONE;

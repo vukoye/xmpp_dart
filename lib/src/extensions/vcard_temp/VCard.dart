@@ -1,8 +1,8 @@
 import 'dart:convert';
 
 import 'package:image/image.dart' as img;
-import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone_obelisk/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
 enum TelephonePremiseType { WORK, HOME }
 enum TelephoneVoiceType { VOICE, FAX, MSG }

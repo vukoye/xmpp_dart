@@ -1,5 +1,5 @@
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xml/xml.dart' as xml;
 
 class XmppElement {

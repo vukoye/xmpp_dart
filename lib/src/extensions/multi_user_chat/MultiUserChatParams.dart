@@ -1,5 +1,5 @@
-import 'package:xmpp_stone_obelisk/src/access_point/communication_config.dart';
-import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatData.dart';
+import 'package:xmpp_stone/src/access_point/communication_config.dart';
+import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 
 class MultiUserChatCreateParams {
   final GroupChatroomConfig config;

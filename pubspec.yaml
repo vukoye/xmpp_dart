@@ -1,4 +1,4 @@
-name: xmpp_stone_obelisk
+name: xmpp_stone
 
 description: "Xmpp Stone is lightweight XMPP client library written completely in Dart. Forked from https://github.com/vukoye/xmpp_dart which I added more functionalities needed for my project also"
 

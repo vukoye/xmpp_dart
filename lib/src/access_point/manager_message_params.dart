@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart' as xmpp;
+import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 
 class XMPPMessageParams {
   final xmpp.MessageStanza? message;

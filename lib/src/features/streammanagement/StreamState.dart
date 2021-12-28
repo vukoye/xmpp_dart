@@ -1,6 +1,6 @@
 import 'dart:collection';
 
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
 class StreamState {
   String? id;

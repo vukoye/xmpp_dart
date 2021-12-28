@@ -1,4 +1,4 @@
-import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart';
+import 'package:xmpp_stone/xmpp_stone.dart';
 
 class XMPPClientPersonel {
   String jid;

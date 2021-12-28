@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:xmpp_stone_obelisk/src/Connection.dart';
-import 'package:xmpp_stone_obelisk/src/chat/Chat.dart';
-import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
-import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/chat/Chat.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/xmpp_stone.dart';
 
 class ChatManager {
   static Map<Connection, ChatManager> instances = <Connection, ChatManager>{};

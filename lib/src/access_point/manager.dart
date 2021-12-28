@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:xmpp_stone_obelisk/src/access_point/communication_config.dart';
-import 'package:xmpp_stone_obelisk/src/access_point/manager_message_params.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/MessageStanza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/PresenceStanza.dart';
-import 'package:xmpp_stone_obelisk/src/extensions/message_delivery/ReceiptInterface.dart';
-import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatData.dart';
-import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatParams.dart';
-import 'package:xmpp_stone_obelisk/src/logger/Log.dart';
-import 'package:xmpp_stone_obelisk/src/messages/MessageHandler.dart';
-import 'package:xmpp_stone_obelisk/src/messages/MessageParams.dart';
-import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart' as xmpp;
+import 'package:xmpp_stone/src/access_point/communication_config.dart';
+import 'package:xmpp_stone/src/access_point/manager_message_params.dart';
+import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
+import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
+import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
+import 'package:xmpp_stone/src/logger/Log.dart';
+import 'package:xmpp_stone/src/messages/MessageHandler.dart';
+import 'package:xmpp_stone/src/messages/MessageParams.dart';
+import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 import 'package:console/console.dart';
 import 'package:intl/intl.dart';
 

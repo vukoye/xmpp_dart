@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:xmpp_stone_obelisk/src/Connection.dart';
+import 'package:xmpp_stone/src/Connection.dart';
 import 'logger/Log.dart';
 
 class ReconnectionManager {

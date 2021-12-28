@@ -1,19 +1,19 @@
 import 'dart:async';
 
 import 'package:collection/collection.dart' show IterableExtension;
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/ANonza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/EnableNonza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/EnabledNonza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/FailedNonza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/RNonza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/ResumeNonza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/ResumedNonza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/SMNonza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone_obelisk/src/features/streammanagement/StreamState.dart';
+import 'package:xmpp_stone/src/elements/nonzas/ANonza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/EnableNonza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/EnabledNonza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/FailedNonza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/RNonza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/ResumeNonza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/ResumedNonza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/SMNonza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/features/streammanagement/StreamState.dart';
 
-import '../../../xmpp_stone_obelisk.dart';
+import '../../../xmpp_stone.dart';
 import '../Negotiator.dart';
 
 class StreamManagementModule extends Negotiator {

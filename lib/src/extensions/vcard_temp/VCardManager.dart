@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:tuple/tuple.dart';
-import 'package:xmpp_stone_obelisk/src/Connection.dart';
-import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
-import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone_obelisk/src/elements/XmppElement.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp_stone_obelisk/src/extensions/vcard_temp/VCard.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp_stone/src/extensions/vcard_temp/VCard.dart';
 
 class VCardManager {
   static Map<Connection, VCardManager> instances = <Connection, VCardManager>{};

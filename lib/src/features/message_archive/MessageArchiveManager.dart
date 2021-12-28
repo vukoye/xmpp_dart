@@ -1,6 +1,6 @@
-import 'package:xmpp_stone_obelisk/src/elements/forms/QueryElement.dart';
-import 'package:xmpp_stone_obelisk/src/elements/forms/XElement.dart';
-import 'package:xmpp_stone_obelisk/src/features/servicediscovery/MAMNegotiator.dart';
+import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
+import 'package:xmpp_stone/src/elements/forms/XElement.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
 import '../../Connection.dart';
 import '../../data/Jid.dart';
 import '../../elements/stanzas/AbstractStanza.dart';

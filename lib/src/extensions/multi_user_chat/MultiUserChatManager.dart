@@ -1,18 +1,18 @@
 import 'dart:async';
 
 import 'package:tuple/tuple.dart';
-import 'package:xmpp_stone_obelisk/src/Connection.dart';
-import 'package:xmpp_stone_obelisk/src/access_point/communication_config.dart';
-import 'package:xmpp_stone_obelisk/src/data/Jid.dart';
-import 'package:xmpp_stone_obelisk/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone_obelisk/src/elements/XmppElement.dart';
-import 'package:xmpp_stone_obelisk/src/elements/forms/XElement.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatData.dart';
-import 'package:xmpp_stone_obelisk/src/extensions/multi_user_chat/MultiUserChatParams.dart';
-import 'package:xmpp_stone_obelisk/src/features/servicediscovery/MultiUserChatNegotiator.dart';
-import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/access_point/communication_config.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/forms/XElement.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
+import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/MultiUserChatNegotiator.dart';
+import 'package:xmpp_stone/xmpp_stone.dart';
 
 class MultiUserChatManager {
   static Map<Connection, MultiUserChatManager> instances =

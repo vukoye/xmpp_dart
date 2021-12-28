@@ -1,9 +1,9 @@
 import 'dart:async';
 
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone_obelisk/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
-import '../../../xmpp_stone_obelisk.dart';
+import '../../../xmpp_stone.dart';
 import '../../Connection.dart';
 import '../../elements/XmppAttribute.dart';
 import '../../elements/XmppElement.dart';

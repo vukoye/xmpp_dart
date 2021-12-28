@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:xmpp_stone_obelisk/src/logger/Log.dart';
-import 'package:xmpp_stone_obelisk/xmpp_stone_obelisk.dart' as xmpp;
+import 'package:xmpp_stone/src/logger/Log.dart';
+import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 import 'dart:io';
 import 'package:console/console.dart';
 import 'package:image/image.dart' as image;

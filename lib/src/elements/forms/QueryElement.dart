@@ -1,4 +1,4 @@
-import 'package:xmpp_stone_obelisk/src/elements/forms/XElement.dart';
+import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import '../XmppAttribute.dart';
 import '../XmppElement.dart';
 

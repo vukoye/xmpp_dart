@@ -1,22 +1,22 @@
 import 'dart:async';
 import 'dart:collection';
 
-import 'package:xmpp_stone_obelisk/src/Connection.dart';
-import 'package:xmpp_stone_obelisk/src/account/XmppAccountSettings.dart';
-import 'package:xmpp_stone_obelisk/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone_obelisk/src/features/BindingResourceNegotiator.dart';
-import 'package:xmpp_stone_obelisk/src/features/Negotiator.dart';
-import 'package:xmpp_stone_obelisk/src/features/SessionInitiationNegotiator.dart';
-import 'package:xmpp_stone_obelisk/src/features/StartTlsNegotatior.dart';
-import 'package:xmpp_stone_obelisk/src/features/sasl/SaslAuthenticationFeature.dart';
-import 'package:xmpp_stone_obelisk/src/features/servicediscovery/AmpNegotiator.dart';
-import 'package:xmpp_stone_obelisk/src/features/servicediscovery/CarbonsNegotiator.dart';
-import 'package:xmpp_stone_obelisk/src/features/servicediscovery/Feature.dart';
-import 'package:xmpp_stone_obelisk/src/features/servicediscovery/MAMNegotiator.dart';
-import 'package:xmpp_stone_obelisk/src/features/servicediscovery/MultiUserChatNegotiator.dart';
-import 'package:xmpp_stone_obelisk/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
+import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/features/BindingResourceNegotiator.dart';
+import 'package:xmpp_stone/src/features/Negotiator.dart';
+import 'package:xmpp_stone/src/features/SessionInitiationNegotiator.dart';
+import 'package:xmpp_stone/src/features/StartTlsNegotatior.dart';
+import 'package:xmpp_stone/src/features/sasl/SaslAuthenticationFeature.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/AmpNegotiator.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/MultiUserChatNegotiator.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xml/xml.dart' as xml;
-import 'package:xmpp_stone_obelisk/src/features/streammanagement/StreamManagmentModule.dart';
+import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
 
 import '../elements/nonzas/Nonza.dart';
 import '../logger/Log.dart';
