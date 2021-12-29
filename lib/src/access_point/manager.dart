@@ -354,9 +354,9 @@ class XMPPClientManager {
       }
 
       // Send receipt if request
-      if (_messageWrapped.isRequestingReceipt) {
-        sendDeliveryAck(message!);
-      }
+      // if (_messageWrapped.isRequestingReceipt) {
+      //   sendDeliveryAck(message!);
+      // }
     });
   }
 
