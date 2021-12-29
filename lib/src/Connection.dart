@@ -218,6 +218,7 @@ xml:lang='en'
           _openStream();
         } else {
           Log.d(TAG, 'Closed in meantime');
+          socket.flush();
           socket.close();
         }
       });
