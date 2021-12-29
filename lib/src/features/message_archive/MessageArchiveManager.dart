@@ -1,6 +1,7 @@
 import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
+import 'package:xmpp_stone/src/logger/Log.dart';
 import '../../Connection.dart';
 import '../../data/Jid.dart';
 import '../../elements/stanzas/AbstractStanza.dart';
@@ -37,7 +38,9 @@ class MessageArchiveManager {
   bool get isQueryByJidSupported =>
       MAMNegotiator.getInstance(_connection).isQueryByJidSupported;
 
-  MessageArchiveManager(this._connection);
+  MessageArchiveManager(this._connection) {
+    _connection.inStanzasStream.listen(_processStanza);
+  }
 
   void queryAll() {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
@@ -103,6 +106,20 @@ class MessageArchiveManager {
             FieldElement.build(varAttr: 'with', value: jid.userAtDomain));
       }
       _connection.writeStanza(iqStanza);
+    }
+  }
+
+  void _processStanza(AbstractStanza? stanza) {
+    if (stanza is IqStanza) {
+      if (stanza.type == IqStanzaType.RESULT) {
+        var finMam = stanza.getChild('fin');
+        if (finMam != null &&
+            finMam.getAttribute('xmlns')!.value == 'urn:xmpp:mam:2') {
+          Log.d(TAG, 'Finished querying result');
+        }
+      } else if (stanza.type == IqStanzaType.ERROR) {
+        //todo handle error cases
+      }
     }
   }
 }

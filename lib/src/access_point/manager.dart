@@ -9,6 +9,7 @@ import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
+import 'package:xmpp_stone/src/features/message_archive/MessageArchiveManager.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/src/messages/MessageHandler.dart';
 import 'package:xmpp_stone/src/messages/MessageParams.dart';
@@ -53,6 +54,7 @@ class XMPPClientManager {
   xmpp.Connection? _connection;
   late MessageHandler _messageHandler;
   late PingManager _pingHandler;
+  late MessageArchiveManager _messageArchiveHandler;
   late ConnectionManagerStateChangedListener _connectionStateListener;
 
   StreamSubscription? messageListener;
@@ -129,6 +131,8 @@ class XMPPClientManager {
         _onPing!();
       }
     }));
+    _messageArchiveHandler =
+        xmpp.MessageArchiveManager.getInstance(_connection!);
     _onReady!(this);
   }
 
@@ -307,6 +311,11 @@ class XMPPClientManager {
             customString: '',
             messageType: MessageStanzaType.CHAT,
             options: XmppCommunicationConfig(shallWaitStanza: false)));
+  }
+
+  void queryArchive() {
+    _messageArchiveHandler.queryByTime(
+        start: DateTime.now().subtract(Duration(minutes: 30)));
   }
 
   void listens() {
