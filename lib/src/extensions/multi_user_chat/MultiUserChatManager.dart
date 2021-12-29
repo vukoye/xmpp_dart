@@ -62,8 +62,14 @@ class MultiUserChatManager {
       XmppCommunicationConfig communicationConfig, String stanzaId) {
     if (!communicationConfig.shallWaitStanza) {
       Timer(Duration(milliseconds: 200), () {
+        var action = GroupChatroomAction.NONE;
+        if (_myUnrespondedIqStanzasActions.containsKey(stanzaId)) {
+          action = _myUnrespondedIqStanzasActions[stanzaId]!;
+          _myUnrespondedIqStanzasActions
+              .remove(_myUnrespondedIqStanzas[stanzaId]!.item1.id);
+        }
         var mucResponse = GroupChatroom(
-            action: _myUnrespondedIqStanzasActions[stanzaId]!,
+            action: action,
             info: _myUnrespondedIqStanzas[stanzaId]!.item1,
             roomName: '',
             isAvailable: true,
@@ -71,8 +77,6 @@ class MultiUserChatManager {
 
         _myUnrespondedIqStanzas[stanzaId]!.item2.complete(mucResponse);
         _myUnrespondedIqStanzas
-            .remove(_myUnrespondedIqStanzas[stanzaId]!.item1.id);
-        _myUnrespondedIqStanzasActions
             .remove(_myUnrespondedIqStanzas[stanzaId]!.item1.id);
       });
     }
