@@ -2,11 +2,13 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:xmpp_stone/src/access_point/communication_config.dart';
 import 'package:xmpp_stone/src/access_point/manager_message_params.dart';
+import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
+import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/src/messages/MessageHandler.dart';
 import 'package:xmpp_stone/src/messages/MessageParams.dart';
@@ -47,8 +49,10 @@ class XMPPClientManager {
   Function(xmpp.SubscriptionEvent event)? _onPresenceSubscription;
   Function(xmpp.PresenceData event)? _onPresence;
   Function(xmpp.XmppConnectionState state)? _onState;
+  Function()? _onPing;
   xmpp.Connection? _connection;
   late MessageHandler _messageHandler;
+  late PingManager _pingHandler;
   late ConnectionManagerStateChangedListener _connectionStateListener;
 
   StreamSubscription? messageListener;
@@ -61,6 +65,7 @@ class XMPPClientManager {
       void Function(xmpp.SubscriptionEvent event)? onPresenceSubscription,
       void Function(xmpp.PresenceData event)? onPresence,
       void Function(xmpp.XmppConnectionState state)? onState,
+      void Function()? onPing,
       String? host,
       String? this.mucDomain}) {
     personel = XMPPClientPersonel(jid, password);
@@ -70,6 +75,7 @@ class XMPPClientManager {
     _onMessage = onMessage;
     _onPresence = onPresence;
     _onState = onState;
+    _onPing = onPing;
     _onPresenceSubscription = onPresenceSubscription;
     this.host = host;
   }
@@ -117,6 +123,12 @@ class XMPPClientManager {
   void onReady() {
     onLog('Connected');
     _messageHandler = xmpp.MessageHandler.getInstance(_connection);
+    _pingHandler = xmpp.PingManager.getInstance(_connection!);
+    _pingHandler.listen(ClientPingListener(onPingReceived: (IqStanza stanza) {
+      if (_onPing != null) {
+        _onPing!();
+      }
+    }));
     _onReady!(this);
   }
 
@@ -446,5 +458,16 @@ class ClientMessagesListener implements xmpp.MessagesListener {
           format(
               'New Message from {color.blue}${message.fromJid!.userAtDomain}{color.end} message: {color.red}${message.body}{color.end}'));
     }
+  }
+}
+
+class ClientPingListener implements xmpp.PingListener {
+  final Function onPingReceived;
+
+  const ClientPingListener({required this.onPingReceived});
+
+  @override
+  void onPing(IqStanza? iqStanza) {
+    onPingReceived(iqStanza);
   }
 }
