@@ -409,7 +409,7 @@ class ConnectionManagerStateChangedListener
 
   @override
   void onConnectionStateChanged(xmpp.XmppConnectionState state) {
-    if (state == xmpp.XmppConnectionState.SessionInitialized) {
+    if (state == xmpp.XmppConnectionState.Ready) {
       Log.i(_context.LOG_TAG, 'Connected');
       _context.onReady();
     } else if (state == xmpp.XmppConnectionState.Closed) {
