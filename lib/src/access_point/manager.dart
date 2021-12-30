@@ -257,21 +257,32 @@ class XMPPClientManager {
 
   Future<GroupChatroom> getRoom(String roomName) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
-    return mucManager.discoverRoom(xmpp.Jid(roomName, mucDomain, ''));
+    var roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return mucManager.discoverRoom(roomJid);
   }
 
   Future<GroupChatroom> getReservedRoomConfig(String roomName) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
-    return mucManager
-        .requestReservedRoomConfig(xmpp.Jid(roomName, mucDomain, ''));
+    var roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return mucManager.requestReservedRoomConfig(roomJid);
   }
 
   // Create room
   Future<GroupChatroom> setRoomConfig(
       String roomName, GroupChatroomConfig config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
+    var roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
     return mucManager.setRoomConfig(
-        xmpp.Jid(roomName, mucDomain, ''),
+        roomJid,
         MultiUserChatCreateParams(
             config: config,
             options: XmppCommunicationConfig(shallWaitStanza: false)));
@@ -281,14 +292,22 @@ class XMPPClientManager {
   Future<GroupChatroom> createInstantRoom(
       String roomName, GroupChatroomConfig config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
-    return mucManager.createRoom(xmpp.Jid(roomName, mucDomain, ''),
+    var roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return mucManager.createRoom(roomJid,
         options: XmppCommunicationConfig(shallWaitStanza: false));
   }
 
   // Join room
   Future<GroupChatroom> join(String roomName, JoinGroupChatroomConfig config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
-    return mucManager.joinRoom(xmpp.Jid(roomName, mucDomain, ''), config);
+    var roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return mucManager.joinRoom(roomJid, config);
   }
 
   // Send 1-1 message
