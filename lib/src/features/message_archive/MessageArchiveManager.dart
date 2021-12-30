@@ -51,7 +51,8 @@ class MessageArchiveManager {
     _connection.writeStanza(iqStanza);
   }
 
-  void queryByTime({DateTime? start, DateTime? end, Jid? jid}) {
+  void queryByTime(
+      {DateTime? start, DateTime? end, Jid? jid, bool includeGroup = false}) {
     if (start == null && end == null && jid == null) {
       queryAll();
     } else {
@@ -67,21 +68,29 @@ class MessageArchiveManager {
           varAttr: 'FORM_TYPE', typeAttr: 'hidden', value: 'urn:xmpp:mam:2'));
       if (start != null) {
         x.addField(FieldElement.build(
-            varAttr: 'start', value: start.toIso8601String()));
+            varAttr: 'start', value: start.millisecondsSinceEpoch.toString()));
       }
       if (end != null) {
-        x.addField(
-            FieldElement.build(varAttr: 'end', value: end.toIso8601String()));
+        x.addField(FieldElement.build(
+            varAttr: 'end', value: end.millisecondsSinceEpoch.toString()));
       }
       if (jid != null) {
         x.addField(
             FieldElement.build(varAttr: 'with', value: jid.userAtDomain));
       }
+      if (includeGroup) {
+        x.addField(
+            FieldElement.build(varAttr: 'include-groupchat', value: 'true'));
+      }
       _connection.writeStanza(iqStanza);
     }
   }
 
-  void queryById({String? beforeId, String? afterId, Jid? jid}) {
+  void queryById(
+      {String? beforeId,
+      String? afterId,
+      Jid? jid,
+      bool includeGroup = false}) {
     if (beforeId == null && afterId == null && jid == null) {
       queryAll();
     } else {
@@ -104,6 +113,10 @@ class MessageArchiveManager {
       if (jid != null) {
         x.addField(
             FieldElement.build(varAttr: 'with', value: jid.userAtDomain));
+      }
+      if (includeGroup) {
+        x.addField(
+            FieldElement.build(varAttr: 'include-groupchat', value: 'true'));
       }
       _connection.writeStanza(iqStanza);
     }

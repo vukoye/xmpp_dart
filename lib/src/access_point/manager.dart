@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:xmpp_stone/src/access_point/communication_config.dart';
 import 'package:xmpp_stone/src/access_point/manager_message_params.dart';
+import 'package:xmpp_stone/src/access_point/manager_query_archive_params.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
@@ -313,9 +315,20 @@ class XMPPClientManager {
             options: XmppCommunicationConfig(shallWaitStanza: false)));
   }
 
-  void queryArchive() {
+  void queryArchiveByTime(ManagerQueryArchiveParams queryParams) {
     _messageArchiveHandler.queryByTime(
-        start: DateTime.now().subtract(Duration(minutes: 30)));
+        start: queryParams.start,
+        end: queryParams.end,
+        jid: Jid.fromFullJid(queryParams.jid ?? ""),
+        includeGroup: queryParams.includeGroup);
+  }
+
+  void queryArchiveById(ManagerQueryArchiveParams queryParams) {
+    _messageArchiveHandler.queryById(
+        beforeId: queryParams.beforeId,
+        afterId: queryParams.afterId,
+        jid: Jid.fromFullJid(queryParams.jid ?? ""),
+        includeGroup: queryParams.includeGroup);
   }
 
   void listens() {
@@ -330,7 +343,14 @@ class XMPPClientManager {
     }
     messageListener =
         _messageHandler.messagesStream.listen((xmpp.MessageStanza? message) {
-      var _messageWrapped = XMPPMessageParams(message: message);
+      var _messageParentWrapped = XMPPMessageParams(message: message);
+      var _messageWrapped = _messageParentWrapped;
+
+      if (_messageParentWrapped.isArchive) {
+        Log.i(LOG_TAG, 'Archive Message parsing from ${message!.id}');
+        _messageWrapped = XMPPMessageParams(
+            message: _messageParentWrapped.message!.getArchiveMessage());
+      }
 
       if (_messageWrapped.isCarbon) {
         _onMessage!(_messageWrapped, ListenerType.onMessage_Carbon);
@@ -366,11 +386,12 @@ class XMPPClientManager {
         if (_messageWrapped.isMessageCustom) {
           _onMessage!(_messageWrapped, ListenerType.onMessage_Custom);
           Log.i(LOG_TAG,
-              'New `ListenerType.onMessage_Custom` from ${message!.id}');
+              'New `ListenerType.onMessage_Custom` with Archive: ${_messageParentWrapped.isArchive.toString()} from ${message!.id}');
         }
         if (_messageWrapped.isMessage) {
           _onMessage!(_messageWrapped, ListenerType.onMessage);
-          Log.i(LOG_TAG, 'New `ListenerType.onMessage` from ${message!.id}');
+          Log.i(LOG_TAG,
+              'New `ListenerType.onMessage` with Archive: ${_messageParentWrapped.isArchive.toString()} from ${message!.id}');
         }
       }
 

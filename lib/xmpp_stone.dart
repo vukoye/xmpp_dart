@@ -32,4 +32,5 @@ export 'src/extensions/message_delivery/MessageDeliveryManager.dart';
 export 'src/extensions/message_delivery/ReceiptInterface.dart';
 export 'src/access_point/manager.dart';
 export 'src/access_point/manager_message_params.dart';
+export 'src/access_point/manager_query_archive_params.dart';
 export 'src/access_point/communication_config.dart';

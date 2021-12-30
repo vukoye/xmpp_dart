@@ -15,6 +15,7 @@ import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeStampElement.dart';
 import 'package:xmpp_stone/src/elements/messages/carbon/ForwardedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/carbon/SentElement.dart';
+import 'package:xmpp_stone/src/elements/messages/mam/ResultElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
@@ -46,9 +47,37 @@ class StanzaParser {
     // Carbon feature
     'message#sent': () => SentElement(),
     'sent#forwarded': () => ForwardedElement(),
+    // MAM
+    'message#result': () => ResultElement(),
+    'result#forwarded': () => ForwardedElement(),
+    'forwarded#delay': () => DelayElement(),
     'forwarded#message': () => MessageStanza('', MessageStanzaType.CHAT),
     'others': () => XmppElement(),
   };
+
+  static AbstractStanza? parseMessageStanzaAttribute(
+      AbstractStanza? stanza, xml.XmlElement element) {
+    var fromString = element.getAttribute('from');
+    if (fromString != null) {
+      var from = Jid.fromFullJid(fromString);
+      stanza!.fromJid = from;
+    }
+    var toString = element.getAttribute('to');
+    if (toString != null) {
+      var to = Jid.fromFullJid(toString);
+      stanza!.toJid = to;
+    }
+    // Look for message type if there are
+    if (stanza is MessageStanza) {
+      if (element.getAttribute('type') != null) {
+        stanza.type = MessageStanzaType.values.lastWhere(
+            (type) =>
+                type.toString().toLowerCase() == element.getAttribute('type'),
+            orElse: () => MessageStanzaType.UNKOWN);
+      }
+    }
+    return stanza;
+  }
 
   //TODO: Improve this!
   static AbstractStanza? parseStanza(xml.XmlElement element) {
@@ -65,16 +94,7 @@ class StanzaParser {
     } else if (element.name.local == 'presence') {
       stanza = _parsePresenceStanza(id, element);
     }
-    var fromString = element.getAttribute('from');
-    if (fromString != null) {
-      var from = Jid.fromFullJid(fromString);
-      stanza!.fromJid = from;
-    }
-    var toString = element.getAttribute('to');
-    if (toString != null) {
-      var to = Jid.fromFullJid(toString);
-      stanza!.toJid = to;
-    }
+    stanza = parseMessageStanzaAttribute(stanza, element);
     element.attributes.forEach((xmlAttribute) {
       stanza!.addAttribute(
           XmppAttribute(xmlAttribute.name.local, xmlAttribute.value));
@@ -136,6 +156,10 @@ class StanzaParser {
     }
     xmppElement = _elementMappings[key]!();
     xmppElement!.name = xmlElement.name.local;
+
+    if (xmppElement is MessageStanza) {
+      xmppElement = parseMessageStanzaAttribute(xmppElement, xmlElement);
+    }
     xmlElement.attributes.forEach((xmlAttribute) {
       xmppElement!.addAttribute(
           XmppAttribute(xmlAttribute.name.local, xmlAttribute.value));

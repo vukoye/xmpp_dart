@@ -62,6 +62,14 @@ class XMPPMessageParams {
     return message!.getSent() != null;
   }
 
+  bool get isArchive {
+    return message!.getArchiveResult() != null;
+  }
+
+  xmpp.XmppElement? get archiveMessage {
+    return isArchive ? message!.getArchiveMessage() : null;
+  }
+
   Map<String, dynamic>? get getCustomData {
     if (isMessageCustom) {
       return json.decode(message!.getCustom()!.textValue!);

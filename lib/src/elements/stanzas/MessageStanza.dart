@@ -9,14 +9,18 @@ import 'package:xmpp_stone/src/elements/messages/ReceiptReceivedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptRequestElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeStampElement.dart';
+import 'package:xmpp_stone/src/elements/messages/carbon/ForwardedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/carbon/SentElement.dart';
+import 'package:xmpp_stone/src/elements/messages/mam/ResultElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpInterface.dart';
+import 'package:xmpp_stone/src/extensions/mam/ArchiveResultInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_carbon/SentInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/CustomInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/DelayInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/TimeInterface.dart';
+import 'package:xmpp_stone/xmpp_stone.dart';
 
 class MessageStanza extends AbstractStanza
     implements
@@ -25,7 +29,8 @@ class MessageStanza extends AbstractStanza
         AmpInterface,
         CustomInterface,
         DelayInterface,
-        SentInterface {
+        SentInterface,
+        ArchiveResultInterface {
   MessageStanzaType? _type;
 
   MessageStanzaType? get type => _type;
@@ -173,6 +178,16 @@ class MessageStanza extends AbstractStanza
   @override
   XmppElement? getSent() {
     return SentElement.parse(this);
+  }
+
+  @override
+  XmppElement? getArchiveResult() {
+    return ResultElement.parse(this);
+  }
+
+  @override
+  MessageStanza? getArchiveMessage() {
+    return ForwardedElement.parseForMessage(ResultElement.parse(this));
   }
 }
 
