@@ -71,8 +71,10 @@ class StanzaParser {
     if (stanza is MessageStanza) {
       if (element.getAttribute('type') != null) {
         stanza.type = MessageStanzaType.values.lastWhere(
-            (type) =>
-                type.toString().toLowerCase() == element.getAttribute('type'),
+            (type) => type
+                .toString()
+                .toLowerCase()
+                .endsWith(element.getAttribute('type')!),
             orElse: () => MessageStanzaType.UNKOWN);
       }
     }
