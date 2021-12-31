@@ -75,7 +75,9 @@ class MultiUserChatManager {
             isAvailable: true,
             error: GroupChatroomError.empty());
 
-        _myUnrespondedIqStanzas[stanzaId]!.item2.complete(mucResponse);
+        if (!_myUnrespondedIqStanzas[stanzaId]!.item2.isCompleted) {
+          _myUnrespondedIqStanzas[stanzaId]!.item2.complete(mucResponse);
+        }
         _myUnrespondedIqStanzas
             .remove(_myUnrespondedIqStanzas[stanzaId]!.item1.id);
       });
@@ -98,7 +100,9 @@ class MultiUserChatManager {
             roomName: '',
             isAvailable: true,
             error: GroupChatroomError.empty());
-        _myUnrespondedPresenceStanzas[stanzaId]!.item2.complete(mucResponse);
+        if (!_myUnrespondedPresenceStanzas[stanzaId]!.item2.isCompleted) {
+          _myUnrespondedPresenceStanzas[stanzaId]!.item2.complete(mucResponse);
+        }
         _myUnrespondedPresenceStanzas
             .remove(_myUnrespondedPresenceStanzas[stanzaId]!.item1.id);
       });
