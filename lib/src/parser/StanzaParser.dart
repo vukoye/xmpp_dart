@@ -16,6 +16,7 @@ import 'package:xmpp_stone/src/elements/messages/TimeStampElement.dart';
 import 'package:xmpp_stone/src/elements/messages/carbon/ForwardedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/carbon/SentElement.dart';
 import 'package:xmpp_stone/src/elements/messages/mam/ResultElement.dart';
+import 'package:xmpp_stone/src/elements/messages/mam/StanzaIdElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
@@ -49,6 +50,7 @@ class StanzaParser {
     'sent#forwarded': () => ForwardedElement(),
     // MAM
     'message#result': () => ResultElement(),
+    'message#stanza-id': () => StanzaIdElement(),
     'result#forwarded': () => ForwardedElement(),
     'forwarded#delay': () => DelayElement(),
     'forwarded#message': () => MessageStanza('', MessageStanzaType.CHAT),
@@ -66,6 +68,10 @@ class StanzaParser {
     if (toString != null) {
       var to = Jid.fromFullJid(toString);
       stanza!.toJid = to;
+    }
+    var idString = element.getAttribute('id');
+    if (idString != null) {
+      stanza!.id = idString;
     }
     // Look for message type if there are
     if (stanza is MessageStanza) {

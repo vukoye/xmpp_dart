@@ -12,9 +12,11 @@ import 'package:xmpp_stone/src/elements/messages/TimeStampElement.dart';
 import 'package:xmpp_stone/src/elements/messages/carbon/ForwardedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/carbon/SentElement.dart';
 import 'package:xmpp_stone/src/elements/messages/mam/ResultElement.dart';
+import 'package:xmpp_stone/src/elements/messages/mam/StanzaIdElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpInterface.dart';
 import 'package:xmpp_stone/src/extensions/mam/ArchiveResultInterface.dart';
+import 'package:xmpp_stone/src/extensions/mam/ArchiveStanzaIdInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_carbon/SentInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/CustomInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/DelayInterface.dart';
@@ -30,7 +32,8 @@ class MessageStanza extends AbstractStanza
         CustomInterface,
         DelayInterface,
         SentInterface,
-        ArchiveResultInterface {
+        ArchiveResultInterface,
+        ArchiveStanzaIdInterface {
   MessageStanzaType? _type;
 
   MessageStanzaType? get type => _type;
@@ -188,6 +191,11 @@ class MessageStanza extends AbstractStanza
   @override
   MessageStanza? getArchiveMessage() {
     return ForwardedElement.parseForMessage(ResultElement.parse(this));
+  }
+
+  @override
+  XmppElement? getStanzaId() {
+    return StanzaIdElement.parse(this);
   }
 }
 
