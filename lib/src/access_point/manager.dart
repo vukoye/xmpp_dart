@@ -53,6 +53,7 @@ class XMPPClientManager {
   Function(xmpp.PresenceData event)? _onPresence;
   Function(xmpp.XmppConnectionState state)? _onState;
   Function()? _onPing;
+  Function(xmpp.AbstractStanza)? _onArchiveRetrieved;
   xmpp.Connection? _connection;
   late MessageHandler _messageHandler;
   late PingManager _pingHandler;
@@ -70,6 +71,7 @@ class XMPPClientManager {
       void Function(xmpp.PresenceData event)? onPresence,
       void Function(xmpp.XmppConnectionState state)? onState,
       void Function()? onPing,
+      void Function(xmpp.AbstractStanza)? onArchiveRetrieved,
       String? host,
       String? this.mucDomain}) {
     personel = XMPPClientPersonel(jid, password);
@@ -80,6 +82,7 @@ class XMPPClientManager {
     _onPresence = onPresence;
     _onState = onState;
     _onPing = onPing;
+    _onArchiveRetrieved = onArchiveRetrieved;
     _onPresenceSubscription = onPresenceSubscription;
     this.host = host;
   }
@@ -135,6 +138,12 @@ class XMPPClientManager {
     }));
     _messageArchiveHandler =
         xmpp.MessageArchiveManager.getInstance(_connection!);
+    _messageArchiveHandler
+        .listen(ClientMAMListener(onResultFinished: (IqStanza stanza) {
+      if (_onArchiveRetrieved != null) {
+        _onArchiveRetrieved!(stanza);
+      }
+    }));
     _onReady!(this);
   }
 
@@ -518,5 +527,16 @@ class ClientPingListener implements xmpp.PingListener {
   @override
   void onPing(IqStanza? iqStanza) {
     onPingReceived(iqStanza);
+  }
+}
+
+class ClientMAMListener implements xmpp.MessageArchiveListener {
+  final Function onResultFinished;
+
+  const ClientMAMListener({required this.onResultFinished});
+
+  @override
+  void onFinish(IqStanza? iqStanza) {
+    onResultFinished(iqStanza);
   }
 }

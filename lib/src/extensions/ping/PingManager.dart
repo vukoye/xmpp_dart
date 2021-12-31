@@ -50,6 +50,9 @@ class PingManager {
   }
 
   void listen(PingListener _listener) {
+    if (listener != null) {
+      listener = null;
+    }
     listener = _listener;
   }
 }

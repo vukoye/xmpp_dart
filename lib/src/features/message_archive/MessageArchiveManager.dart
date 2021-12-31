@@ -1,5 +1,6 @@
 import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
+import 'package:xmpp_stone/src/features/message_archive/MessageArchiveListener.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 import '../../Connection.dart';
@@ -22,6 +23,8 @@ class MessageArchiveManager {
     }
     return instance;
   }
+
+  MessageArchiveListener? listener;
 
   final Connection _connection;
 
@@ -105,10 +108,10 @@ class MessageArchiveManager {
       x.addField(FieldElement.build(
           varAttr: 'FORM_TYPE', typeAttr: 'hidden', value: 'urn:xmpp:mam:2'));
       if (beforeId != null) {
-        x.addField(FieldElement.build(varAttr: 'beforeId', value: beforeId));
+        x.addField(FieldElement.build(varAttr: 'before-id', value: beforeId));
       }
       if (afterId != null) {
-        x.addField(FieldElement.build(varAttr: 'afterId', value: afterId));
+        x.addField(FieldElement.build(varAttr: 'after-id', value: afterId));
       }
       if (jid != null) {
         x.addField(
@@ -129,11 +132,22 @@ class MessageArchiveManager {
         if (finMam != null &&
             finMam.getAttribute('xmlns')!.value == 'urn:xmpp:mam:2') {
           Log.d(TAG, 'Finished querying result');
+
+          if (listener != null) {
+            listener!.onFinish(stanza);
+          }
         }
       } else if (stanza.type == IqStanzaType.ERROR) {
         //todo handle error cases
       }
     }
+  }
+
+  void listen(MessageArchiveListener _listener) {
+    if (listener != null) {
+      listener = null;
+    }
+    listener = _listener;
   }
 }
 
