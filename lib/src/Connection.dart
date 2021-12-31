@@ -118,6 +118,8 @@ class Connection {
     return _connectionStateStreamController.stream;
   }
 
+  List<String> queueStanzaWrite = [];
+
   Jid get fullJid => account.fullJid;
 
   late ConnectionNegotiatorManager connectionNegotatiorManager;
@@ -154,7 +156,8 @@ to='${fullJid.domain}'
 xml:lang='en'
 >
 """;
-    write(streamOpeningString);
+    queueStanzaWrite.add(streamOpeningString);
+    write();
   }
 
   String restOfResponse = '';
@@ -241,6 +244,8 @@ xml:lang='en'
           _socket!.write('</stream:stream>');
         } on Exception {
           Log.d(TAG, 'Socket already closed');
+
+          setState(XmppConnectionState.Closed);
         }
       }
       authenticated = false;
@@ -340,22 +345,29 @@ xml:lang='en'
         state != XmppConnectionState.SocketOpening;
   }
 
-  void write(message) {
+  void write() {
+    String message = queueStanzaWrite.removeAt(0);
     Log.xmppp_sending(message);
-    if (isOpened()) {
-      _socket!.write(message);
+    try {
+      if (isOpened()) {
+        Log.d(TAG, 'Writing to stanza/socket:\n${message}');
+        _socket!.write(message);
+      }
+    } catch (e) {
+      close();
     }
   }
 
   void writeStanza(AbstractStanza stanza) {
     _outStanzaStreamController.add(stanza);
-    Log.d(TAG, 'Writing to stanza:\n${stanza.buildXmlString()}');
-    write(stanza.buildXmlString());
+    queueStanzaWrite.add(stanza.buildXmlString());
+    write();
   }
 
   void writeNonza(Nonza nonza) {
     _outNonzaStreamController.add(nonza);
-    write(nonza.buildXmlString());
+    queueStanzaWrite.add(nonza.buildXmlString());
+    write();
   }
 
   void setState(XmppConnectionState state) {
