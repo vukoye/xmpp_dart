@@ -41,7 +41,7 @@ class XMPPMessageParams {
         !message!.isAmpDeliverStore() &&
         !message!.isAmpDeliverDirect() &&
         message!.fromJid!.isValid() &&
-        message!.toJid!.isValid());
+        (message!.toJid != null && message!.toJid!.isValid()));
   }
 
   bool get isAckReadClient {
@@ -64,6 +64,10 @@ class XMPPMessageParams {
 
   bool get isArchive {
     return message!.getArchiveResult() != null;
+  }
+
+  bool get hasStanzaArchiveId {
+    return message!.getStanzaId() != null;
   }
 
   xmpp.XmppElement? get archiveMessage {
