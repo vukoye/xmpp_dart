@@ -68,11 +68,11 @@ class MessageArchiveManager {
           varAttr: 'FORM_TYPE', typeAttr: 'hidden', value: 'urn:xmpp:mam:2'));
       if (start != null) {
         x.addField(FieldElement.build(
-            varAttr: 'start', value: start.millisecondsSinceEpoch.toString()));
+            varAttr: 'start', value: start.toUtc().toIso8601String()));
       }
       if (end != null) {
         x.addField(FieldElement.build(
-            varAttr: 'end', value: end.millisecondsSinceEpoch.toString()));
+            varAttr: 'end', value: end.toUtc().toIso8601String()));
       }
       if (jid != null) {
         x.addField(
