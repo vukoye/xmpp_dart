@@ -446,7 +446,9 @@ class XMPPClientManager {
           presenceTypeEvent.showElement.toString());
     });
     presenceManager.subscriptionStream.listen((streamEvent) {
-      _onPresenceSubscription!(streamEvent);
+      if (_onPresenceSubscription != null) {
+        _onPresenceSubscription!(streamEvent);
+      }
       if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
         onLog('Accepting presence request');
         presenceManager.acceptSubscription(streamEvent.jid);
