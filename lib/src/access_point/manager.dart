@@ -355,7 +355,9 @@ class XMPPClientManager {
     _messageArchiveHandler.queryById(
         beforeId: queryParams.beforeId,
         afterId: queryParams.afterId,
-        jid: Jid.fromFullJid(queryParams.jid ?? ""),
+        jid: (queryParams.jid != '' && queryParams.jid != null)
+            ? Jid.fromFullJid(queryParams.jid ?? "")
+            : null,
         includeGroup: queryParams.includeGroup);
   }
 
