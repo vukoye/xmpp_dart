@@ -18,7 +18,9 @@ enum GroupChatroomAction {
   FIND_RESERVED_CONFIG,
   CREATE_ROOM,
   CREATE_RESERVED_ROOM,
-  JOIN_ROOM
+  JOIN_ROOM,
+  GET_ROOM_MEMBERS,
+  ADD_MEMBERS,
 }
 
 class GroupChatroomError {
@@ -63,11 +65,14 @@ class GroupChatroom {
   final bool isAvailable;
   final XmppElement info;
   final GroupChatroomError error;
+  final List<Jid> groupMembers;
+
   GroupChatroom(
       {required this.action,
       required this.roomName,
       required this.info,
       required this.isAvailable,
+      required this.groupMembers,
       required this.error});
 }
 
@@ -83,6 +88,7 @@ class InvalidGroupChatroom extends GroupChatroom {
             roomName: roomName,
             info: info,
             isAvailable: isAvailable,
+            groupMembers: [],
             error: error);
 }
 

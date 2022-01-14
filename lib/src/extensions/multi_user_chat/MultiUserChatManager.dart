@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:tuple/tuple.dart';
+import 'package:xml/xml.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/access_point/communication_config.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
@@ -73,6 +74,7 @@ class MultiUserChatManager {
             info: _myUnrespondedIqStanzas[stanzaId]!.item1,
             roomName: '',
             isAvailable: true,
+            groupMembers: [],
             error: GroupChatroomError.empty());
 
         if (!_myUnrespondedIqStanzas[stanzaId]!.item2.isCompleted) {
@@ -99,6 +101,7 @@ class MultiUserChatManager {
             info: _myUnrespondedPresenceStanzas[stanzaId]!.item1,
             roomName: '',
             isAvailable: true,
+            groupMembers: [],
             error: GroupChatroomError.empty());
         if (!_myUnrespondedPresenceStanzas[stanzaId]!.item2.isCompleted) {
           _myUnrespondedPresenceStanzas[stanzaId]!.item2.complete(mucResponse);
@@ -130,6 +133,55 @@ class MultiUserChatManager {
 
     _shallHandleStanzaPrematurely(options, iqStanza.id ?? "");
     return completer.future;
+  }
+
+  Future<GroupChatroom> getMembers(Jid groupJid) async {
+    var completer = Completer<GroupChatroom>();
+
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    iqStanza.fromJid = _connection.fullJid;
+    iqStanza.toJid = groupJid;
+
+    var queryElement = XmppElement();
+    queryElement.name = 'query';
+    queryElement.addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
+    var child = XmppElement();
+    child.name = 'item';
+    child.addAttribute(XmppAttribute('affiliation', 'member'));
+    queryElement.addChild(child);
+    iqStanza.addChild(queryElement);
+
+    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+    _myUnrespondedIqStanzasActions[iqStanza.id] = GroupChatroomAction.GET_ROOM_MEMBERS;
+
+    _connection.writeStanza(iqStanza);
+    
+    return completer.future;
+  }
+
+  Future<void> addMembers(Jid groupJid, Iterable<String> memberJids) async {
+    final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    iqStanza.fromJid = _connection.fullJid;
+    iqStanza.toJid = groupJid;
+    
+    final queryElement = XmppElement();
+    queryElement.name = 'query';
+    queryElement.addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
+    
+    for(final memberJid in memberJids) {
+      final item = XmppElement();
+      item.name = 'item';
+      item.addAttribute(XmppAttribute('affiliation', 'member'));
+      item.addAttribute(XmppAttribute('jid', memberJid));
+      queryElement.addChild(item);
+    }
+
+    iqStanza.addChild(queryElement);
+
+    _connection.writeStanza(iqStanza);
+    print(iqStanza.buildXmlString());
+
+    return Future.value(); 
   }
 
   // Try to request for room configuration
@@ -254,13 +306,30 @@ class MultiUserChatManager {
       AbstractStanza stanza, GroupChatroomAction action) {
     var queryChild = stanza.getChild('query');
     if (queryChild != null) {
-      var muc = GroupChatroom(
-          action: action,
-          info: stanza,
-          roomName: '',
-          isAvailable: true,
-          error: GroupChatroomError.empty());
-      return muc;
+      if (action == GroupChatroomAction.GET_ROOM_MEMBERS) {
+        final items = queryChild.children.where((child) => child!.name == 'item');
+        final groupMembers = items.map((item) {
+          return Jid.fromFullJid(item!.getAttribute('jid')!.value!);
+        }).toList();
+
+        return GroupChatroom(
+            action: action,
+            info: stanza,
+            roomName: '',
+            isAvailable: true,
+            groupMembers: groupMembers,
+            error: GroupChatroomError.empty());
+      }
+      else {
+        var muc = GroupChatroom(
+            action: action,
+            info: stanza,
+            roomName: '',
+            isAvailable: true,
+            groupMembers: [],
+            error: GroupChatroomError.empty());
+        return muc;
+      }
     }
     return _handleError(stanza, action);
   }
@@ -272,6 +341,7 @@ class MultiUserChatManager {
         info: stanza,
         roomName: '',
         isAvailable: false,
+        groupMembers: [],
         error: GroupChatroomError.parse(stanza));
   }
 

@@ -318,6 +318,29 @@ class XMPPClientManager {
     }
     return mucManager.joinRoom(roomJid, config);
   }
+  
+  // Get group members
+  Future<GroupChatroom> getMembers(String roomName) async {
+    var mucManager = xmpp.MultiUserChatManager(_connection!);
+    var roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+
+    return await mucManager.getMembers(roomJid);
+  }
+
+  // Add members in group
+  Future<void> addMembersInGroup(String roomName, Iterable<String> memberJids) {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if(!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+
+    mucManager.addMembers(roomJid, memberJids);
+    return Future.value();
+  }
 
   // Send 1-1 message
   Future<xmpp.MessageStanza> sendMessage(String message, String receiver,
