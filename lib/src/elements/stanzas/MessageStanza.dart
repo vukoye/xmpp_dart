@@ -1,5 +1,6 @@
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/elements/messages/Amp.dart';
 import 'package:xmpp_stone/src/elements/messages/AmpRuleElement.dart';
 import 'package:xmpp_stone/src/elements/messages/CustomElement.dart';
@@ -11,6 +12,7 @@ import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeStampElement.dart';
 import 'package:xmpp_stone/src/elements/messages/carbon/ForwardedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/carbon/SentElement.dart';
+import 'package:xmpp_stone/src/elements/messages/invitation/InviteElement.dart';
 import 'package:xmpp_stone/src/elements/messages/mam/ResultElement.dart';
 import 'package:xmpp_stone/src/elements/messages/mam/StanzaIdElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
@@ -22,7 +24,7 @@ import 'package:xmpp_stone/src/extensions/message_delivery/CustomInterface.dart'
 import 'package:xmpp_stone/src/extensions/message_delivery/DelayInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/TimeInterface.dart';
-import 'package:xmpp_stone/xmpp_stone.dart';
+import 'package:xmpp_stone/src/extensions/multi_user_chat/message_invitation_interface/MessageInvitationInterface.dart';
 
 class MessageStanza extends AbstractStanza
     implements
@@ -33,7 +35,8 @@ class MessageStanza extends AbstractStanza
         DelayInterface,
         SentInterface,
         ArchiveResultInterface,
-        ArchiveStanzaIdInterface {
+        ArchiveStanzaIdInterface,
+        MessageInvitationInterface {
   MessageStanzaType? _type;
 
   MessageStanzaType? get type => _type;
@@ -198,6 +201,18 @@ class MessageStanza extends AbstractStanza
   @override
   XmppElement? getStanzaId() {
     return StanzaIdElement.parse(this);
+  }
+
+  @override
+  XmppElement? getInvitation() {
+    final xElement = XElement.parse(this);
+    if (xElement != null &&
+        xElement.getAttribute('xmlns')!.value ==
+            'http://jabber.org/protocol/muc#user') {
+      return InviteElement.parse(xElement);
+    } else {
+      return null;
+    }
   }
 }
 

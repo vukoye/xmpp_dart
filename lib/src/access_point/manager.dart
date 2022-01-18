@@ -39,6 +39,7 @@ enum ListenerType {
   onMessage_Read_Client,
   onMessage_Carbon,
   onMessage_Delayed,
+  onMessage_GroupInvitation, // Protocol
 }
 
 class XMPPClientManager {
@@ -456,6 +457,11 @@ class XMPPClientManager {
         _onMessage!(_messageWrapped, ListenerType.onMessage_Read_Client);
         Log.i(LOG_TAG,
             'New `ListenerType.onMessage_Read_Client` from ${message!.id}');
+      }
+      if (_messageWrapped.isGroupInvitationMessage) {
+        _onMessage!(_messageWrapped, ListenerType.onMessage_GroupInvitation);
+        Log.i(LOG_TAG,
+            'New `ListenerType.onMessage_GroupInvitation` from ${message!.id}');
       }
       if (_messageWrapped.isOnlyMessage) {
         if (_messageWrapped.isMessageCustom) {
