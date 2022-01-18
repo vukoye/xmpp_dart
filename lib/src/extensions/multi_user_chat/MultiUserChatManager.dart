@@ -1,19 +1,20 @@
 import 'dart:async';
 
 import 'package:tuple/tuple.dart';
-import 'package:xml/xml.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/access_point/communication_config.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
+import 'package:xmpp_stone/src/elements/messages/invitation/InviteElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MultiUserChatNegotiator.dart';
-import 'package:xmpp_stone/xmpp_stone.dart';
 
 class MultiUserChatManager {
   static Map<Connection, MultiUserChatManager> instances =
@@ -144,7 +145,8 @@ class MultiUserChatManager {
 
     var queryElement = XmppElement();
     queryElement.name = 'query';
-    queryElement.addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
+    queryElement.addAttribute(
+        XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
     var child = XmppElement();
     child.name = 'item';
     child.addAttribute(XmppAttribute('affiliation', 'member'));
@@ -152,10 +154,11 @@ class MultiUserChatManager {
     iqStanza.addChild(queryElement);
 
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
-    _myUnrespondedIqStanzasActions[iqStanza.id] = GroupChatroomAction.GET_ROOM_MEMBERS;
+    _myUnrespondedIqStanzasActions[iqStanza.id] =
+        GroupChatroomAction.GET_ROOM_MEMBERS;
 
     _connection.writeStanza(iqStanza);
-    
+
     return completer.future;
   }
 
@@ -163,12 +166,13 @@ class MultiUserChatManager {
     final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = groupJid;
-    
+
     final queryElement = XmppElement();
     queryElement.name = 'query';
-    queryElement.addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
-    
-    for(final memberJid in memberJids) {
+    queryElement.addAttribute(
+        XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
+
+    for (final memberJid in memberJids) {
       final item = XmppElement();
       item.name = 'item';
       item.addAttribute(XmppAttribute('affiliation', 'member'));
@@ -181,7 +185,26 @@ class MultiUserChatManager {
     _connection.writeStanza(iqStanza);
     print(iqStanza.buildXmlString());
 
-    return Future.value(); 
+    return Future.value();
+  }
+
+  Future<void> inviteMembers(Jid groupJid, Iterable<String> memberJids) async {
+    final stanza =
+        MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.NONE);
+    stanza.toJid = groupJid;
+    stanza.fromJid = _connection.fullJid;
+
+    XElement invitationForm = XElement();
+    invitationForm.addAttribute(
+        XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#user'));
+    for (final memberJid in memberJids) {
+      invitationForm.addChild(InviteElement.build(
+          Jid.fromFullJid(memberJid), 'Invitation to groupchat'));
+    }
+
+    stanza.addChild(invitationForm);
+    print(stanza.buildXmlString());
+    _connection.writeStanza(stanza);
   }
 
   // Try to request for room configuration
@@ -290,6 +313,35 @@ class MultiUserChatManager {
     return completer.future;
   }
 
+  Future<GroupChatroom> acceptRoomInvitation(Jid _roomtDotMucDomain,
+      {XmppCommunicationConfig options =
+          const XmppCommunicationConfig(shallWaitStanza: false)}) {
+    var completer = Completer<GroupChatroom>();
+    var presenceStanza = PresenceStanza();
+    presenceStanza.id = AbstractStanza.getRandomId();
+
+    // Change nickname
+    Jid roomtDotMucDomain = Jid(
+        _roomtDotMucDomain.local,
+        _roomtDotMucDomain.domain,
+        '${_connection.fullJid.userAtDomain}#${_connection.fullJid.resource}');
+    presenceStanza.fromJid = _connection.fullJid;
+    presenceStanza.addAttribute(XmppAttribute('to', roomtDotMucDomain.fullJid));
+
+    presenceStanza.addChild(
+        AcceptGroupChatroomInvitationConfig().buildAcceptRoomXElement());
+    print(presenceStanza.buildXmlString());
+
+    _myUnrespondedPresenceStanzas[presenceStanza.id] =
+        Tuple2(presenceStanza, completer);
+    _myUnrespondedIqStanzasActions[presenceStanza.id] =
+        GroupChatroomAction.ACCEPT_ROOM;
+    _connection.writeStanza(presenceStanza);
+
+    _shallHandlePresencePrematurely(options, presenceStanza.id ?? "");
+    return completer.future;
+  }
+
   ///
   /// <xmpp_stone>
   ///   <iq from='tseting@conference.dev.xmpp.hiapp-chat.com' to='627775027401@dev.xmpp.hiapp-chat.com/c714d7b25ea373e31640-246580-77685' type='error' xml:lang='en' id='MVEPQWBJA'>
@@ -307,7 +359,8 @@ class MultiUserChatManager {
     var queryChild = stanza.getChild('query');
     if (queryChild != null) {
       if (action == GroupChatroomAction.GET_ROOM_MEMBERS) {
-        final items = queryChild.children.where((child) => child!.name == 'item');
+        final items =
+            queryChild.children.where((child) => child!.name == 'item');
         final groupMembers = items.map((item) {
           return Jid.fromFullJid(item!.getAttribute('jid')!.value!);
         }).toList();
@@ -319,8 +372,7 @@ class MultiUserChatManager {
             isAvailable: true,
             groupMembers: groupMembers,
             error: GroupChatroomError.empty());
-      }
-      else {
+      } else {
         var muc = GroupChatroom(
             action: action,
             info: stanza,
