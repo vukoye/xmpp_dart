@@ -42,12 +42,14 @@ class MessageStanza extends AbstractStanza
     _type = value;
   }
 
-  MessageStanza(id, type) {
+  MessageStanza(id, MessageStanzaType type) {
     name = 'message';
     this.id = id;
-    _type = type;
-    addAttribute(
-        XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
+    if (type != MessageStanzaType.NONE) {
+      _type = type;
+      addAttribute(XmppAttribute(
+          'type', _type.toString().split('.').last.toLowerCase()));
+    }
   }
 
   String? get body => children
@@ -199,4 +201,12 @@ class MessageStanza extends AbstractStanza
   }
 }
 
-enum MessageStanzaType { CHAT, ERROR, GROUPCHAT, HEADLINE, NORMAL, UNKOWN }
+enum MessageStanzaType {
+  CHAT,
+  ERROR,
+  GROUPCHAT,
+  HEADLINE,
+  NORMAL,
+  UNKOWN,
+  NONE
+}
