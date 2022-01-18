@@ -1,5 +1,5 @@
-import '../XmppAttribute.dart';
-import '../XmppElement.dart';
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
 class FieldElement extends XmppElement {
   FieldElement() {
@@ -31,6 +31,11 @@ class FieldElement extends XmppElement {
         valueElement.textValue = childValue;
         addChild(valueElement);
       });
+    }
+    if (values.isEmpty && value == null) {
+      var valueElement = XmppElement();
+      valueElement.name = 'value';
+      addChild(valueElement);
     }
   }
 
