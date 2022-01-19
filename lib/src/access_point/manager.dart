@@ -340,6 +340,17 @@ class XMPPClientManager {
     return await mucManager.getMembers(roomJid);
   }
 
+  // Get group owners
+  Future<GroupChatroom> getAdmin(String roomName) async {
+    var mucManager = xmpp.MultiUserChatManager(_connection!);
+    var roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+
+    return await mucManager.getAdmins(roomJid);
+  }
+
   // Add members in group
   Future<void> addMembersInGroup(String roomName, Iterable<String> memberJids) {
     final mucManager = xmpp.MultiUserChatManager(_connection!);

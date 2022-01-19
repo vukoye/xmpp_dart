@@ -136,7 +136,7 @@ class MultiUserChatManager {
     return completer.future;
   }
 
-  Future<GroupChatroom> getMembers(Jid groupJid) async {
+  Future<GroupChatroom> _getUsers(Jid groupJid, String affiliation) async {
     var completer = Completer<GroupChatroom>();
 
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
@@ -149,7 +149,7 @@ class MultiUserChatManager {
         XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
     var child = XmppElement();
     child.name = 'item';
-    child.addAttribute(XmppAttribute('affiliation', 'member'));
+    child.addAttribute(XmppAttribute('affiliation', affiliation));
     queryElement.addChild(child);
     iqStanza.addChild(queryElement);
 
@@ -160,6 +160,14 @@ class MultiUserChatManager {
     _connection.writeStanza(iqStanza);
 
     return completer.future;
+  }
+
+  Future<GroupChatroom> getMembers(Jid groupJid) async {
+    return await _getUsers(groupJid, 'member');
+  }
+
+  Future<GroupChatroom> getAdmins(Jid groupJid) async {
+    return await _getUsers(groupJid, 'owner');
   }
 
   Future<void> addMembers(Jid groupJid, Iterable<String> memberJids) async {
