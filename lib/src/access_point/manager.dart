@@ -311,13 +311,15 @@ class XMPPClientManager {
   }
 
   // Join room
-  Future<GroupChatroom> join(String roomName, JoinGroupChatroomConfig config) {
+  Future<GroupChatroom> join(String roomName, JoinGroupChatroomConfig config,
+      {XmppCommunicationConfig options =
+          const XmppCommunicationConfig(shallWaitStanza: false)}) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
       roomJid = xmpp.Jid(roomName, mucDomain, '');
     }
-    return mucManager.joinRoom(roomJid, config);
+    return mucManager.joinRoom(roomJid, config, options: options);
   }
 
   Future<GroupChatroom> acceptInvitation(String roomName) {

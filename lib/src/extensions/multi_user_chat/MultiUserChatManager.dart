@@ -394,6 +394,25 @@ class MultiUserChatManager {
     return _handleError(stanza, action);
   }
 
+  GroupChatroom _handleMucPresenceResponse(
+      AbstractStanza stanza, GroupChatroomAction action) {
+    var xChild = stanza.getChild('x');
+    if (xChild != null) {
+      final status = xChild.getChild('status');
+      if (status != null && status.getAttribute('code')!.value == '110') {
+        var muc = GroupChatroom(
+            action: action,
+            info: stanza,
+            roomName: '',
+            isAvailable: true,
+            groupMembers: [],
+            error: GroupChatroomError.empty());
+        return muc;
+      }
+    }
+    return _handlePresenceError(stanza, action);
+  }
+
   GroupChatroom _handleError(
       AbstractStanza stanza, GroupChatroomAction action) {
     return GroupChatroom(
@@ -403,6 +422,19 @@ class MultiUserChatManager {
         isAvailable: false,
         groupMembers: [],
         error: GroupChatroomError.parse(stanza));
+  }
+
+  GroupChatroom _handlePresenceError(
+      AbstractStanza stanza, GroupChatroomAction action) {
+    return GroupChatroom(
+      action: action,
+      info: stanza,
+      roomName: '',
+      isAvailable: false,
+      groupMembers: [],
+      error: GroupChatroomError.empty(),
+    );
+    // error: GroupChatroomError.parse(stanza));
   }
 
   void _processStanza(AbstractStanza? stanza) {
@@ -436,12 +468,16 @@ class MultiUserChatManager {
         GroupChatroomAction _action =
             _myUnrespondedIqStanzasActions[stanza.id]!;
         print('MUC Stanza type: ' + stanza.type.toString());
-        if (stanza.type == IqStanzaType.RESULT) {
-          var mucResult = _handleMucResponse(stanza, _action);
-          unrespondedPresence!.item2.complete(mucResult);
-          // vCardChild is null because of the result response of updating the card
-        } else if (stanza.type == IqStanzaType.ERROR) {
-          unrespondedPresence!.item2.complete(_handleError(stanza, _action));
+        final xElement = stanza.getChild('x');
+        if (xElement != null) {
+          final status = xElement.getChild('status');
+          if (status != null && status.getAttribute('code')!.value == '110') {
+            var mucResult = _handleMucPresenceResponse(stanza, _action);
+            unrespondedPresence!.item2.complete(mucResult);
+          } else {
+            unrespondedPresence!.item2
+                .complete(_handlePresenceError(stanza, _action));
+          }
         }
       }
     }
