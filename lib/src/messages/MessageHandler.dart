@@ -9,7 +9,6 @@ import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/messages/MessageApi.dart';
 import 'package:xmpp_stone/src/messages/MessageParams.dart';
-import 'package:xmpp_stone/xmpp_stone.dart';
 
 class MessageHandler implements MessageApi {
   static Map<Connection?, MessageHandler> instances =

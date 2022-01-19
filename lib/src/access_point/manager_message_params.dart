@@ -20,7 +20,8 @@ class XMPPMessageParams {
         isAckDeliveryStored ||
         isAckReadClient ||
         isDelay ||
-        isCarbon);
+        isCarbon ||
+        isGroupInvitationMessage);
   }
 
   bool get isRequestingReceipt {
@@ -68,6 +69,10 @@ class XMPPMessageParams {
 
   bool get hasStanzaArchiveId {
     return message!.getStanzaId() != null;
+  }
+
+  bool get isGroupInvitationMessage {
+    return message!.getInvitation() != null;
   }
 
   xmpp.XmppElement? get archiveMessage {

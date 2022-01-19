@@ -3,12 +3,13 @@ import '../XmppAttribute.dart';
 import '../XmppElement.dart';
 
 class XElement extends XmppElement {
+  static String elementName = 'x';
   XElement() {
-    name = 'x';
+    name = elementName;
   }
 
   XElement.build() {
-    name = 'x';
+    name = elementName;
     addAttribute(XmppAttribute('xmlns', 'jabber:x:data'));
   }
 
@@ -19,6 +20,12 @@ class XElement extends XmppElement {
 
   void addField(FieldElement fieldElement) {
     addChild(fieldElement);
+  }
+
+  static XmppElement? parse(parent) {
+    return parent.children.firstWhere(
+        (child) => (child.name == XElement.elementName),
+        orElse: () => null);
   }
 }
 

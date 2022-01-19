@@ -39,6 +39,7 @@ enum ListenerType {
   onMessage_Read_Client,
   onMessage_Carbon,
   onMessage_Delayed,
+  onMessage_GroupInvitation, // Protocol
 }
 
 class XMPPClientManager {
@@ -319,6 +320,62 @@ class XMPPClientManager {
     return mucManager.joinRoom(roomJid, config);
   }
 
+  Future<GroupChatroom> acceptInvitation(String roomName) {
+    var mucManager = xmpp.MultiUserChatManager(_connection!);
+    var roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return mucManager.acceptRoomInvitation(roomJid);
+  }
+
+  // Get group members
+  Future<GroupChatroom> getMembers(String roomName) async {
+    var mucManager = xmpp.MultiUserChatManager(_connection!);
+    var roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+
+    return await mucManager.getMembers(roomJid);
+  }
+
+  // Get group owners
+  Future<GroupChatroom> getAdmin(String roomName) async {
+    var mucManager = xmpp.MultiUserChatManager(_connection!);
+    var roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+
+    return await mucManager.getAdmins(roomJid);
+  }
+
+  // Add members in group
+  Future<void> addMembersInGroup(String roomName, Iterable<String> memberJids) {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+
+    mucManager.addMembers(roomJid, memberJids);
+    return Future.value();
+  }
+
+  // Add members in group
+  Future<void> inviteMemberToGroup(
+      String roomName, Iterable<String> memberJids) {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+
+    mucManager.inviteMembers(roomJid, memberJids);
+    return Future.value();
+  }
+
   // Send 1-1 message
   Future<xmpp.MessageStanza> sendMessage(String message, String receiver,
       {MessageParams additional = const MessageParams(
@@ -411,6 +468,11 @@ class XMPPClientManager {
         _onMessage!(_messageWrapped, ListenerType.onMessage_Read_Client);
         Log.i(LOG_TAG,
             'New `ListenerType.onMessage_Read_Client` from ${message!.id}');
+      }
+      if (_messageWrapped.isGroupInvitationMessage) {
+        _onMessage!(_messageWrapped, ListenerType.onMessage_GroupInvitation);
+        Log.i(LOG_TAG,
+            'New `ListenerType.onMessage_GroupInvitation` from ${message!.id}');
       }
       if (_messageWrapped.isOnlyMessage) {
         if (_messageWrapped.isMessageCustom) {

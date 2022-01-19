@@ -138,7 +138,7 @@ class StanzaParser {
           break;
       }
     }
-    var stanza = MessageStanza(id, type);
+    var stanza = MessageStanza(id, type ?? MessageStanzaType.NONE);
 
     return stanza;
   }
