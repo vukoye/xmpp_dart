@@ -7,6 +7,7 @@ import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp_stone/src/extensions/chat_states/ChatStateDecoration.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
@@ -39,6 +40,7 @@ enum ListenerType {
   onMessage_Read_Client,
   onMessage_Carbon,
   onMessage_Delayed,
+  onMessage_ChatState,
   onMessage_GroupInvitation, // Protocol
 }
 
@@ -386,9 +388,16 @@ class XMPPClientManager {
           messageId: '',
           receipt: ReceiptRequestType.RECEIVED,
           messageType: MessageStanzaType.CHAT,
+          chatStateType: ChatStateType.None,
           options: XmppCommunicationConfig(shallWaitStanza: false))}) {
     return _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
         additional: additional);
+  }
+
+  Future<xmpp.MessageStanza> sendState(String receiver,
+      MessageStanzaType messageType, ChatStateType chatStateType) {
+    return _messageHandler.sendState(
+        xmpp.Jid.fromFullJid(receiver), messageType, chatStateType);
   }
 
   Future<xmpp.MessageStanza> sendDeliveryAck(xmpp.MessageStanza message) {
@@ -398,6 +407,7 @@ class XMPPClientManager {
             messageId: message.id!,
             millisecondTs: 0,
             customString: '',
+            chatStateType: ChatStateType.None,
             messageType: MessageStanzaType.CHAT,
             options: XmppCommunicationConfig(shallWaitStanza: false)));
   }
@@ -487,6 +497,12 @@ class XMPPClientManager {
           Log.i(LOG_TAG,
               'New `ListenerType.onMessage` with Archive: ${_messageParentWrapped.isArchive.toString()} from ${message!.id}');
         }
+      }
+
+      if (_messageParentWrapped.isChatState) {
+        _onMessage!(_messageWrapped, ListenerType.onMessage_ChatState);
+        Log.i(LOG_TAG,
+            'New `ListenerType.onMessage_ChatState` with State: ${_messageParentWrapped.isArchive.toString()} from ${message!.id}');
       }
 
       // Send receipt if request

@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:xmpp_stone/src/extensions/chat_states/ChatStateDecoration.dart';
 import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 
 class XMPPMessageParams {
@@ -42,6 +43,7 @@ class XMPPMessageParams {
         !message!.isAmpDeliverStore() &&
         !message!.isAmpDeliverDirect() &&
         message!.fromJid!.isValid() &&
+        !isChatState &&
         (message!.toJid != null && message!.toJid!.isValid()));
   }
 
@@ -77,6 +79,19 @@ class XMPPMessageParams {
 
   xmpp.XmppElement? get archiveMessage {
     return isArchive ? message!.getArchiveMessage() : null;
+  }
+
+  bool get isChatState {
+    return ChatStateDecoration(
+            message:
+                message ?? xmpp.MessageStanza('', xmpp.MessageStanzaType.NONE))
+        .hasState;
+  }
+
+  ChatStateDecoration get getChatStateDecoration {
+    return ChatStateDecoration(
+        message:
+            message ?? xmpp.MessageStanza('', xmpp.MessageStanzaType.NONE));
   }
 
   Map<String, dynamic>? get getCustomData {
