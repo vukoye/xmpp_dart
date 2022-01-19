@@ -1,5 +1,6 @@
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/elements/messages/Amp.dart';
 import 'package:xmpp_stone/src/elements/messages/AmpRuleElement.dart';
 import 'package:xmpp_stone/src/elements/messages/CustomElement.dart';
@@ -9,14 +10,21 @@ import 'package:xmpp_stone/src/elements/messages/ReceiptReceivedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/ReceiptRequestElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
 import 'package:xmpp_stone/src/elements/messages/TimeStampElement.dart';
+import 'package:xmpp_stone/src/elements/messages/carbon/ForwardedElement.dart';
 import 'package:xmpp_stone/src/elements/messages/carbon/SentElement.dart';
+import 'package:xmpp_stone/src/elements/messages/invitation/InviteElement.dart';
+import 'package:xmpp_stone/src/elements/messages/mam/ResultElement.dart';
+import 'package:xmpp_stone/src/elements/messages/mam/StanzaIdElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpInterface.dart';
+import 'package:xmpp_stone/src/extensions/mam/ArchiveResultInterface.dart';
+import 'package:xmpp_stone/src/extensions/mam/ArchiveStanzaIdInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_carbon/SentInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/CustomInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/DelayInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/TimeInterface.dart';
+import 'package:xmpp_stone/src/extensions/multi_user_chat/message_invitation_interface/MessageInvitationInterface.dart';
 
 class MessageStanza extends AbstractStanza
     implements
@@ -25,7 +33,10 @@ class MessageStanza extends AbstractStanza
         AmpInterface,
         CustomInterface,
         DelayInterface,
-        SentInterface {
+        SentInterface,
+        ArchiveResultInterface,
+        ArchiveStanzaIdInterface,
+        MessageInvitationInterface {
   MessageStanzaType? _type;
 
   MessageStanzaType? get type => _type;
@@ -34,12 +45,14 @@ class MessageStanza extends AbstractStanza
     _type = value;
   }
 
-  MessageStanza(id, type) {
+  MessageStanza(id, MessageStanzaType type) {
     name = 'message';
     this.id = id;
-    _type = type;
-    addAttribute(
-        XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
+    if (type != MessageStanzaType.NONE) {
+      _type = type;
+      addAttribute(XmppAttribute(
+          'type', _type.toString().split('.').last.toLowerCase()));
+    }
   }
 
   String? get body => children
@@ -174,6 +187,41 @@ class MessageStanza extends AbstractStanza
   XmppElement? getSent() {
     return SentElement.parse(this);
   }
+
+  @override
+  XmppElement? getArchiveResult() {
+    return ResultElement.parse(this);
+  }
+
+  @override
+  MessageStanza? getArchiveMessage() {
+    return ForwardedElement.parseForMessage(ResultElement.parse(this));
+  }
+
+  @override
+  XmppElement? getStanzaId() {
+    return StanzaIdElement.parse(this);
+  }
+
+  @override
+  XmppElement? getInvitation() {
+    final xElement = XElement.parse(this);
+    if (xElement != null &&
+        xElement.getAttribute('xmlns')!.value ==
+            'http://jabber.org/protocol/muc#user') {
+      return InviteElement.parse(xElement);
+    } else {
+      return null;
+    }
+  }
 }
 
-enum MessageStanzaType { CHAT, ERROR, GROUPCHAT, HEADLINE, NORMAL, UNKOWN }
+enum MessageStanzaType {
+  CHAT,
+  ERROR,
+  GROUPCHAT,
+  HEADLINE,
+  NORMAL,
+  UNKOWN,
+  NONE
+}

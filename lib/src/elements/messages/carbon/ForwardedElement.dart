@@ -1,3 +1,5 @@
+import 'package:xmpp_stone/xmpp_stone.dart';
+
 import '../../XmppAttribute.dart';
 import '../../XmppElement.dart';
 
@@ -7,7 +9,7 @@ class ForwardedElement extends XmppElement {
     name = elementName;
   }
 
-  ForwardedElement.build(String timestamp, String from) {
+  ForwardedElement.build() {
     name = elementName;
     addAttribute(XmppAttribute('xmlns', 'urn:xmpp:forward:0'));
   }
@@ -16,5 +18,15 @@ class ForwardedElement extends XmppElement {
     return parent.children.firstWhere(
         (child) => (child.name == ForwardedElement.elementName),
         orElse: () => null);
+  }
+
+  static MessageStanza? parseForMessage(parent) {
+    XmppElement? parentXmpp = parse(parent)!;
+    if (parentXmpp != null) {
+      return parentXmpp.children.firstWhere((child) => (child is MessageStanza),
+          orElse: () => null) as MessageStanza;
+    } else {
+      return null;
+    }
   }
 }

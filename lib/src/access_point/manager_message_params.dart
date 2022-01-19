@@ -20,7 +20,8 @@ class XMPPMessageParams {
         isAckDeliveryStored ||
         isAckReadClient ||
         isDelay ||
-        isCarbon);
+        isCarbon ||
+        isGroupInvitationMessage);
   }
 
   bool get isRequestingReceipt {
@@ -41,7 +42,7 @@ class XMPPMessageParams {
         !message!.isAmpDeliverStore() &&
         !message!.isAmpDeliverDirect() &&
         message!.fromJid!.isValid() &&
-        message!.toJid!.isValid());
+        (message!.toJid != null && message!.toJid!.isValid()));
   }
 
   bool get isAckReadClient {
@@ -60,6 +61,22 @@ class XMPPMessageParams {
 
   bool get isCarbon {
     return message!.getSent() != null;
+  }
+
+  bool get isArchive {
+    return message!.getArchiveResult() != null;
+  }
+
+  bool get hasStanzaArchiveId {
+    return message!.getStanzaId() != null;
+  }
+
+  bool get isGroupInvitationMessage {
+    return message!.getInvitation() != null;
+  }
+
+  xmpp.XmppElement? get archiveMessage {
+    return isArchive ? message!.getArchiveMessage() : null;
   }
 
   Map<String, dynamic>? get getCustomData {

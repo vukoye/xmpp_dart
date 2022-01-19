@@ -38,5 +38,7 @@ class AmpNegotiator extends Negotiator {
   @override
   void negotiate(List<Nonza> nonzas) {
     // Do not genetiate
+    state = NegotiatorState.DONE;
+    enabled = true;
   }
 }

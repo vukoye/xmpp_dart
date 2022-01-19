@@ -7,7 +7,7 @@ class SentElement extends XmppElement {
     name = elementName;
   }
 
-  SentElement.build(String timestamp, String from) {
+  SentElement.build() {
     name = elementName;
     addAttribute(XmppAttribute('xmlns', 'urn:xmpp:carbons:2'));
   }

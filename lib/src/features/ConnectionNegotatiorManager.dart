@@ -119,7 +119,7 @@ class ConnectionNegotiatorManager {
     //     .add(ServiceDiscoveryNegotiator.getInstance(_connection));
     supportedNegotiatorList.add(CarbonsNegotiator.getInstance(_connection));
     supportedNegotiatorList.add(MAMNegotiator.getInstance(_connection));
-    supportedNegotiatorList.add(AmpNegotiator.getInstance(_connection));
+    // supportedNegotiatorList.add(AmpNegotiator.getInstance(_connection));
     supportedNegotiatorList
         .add(MultiUserChatNegotiator.getInstance(_connection));
   }

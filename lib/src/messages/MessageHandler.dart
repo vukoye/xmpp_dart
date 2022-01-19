@@ -9,7 +9,6 @@ import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/messages/MessageApi.dart';
 import 'package:xmpp_stone/src/messages/MessageParams.dart';
-import 'package:xmpp_stone/xmpp_stone.dart';
 
 class MessageHandler implements MessageApi {
   static Map<Connection?, MessageHandler> instances =
@@ -92,11 +91,13 @@ class MessageHandler implements MessageApi {
 
     if (!additional.options.shallWaitStanza) {
       Timer(Duration(milliseconds: 200), () {
-        _myUnrespondedIqStanzas[stanza.id]!
-            .item2
-            .complete(_myUnrespondedIqStanzas[stanza.id]!.item1);
-        _myUnrespondedIqStanzas
-            .remove(_myUnrespondedIqStanzas[stanza.id]!.item1.id);
+        if (_myUnrespondedIqStanzas.containsKey(stanza.id)) {
+          _myUnrespondedIqStanzas[stanza.id]!
+              .item2
+              .complete(_myUnrespondedIqStanzas[stanza.id]!.item1);
+          _myUnrespondedIqStanzas
+              .remove(_myUnrespondedIqStanzas[stanza.id]!.item1.id);
+        }
       });
     }
     return completer.future;
