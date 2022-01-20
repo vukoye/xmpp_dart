@@ -96,8 +96,22 @@ class XMPPMessageParams {
 
   Map<String, dynamic>? get getCustomData {
     if (isMessageCustom) {
-      return json.decode(message!.getCustom()!.textValue!);
+      return _tryParseCustomData(message!.getCustom()!.textValue!);
     }
     return {};
+  }
+
+  Map<String, dynamic> _tryParseCustomData(_customData) {
+    final String customData = _customData;
+    if (customData.isNotEmpty) {
+      final firstAttempt = json.decode(customData);
+      if (firstAttempt is String) {
+        return Map<String, dynamic>.from(json.decode(firstAttempt));
+      } else {
+        return Map<String, dynamic>.from(firstAttempt);
+      }
+    }
+
+    return const {};
   }
 }
