@@ -242,9 +242,8 @@ xml:lang='en'
         try {
           setState(XmppConnectionState.Closing);
           _socket!.write('</stream:stream>');
-        } on Exception {
+        } catch (e) {
           Log.d(TAG, 'Socket already closed');
-
           setState(XmppConnectionState.Closed);
         }
       }
@@ -349,11 +348,16 @@ xml:lang='en'
     String message = queueStanzaWrite.removeAt(0);
     Log.xmppp_sending(message);
     try {
+      print('sfsdfsdfd');
       if (isOpened()) {
         Log.d(TAG, 'Writing to stanza/socket:\n${message}');
         _socket!.write(message);
+      } else {
+        // Trigger to reconnect
+        setState(XmppConnectionState.ForcefullyClosed);
       }
     } catch (e) {
+      print('sfd');
       close();
     }
   }
