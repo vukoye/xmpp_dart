@@ -118,18 +118,6 @@ class XMPPClientManager {
     return _connection!.state;
   }
 
-  lookForConnection() {
-    if (_connection!.state == xmpp.XmppConnectionState.ForcefullyClosed) {
-      _connection!.reconnect();
-    } else if (_connection!.state == xmpp.XmppConnectionState.Closed) {
-      _connection!.connect();
-    } else if (_connection!.state == xmpp.XmppConnectionState.Closing) {
-      _connection!.close();
-      _connection!.connect();
-    }
-    return getState();
-  }
-
   void onReady() {
     onLog('Connected');
     _messageHandler = xmpp.MessageHandler.getInstance(_connection);
@@ -205,6 +193,24 @@ class XMPPClientManager {
     var jid = xmpp.Jid.fromFullJid(receiver);
     var presenceManager = xmpp.PresenceManager.getInstance(_connection);
     presenceManager.askDirectPresence(jid);
+  }
+
+  void presenceSubscribe(String receiver) {
+    var jid = xmpp.Jid.fromFullJid(receiver);
+    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
+    presenceManager.subscribe(jid);
+  }
+
+  void presenceReject(String receiver) {
+    var jid = xmpp.Jid.fromFullJid(receiver);
+    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
+    presenceManager.declineSubscription(jid);
+  }
+
+  void presenceAccept(String receiver) {
+    var jid = xmpp.Jid.fromFullJid(receiver);
+    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
+    presenceManager.acceptSubscription(jid);
   }
 
   // My contact/buddy
@@ -530,13 +536,6 @@ class XMPPClientManager {
     presenceManager.subscriptionStream.listen((streamEvent) {
       if (_onPresenceSubscription != null) {
         _onPresenceSubscription!(streamEvent);
-      }
-      if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
-        onLog('Accepting presence request');
-        presenceManager.acceptSubscription(streamEvent.jid);
-      } else if (streamEvent.type == xmpp.SubscriptionEventType.ACCEPTED) {
-        onLog('Acccepted presence request');
-        // presenceManager.acceptSubscription(streamEvent.jid);
       }
     });
   }

@@ -348,7 +348,6 @@ xml:lang='en'
     String message = queueStanzaWrite.removeAt(0);
     Log.xmppp_sending(message);
     try {
-      print('sfsdfsdfd');
       if (isOpened()) {
         Log.d(TAG, 'Writing to stanza/socket:\n${message}');
         _socket!.write(message);
