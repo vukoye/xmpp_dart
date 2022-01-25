@@ -117,7 +117,6 @@ class RosterManager {
       var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
       if (_myUnrespondedIqStanzas[stanza.id] != null) {
         if (stanza.type == IqStanzaType.RESULT) {
-          print('sdfd' + stanza.buildXmlString());
           if (_isFullJidRequest(unrespondedStanza!.item1)) {
             _handleFullRosterResponse(stanza);
             _handleRosterResultSuccessResponse(unrespondedStanza);
@@ -160,10 +159,14 @@ class RosterManager {
           var jid = Jid.fromFullJid(child.getAttribute('jid')!.value!);
           var name = child.getAttribute('name')?.value;
           var subscriptionString = child.getAttribute('subscription')?.value;
+          var subscriptionRequestStatusString =
+              child.getAttribute('ask')?.value;
           var buddy = Buddy(jid);
           buddy.name = name;
           buddy.accountJid = _connection.fullJid;
           buddy.subscriptionType = Buddy.typeFromString(subscriptionString);
+          buddy.subscriptionAskType =
+              Buddy.typeAskFromString(subscriptionRequestStatusString);
           _rosterMap[jid] = buddy;
         }
       });
