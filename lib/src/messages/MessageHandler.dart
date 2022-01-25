@@ -6,6 +6,7 @@ import 'package:xmpp_stone/src/access_point/communication_config.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone/src/extensions/chat_states/ChatStateDecoration.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/messages/MessageApi.dart';
 import 'package:xmpp_stone/src/messages/MessageParams.dart';
@@ -49,8 +50,27 @@ class MessageHandler implements MessageApi {
           messageId: '',
           receipt: ReceiptRequestType.NONE,
           messageType: MessageStanzaType.CHAT,
+          chatStateType: ChatStateType.None,
           options: XmppCommunicationConfig(shallWaitStanza: false))}) {
     return _sendMessageStanza(to, text, additional);
+  }
+
+  Future<MessageStanza> sendState(
+    Jid? to,
+    MessageStanzaType messageType,
+    ChatStateType chatStateType,
+  ) {
+    return _sendMessageStanza(
+        to,
+        '',
+        MessageParams(
+            millisecondTs: 0,
+            customString: '',
+            messageId: '',
+            receipt: ReceiptRequestType.NONE,
+            messageType: messageType,
+            chatStateType: chatStateType,
+            options: XmppCommunicationConfig(shallWaitStanza: false)));
   }
 
   Future<MessageStanza> _sendMessageStanza(
@@ -82,6 +102,10 @@ class MessageHandler implements MessageApi {
 
     if (additional.customString.isNotEmpty) {
       stanza.addCustom(additional.customString);
+    }
+
+    if (additional.chatStateType != ChatStateType.None) {
+      ChatStateDecoration(message: stanza).setState(additional.chatStateType);
     }
 
     print(stanza.buildXmlString());

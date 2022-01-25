@@ -52,7 +52,9 @@ class GroupChatroomError {
         orElse: () => XmppElement());
 
     return GroupChatroomError(
-        errorCode: errorElement.getAttribute('code')!.value ?? '',
+        errorCode: errorElement.getAttribute('code') != null
+            ? errorElement.getAttribute('code')!.value ?? ''
+            : '',
         errorMessage: textItem!.textValue ?? '',
         errorType: errorItem!.name ?? '',
         hasError: true);

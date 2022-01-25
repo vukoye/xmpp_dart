@@ -7,6 +7,7 @@ import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp_stone/src/extensions/chat_states/ChatStateDecoration.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
@@ -39,6 +40,7 @@ enum ListenerType {
   onMessage_Read_Client,
   onMessage_Carbon,
   onMessage_Delayed,
+  onMessage_ChatState,
   onMessage_GroupInvitation, // Protocol
 }
 
@@ -114,18 +116,6 @@ class XMPPClientManager {
 
   xmpp.XmppConnectionState getState() {
     return _connection!.state;
-  }
-
-  lookForConnection() {
-    if (_connection!.state == xmpp.XmppConnectionState.ForcefullyClosed) {
-      _connection!.reconnect();
-    } else if (_connection!.state == xmpp.XmppConnectionState.Closed) {
-      _connection!.connect();
-    } else if (_connection!.state == xmpp.XmppConnectionState.Closing) {
-      _connection!.close();
-      _connection!.connect();
-    }
-    return getState();
   }
 
   void onReady() {
@@ -205,6 +195,24 @@ class XMPPClientManager {
     presenceManager.askDirectPresence(jid);
   }
 
+  void presenceSubscribe(String receiver) {
+    var jid = xmpp.Jid.fromFullJid(receiver);
+    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
+    presenceManager.subscribe(jid);
+  }
+
+  void presenceReject(String receiver) {
+    var jid = xmpp.Jid.fromFullJid(receiver);
+    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
+    presenceManager.declineSubscription(jid);
+  }
+
+  void presenceAccept(String receiver) {
+    var jid = xmpp.Jid.fromFullJid(receiver);
+    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
+    presenceManager.acceptSubscription(jid);
+  }
+
   // My contact/buddy
   Future<xmpp.VCard> vCardFrom(receiver) {
     var receiverJid = xmpp.Jid.fromFullJid(receiver);
@@ -212,15 +220,19 @@ class XMPPClientManager {
     return vCardManager.getVCardFor(receiverJid);
   }
 
+  StreamSubscription? _rosterList = null;
+
   // Get roster list
   Future<List<xmpp.Buddy>> rosterList() {
     var completer = Completer<List<xmpp.Buddy>>();
     var rosterManager = xmpp.RosterManager.getInstance(_connection);
-    rosterManager.queryForRoster().then((result) {
-      var rosterList = rosterManager.getRoster();
-      personel.buddies = rosterList;
+    if (_rosterList != null) {
+      _rosterList!.cancel();
+    }
+    _rosterList = rosterManager.rosterStream.listen((rosterList) {
       completer.complete(rosterList);
     });
+    rosterManager.queryForRoster().then((result) {});
     return completer.future;
   }
 
@@ -311,13 +323,15 @@ class XMPPClientManager {
   }
 
   // Join room
-  Future<GroupChatroom> join(String roomName, JoinGroupChatroomConfig config) {
+  Future<GroupChatroom> join(String roomName, JoinGroupChatroomConfig config,
+      {XmppCommunicationConfig options =
+          const XmppCommunicationConfig(shallWaitStanza: false)}) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
       roomJid = xmpp.Jid(roomName, mucDomain, '');
     }
-    return mucManager.joinRoom(roomJid, config);
+    return mucManager.joinRoom(roomJid, config, options: options);
   }
 
   Future<GroupChatroom> acceptInvitation(String roomName) {
@@ -384,9 +398,16 @@ class XMPPClientManager {
           messageId: '',
           receipt: ReceiptRequestType.RECEIVED,
           messageType: MessageStanzaType.CHAT,
+          chatStateType: ChatStateType.None,
           options: XmppCommunicationConfig(shallWaitStanza: false))}) {
     return _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
         additional: additional);
+  }
+
+  Future<xmpp.MessageStanza> sendState(String receiver,
+      MessageStanzaType messageType, ChatStateType chatStateType) {
+    return _messageHandler.sendState(
+        xmpp.Jid.fromFullJid(receiver), messageType, chatStateType);
   }
 
   Future<xmpp.MessageStanza> sendDeliveryAck(xmpp.MessageStanza message) {
@@ -396,6 +417,7 @@ class XMPPClientManager {
             messageId: message.id!,
             millisecondTs: 0,
             customString: '',
+            chatStateType: ChatStateType.None,
             messageType: MessageStanzaType.CHAT,
             options: XmppCommunicationConfig(shallWaitStanza: false)));
   }
@@ -487,6 +509,12 @@ class XMPPClientManager {
         }
       }
 
+      if (_messageParentWrapped.isChatState) {
+        _onMessage!(_messageWrapped, ListenerType.onMessage_ChatState);
+        Log.i(LOG_TAG,
+            'New `ListenerType.onMessage_ChatState` with State: ${_messageParentWrapped.isArchive.toString()} from ${message!.id}');
+      }
+
       // Send receipt if request
       // if (_messageWrapped.isRequestingReceipt) {
       //   sendDeliveryAck(message!);
@@ -512,13 +540,6 @@ class XMPPClientManager {
     presenceManager.subscriptionStream.listen((streamEvent) {
       if (_onPresenceSubscription != null) {
         _onPresenceSubscription!(streamEvent);
-      }
-      if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
-        onLog('Accepting presence request');
-        presenceManager.acceptSubscription(streamEvent.jid);
-      } else if (streamEvent.type == xmpp.SubscriptionEventType.ACCEPTED) {
-        onLog('Acccepted presence request');
-        // presenceManager.acceptSubscription(streamEvent.jid);
       }
     });
   }
