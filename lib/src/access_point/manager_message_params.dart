@@ -10,8 +10,7 @@ class XMPPMessageParams {
   bool _isCustomDelivery() {
     if (_isCustomAck()) {
       return ['Delivery-Ack-Group', 'Delivery-Ack']
-              .contains(getCustomData!['iqType']) ||
-          getCustomData!['iqType'].toString().isNotEmpty;
+          .contains(getCustomData!['iqType']);
     } else {
       return false;
     }
@@ -20,13 +19,16 @@ class XMPPMessageParams {
   bool _isCustomRead() {
     if (_isCustomAck()) {
       return [
-            'Read-Ack-Group',
-            'Read-Ack',
-          ].contains(getCustomData!['iqType']) ||
-          getCustomData!['iqType'].toString().isNotEmpty;
+        'Read-Ack-Group',
+        'Read-Ack',
+      ].contains(getCustomData!['iqType']);
     } else {
       return false;
     }
+  }
+
+  bool isCustomAny() {
+    return message!.getCustom() != null;
   }
 
   bool _isCustomAck() {
@@ -70,20 +72,11 @@ class XMPPMessageParams {
   }
 
   bool get isAckDeliveryClient {
-    return (message!.body == null &&
-            message!.getCustom() == null &&
-            !message!.isAmpDeliverStore() &&
-            !message!.isAmpDeliverDirect() &&
-            message!.fromJid!.isValid() &&
-            !isChatState &&
-            (message!.toJid != null && message!.toJid!.isValid())) ||
-        _isCustomDelivery();
+    return _isCustomDelivery();
   }
 
   bool get isAckReadClient {
-    return (message!.body == null &&
-        message!.getCustom() != null &&
-        _isCustomRead());
+    return _isCustomRead();
   }
 
   bool get isDelay {
@@ -128,7 +121,7 @@ class XMPPMessageParams {
   }
 
   Map<String, dynamic>? get getCustomData {
-    if (isMessageCustom) {
+    if (message!.getCustom() != null) {
       return _tryParseCustomData(message!.getCustom()!.textValue!);
     }
     return {};
