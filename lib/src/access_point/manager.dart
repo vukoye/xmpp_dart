@@ -8,6 +8,7 @@ import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone/src/extensions/chat_states/ChatStateDecoration.dart';
+import 'package:xmpp_stone/src/extensions/last_activity/LastActivityManager.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
@@ -61,6 +62,7 @@ class XMPPClientManager {
   late MessageHandler _messageHandler;
   late PingManager _pingHandler;
   late MessageArchiveManager _messageArchiveHandler;
+  late LastActivityManager _lastActivityManager;
   late ConnectionManagerStateChangedListener _connectionStateListener;
 
   StreamSubscription? messageListener;
@@ -118,6 +120,7 @@ class XMPPClientManager {
     return _connection!.state;
   }
 
+  // Initialized managers
   void onReady() {
     onLog('Connected');
     _messageHandler = xmpp.MessageHandler.getInstance(_connection);
@@ -135,6 +138,8 @@ class XMPPClientManager {
         _onArchiveRetrieved!(stanza);
       }
     }));
+    // Last activity - XEP0012
+    _lastActivityManager = xmpp.LastActivityManager.getInstance(_connection!);
     _onReady!(this);
   }
 
@@ -422,6 +427,8 @@ class XMPPClientManager {
             options: XmppCommunicationConfig(shallWaitStanza: false)));
   }
 
+  /// Archive related methods
+
   void queryArchiveByTime(ManagerQueryArchiveParams queryParams) {
     _messageArchiveHandler.queryByTime(
         start: queryParams.start,
@@ -439,6 +446,13 @@ class XMPPClientManager {
             : null,
         includeGroup: queryParams.includeGroup);
   }
+
+  /// Last Activity method
+  Future<String> askLastActivity(final String userJid) async {
+    return await _lastActivityManager.askLastActivity(Jid.fromFullJid(userJid));
+  }
+
+  /// Listeners
 
   void listens() {
     _listenMessage();
