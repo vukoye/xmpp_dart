@@ -221,6 +221,7 @@ xml:lang='en'
           _openStream();
         } else {
           Log.d(TAG, 'Closed in meantime');
+          queueStanzaWrite = [];
           socket.flush();
           socket.close();
         }
@@ -244,6 +245,7 @@ xml:lang='en'
           _socket!.write('</stream:stream>');
         } catch (e) {
           Log.d(TAG, 'Socket already closed');
+          queueStanzaWrite = [];
           setState(XmppConnectionState.Closed);
         }
       }
