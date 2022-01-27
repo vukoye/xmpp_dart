@@ -7,8 +7,41 @@ class XMPPMessageParams {
   final xmpp.MessageStanza? message;
   const XMPPMessageParams({this.message});
 
+  bool _isCustomDelivery() {
+    if (_isCustomAck()) {
+      return ['Delivery-Ack-Group', 'Delivery-Ack']
+          .contains(getCustomData!['iqType']);
+    } else {
+      return false;
+    }
+  }
+
+  bool _isCustomRead() {
+    if (_isCustomAck()) {
+      return [
+        'Read-Ack-Group',
+        'Read-Ack',
+      ].contains(getCustomData!['iqType']);
+    } else {
+      return false;
+    }
+  }
+
+  bool isCustomAny() {
+    return message!.getCustom() != null;
+  }
+
+  bool _isCustomAck() {
+    return message!.getCustom() != null && getCustomData!.containsKey('iqType');
+  }
+
+  bool _isCustomMessage() {
+    return message!.getCustom() != null &&
+        !getCustomData!.containsKey('iqType');
+  }
+
   bool get isMessageCustom {
-    return message!.body == null && message!.getCustom() != null;
+    return message!.body == null && _isCustomMessage();
   }
 
   bool get isMessage {
@@ -22,7 +55,8 @@ class XMPPMessageParams {
         isAckReadClient ||
         isDelay ||
         isCarbon ||
-        isGroupInvitationMessage);
+        isGroupInvitationMessage ||
+        _isCustomAck());
   }
 
   bool get isRequestingReceipt {
@@ -38,19 +72,11 @@ class XMPPMessageParams {
   }
 
   bool get isAckDeliveryClient {
-    return (message!.body == null &&
-        message!.getCustom() == null &&
-        !message!.isAmpDeliverStore() &&
-        !message!.isAmpDeliverDirect() &&
-        message!.fromJid!.isValid() &&
-        !isChatState &&
-        (message!.toJid != null && message!.toJid!.isValid()));
+    return _isCustomDelivery();
   }
 
   bool get isAckReadClient {
-    return (message!.body == null &&
-        message!.getCustom() != null &&
-        getCustomData!['iqType'] == 'Read-Ack');
+    return _isCustomRead();
   }
 
   bool get isDelay {
@@ -95,7 +121,7 @@ class XMPPMessageParams {
   }
 
   Map<String, dynamic>? get getCustomData {
-    if (isMessageCustom) {
+    if (message!.getCustom() != null) {
       return _tryParseCustomData(message!.getCustom()!.textValue!);
     }
     return {};
