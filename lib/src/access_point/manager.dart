@@ -360,7 +360,18 @@ class XMPPClientManager {
   }
 
   // Get group owners
-  Future<GroupChatroom> getAdmin(String roomName) async {
+  Future<GroupChatroom> getOwners(String roomName) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+
+    return await mucManager.getOwners(roomJid);
+  }
+
+  // Get group admins
+  Future<GroupChatroom> getAdmins(String roomName) async {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {

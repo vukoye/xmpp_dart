@@ -167,6 +167,10 @@ class MultiUserChatManager {
   }
 
   Future<GroupChatroom> getAdmins(Jid groupJid) async {
+    return await _getUsers(groupJid, 'admin');
+  }
+
+  Future<GroupChatroom> getOwners(Jid groupJid) async {
     return await _getUsers(groupJid, 'owner');
   }
 
