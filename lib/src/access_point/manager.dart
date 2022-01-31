@@ -392,8 +392,8 @@ class XMPPClientManager {
     mucManager.addMembers(roomJid, memberJids);
     return Future.value();
   }
-
-  // Add members in group
+  
+  // Invite members in group
   Future<void> inviteMemberToGroup(
       String roomName, Iterable<String> memberJids) {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
