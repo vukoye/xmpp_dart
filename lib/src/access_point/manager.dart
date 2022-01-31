@@ -225,17 +225,15 @@ class XMPPClientManager {
     return vCardManager.getVCardFor(receiverJid);
   }
 
-  StreamSubscription? _rosterList = null;
-
   // Get roster list
   Future<List<xmpp.Buddy>> rosterList() {
     var completer = Completer<List<xmpp.Buddy>>();
     var rosterManager = xmpp.RosterManager.getInstance(_connection);
-    if (_rosterList != null) {
-      _rosterList!.cancel();
-    }
+
+    StreamSubscription? _rosterList = null;
     _rosterList = rosterManager.rosterStream.listen((rosterList) {
       completer.complete(rosterList);
+      _rosterList!.cancel();
     });
     rosterManager.queryForRoster().then((result) {});
     return completer.future;
