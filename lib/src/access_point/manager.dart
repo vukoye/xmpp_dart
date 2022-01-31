@@ -225,17 +225,15 @@ class XMPPClientManager {
     return vCardManager.getVCardFor(receiverJid);
   }
 
-  StreamSubscription? _rosterList = null;
-
   // Get roster list
   Future<List<xmpp.Buddy>> rosterList() {
     var completer = Completer<List<xmpp.Buddy>>();
     var rosterManager = xmpp.RosterManager.getInstance(_connection);
-    if (_rosterList != null) {
-      _rosterList!.cancel();
-    }
+
+    StreamSubscription? _rosterList = null;
     _rosterList = rosterManager.rosterStream.listen((rosterList) {
       completer.complete(rosterList);
+      _rosterList!.cancel();
     });
     rosterManager.queryForRoster().then((result) {});
     return completer.future;
@@ -360,7 +358,18 @@ class XMPPClientManager {
   }
 
   // Get group owners
-  Future<GroupChatroom> getAdmin(String roomName) async {
+  Future<GroupChatroom> getOwners(String roomName) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? "")) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+
+    return await mucManager.getOwners(roomJid);
+  }
+
+  // Get group admins
+  Future<GroupChatroom> getAdmins(String roomName) async {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
