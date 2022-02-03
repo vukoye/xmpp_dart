@@ -191,7 +191,7 @@ class MultiUserChatManager {
       item.addAttribute(XmppAttribute('affiliation', affiliation));
       item.addAttribute(XmppAttribute('jid', memberJid));
       // add reason
-      final reason = ReasonElement.build("add member!");
+      final reason = ReasonElement.build("add user!");
       item.addChild(reason);
 
       queryElement.addChild(item);
@@ -205,6 +205,42 @@ class MultiUserChatManager {
     return Future.value();
   }
 
+  Future<GroupChatroom> _addUsersAsync(Jid groupJid, Iterable<String> memberJids, String affiliation) async {
+    var completer = Completer<GroupChatroom>();
+
+    final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    iqStanza.fromJid = _connection.fullJid;
+    iqStanza.toJid = groupJid;
+
+    final queryElement = XmppElement();
+    queryElement.name = 'query';
+    queryElement.addAttribute(
+        XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
+
+    for (final memberJid in memberJids) {
+      final item = XmppElement();
+      item.name = 'item';
+      item.addAttribute(XmppAttribute('affiliation', affiliation));
+      item.addAttribute(XmppAttribute('jid', memberJid));
+      // add reason
+      final reason = ReasonElement.build("add member!");
+      item.addChild(reason);
+
+      queryElement.addChild(item);
+    }
+
+    iqStanza.addChild(queryElement);
+
+    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+    _myUnrespondedIqStanzasActions[iqStanza.id] =
+        GroupChatroomAction.ADD_USERS;
+
+    _connection.writeStanza(iqStanza);
+    print(iqStanza.buildXmlString());
+
+    return completer.future;
+  }
+
   Future<void> addMembers(Jid groupJid, Iterable<String> memberJids) async {
     return await _addUsers(groupJid, memberJids, 'member');
   }
@@ -215,6 +251,18 @@ class MultiUserChatManager {
 
   Future<void> addOwners(Jid groupJid, Iterable<String> memberJids) async {
     return await _addUsers(groupJid, memberJids, 'owner');
+  }
+
+  Future<GroupChatroom> addMembersAsync(Jid groupJid, Iterable<String> memberJids) async {
+    return await _addUsersAsync(groupJid, memberJids, 'member');
+  }
+
+  Future<GroupChatroom> addAdminsAsync(Jid groupJid, Iterable<String> memberJids) async {
+    return await _addUsersAsync(groupJid, memberJids, 'admin');
+  }
+
+  Future<GroupChatroom> addOwnersAsync(Jid groupJid, Iterable<String> memberJids) async {
+    return await _addUsersAsync(groupJid, memberJids, 'owner');
   }
 
   Future<void> inviteMembers(Jid groupJid, Iterable<String> memberJids) async {
@@ -387,6 +435,7 @@ class MultiUserChatManager {
       AbstractStanza stanza, GroupChatroomAction action) {
     var queryChild = stanza.getChild('query');
     if (queryChild != null) {
+      // TODO: refactor to use only one return
       if (action == GroupChatroomAction.GET_ROOM_MEMBERS) {
         final items =
             queryChild.children.where((child) => child!.name == 'item');
@@ -477,6 +526,9 @@ class MultiUserChatManager {
         } else if (stanza.type == IqStanzaType.ERROR) {
           unrespondedStanza!.item2.complete(_handleError(stanza, _action));
         }
+        // TODO: to double check
+        _myUnrespondedIqStanzas.remove(stanza.id);
+        
       }
     }
   }
