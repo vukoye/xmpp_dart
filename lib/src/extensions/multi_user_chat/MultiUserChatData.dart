@@ -18,7 +18,7 @@ enum GroupChatroomAction {
   JOIN_ROOM,
   ACCEPT_ROOM,
   GET_ROOM_MEMBERS,
-  ADD_MEMBERS,
+  ADD_USERS,
 }
 
 class GroupChatroomError {
@@ -48,7 +48,7 @@ class GroupChatroomError {
     XmppElement? textItem = errorElement.children.firstWhere(
         (element) => element!.name == 'text',
         orElse: () => XmppElement());
-
+    // TODO: handle forbiden error
     return GroupChatroomError(
         errorCode: errorElement.getAttribute('code') != null
             ? errorElement.getAttribute('code')!.value ?? ''
