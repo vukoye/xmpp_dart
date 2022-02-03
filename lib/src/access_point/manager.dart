@@ -300,7 +300,7 @@ class XMPPClientManager {
 
   // Create room
   Future<GroupChatroom> setRoomConfig(
-      String roomName, GroupChatroomConfig config) {
+      String roomName, GroupChatroomParams config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -315,7 +315,7 @@ class XMPPClientManager {
 
   // Create room
   Future<GroupChatroom> createInstantRoom(
-      String roomName, GroupChatroomConfig config) {
+      String roomName, GroupChatroomParams config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -326,7 +326,7 @@ class XMPPClientManager {
   }
 
   // Join room
-  Future<GroupChatroom> join(String roomName, JoinGroupChatroomConfig config,
+  Future<GroupChatroom> join(String roomName, JoinGroupChatroomParams config,
       {XmppCommunicationConfig options =
           const XmppCommunicationConfig(shallWaitStanza: false)}) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
@@ -388,6 +388,18 @@ class XMPPClientManager {
     }
 
     mucManager.addMembers(roomJid, memberJids);
+    return Future.value();
+  }
+
+  // Add admins in group
+  Future<void> addAdminsInGroup(String roomName, Iterable<String> memberJids) {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+
+    mucManager.addAdmins(roomJid, memberJids);
     return Future.value();
   }
 

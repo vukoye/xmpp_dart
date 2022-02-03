@@ -8,6 +8,7 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/elements/messages/invitation/InviteElement.dart';
+import 'package:xmpp_stone/src/elements/messages/invitation/ReasonElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
@@ -174,7 +175,7 @@ class MultiUserChatManager {
     return await _getUsers(groupJid, 'owner');
   }
 
-  Future<void> addMembers(Jid groupJid, Iterable<String> memberJids) async {
+  Future<void> _addUsers(Jid groupJid, Iterable<String> memberJids, String affiliation) async {
     final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = groupJid;
@@ -187,8 +188,12 @@ class MultiUserChatManager {
     for (final memberJid in memberJids) {
       final item = XmppElement();
       item.name = 'item';
-      item.addAttribute(XmppAttribute('affiliation', 'member'));
+      item.addAttribute(XmppAttribute('affiliation', affiliation));
       item.addAttribute(XmppAttribute('jid', memberJid));
+      // add reason
+      final reason = ReasonElement.build("add member!");
+      item.addChild(reason);
+
       queryElement.addChild(item);
     }
 
@@ -198,6 +203,18 @@ class MultiUserChatManager {
     print(iqStanza.buildXmlString());
 
     return Future.value();
+  }
+
+  Future<void> addMembers(Jid groupJid, Iterable<String> memberJids) async {
+    return await _addUsers(groupJid, memberJids, 'member');
+  }
+
+  Future<void> addAdmins(Jid groupJid, Iterable<String> memberJids) async {
+    return await _addUsers(groupJid, memberJids, 'admin');
+  }
+
+  Future<void> addOwners(Jid groupJid, Iterable<String> memberJids) async {
+    return await _addUsers(groupJid, memberJids, 'owner');
   }
 
   Future<void> inviteMembers(Jid groupJid, Iterable<String> memberJids) async {
@@ -253,7 +270,7 @@ class MultiUserChatManager {
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = roomtDotMucDomain;
 
-    var form = GroupChatroomConfigForm(config: params.config);
+    var form = GroupChatroomFormParams(config: params.config);
 
     var queryElement = form.buildForm();
 
@@ -297,7 +314,7 @@ class MultiUserChatManager {
   }
 
   Future<GroupChatroom> joinRoom(
-      Jid _roomtDotMucDomain, JoinGroupChatroomConfig config,
+      Jid _roomtDotMucDomain, JoinGroupChatroomParams config,
       {XmppCommunicationConfig options =
           const XmppCommunicationConfig(shallWaitStanza: false)}) {
     var completer = Completer<GroupChatroom>();
@@ -341,7 +358,7 @@ class MultiUserChatManager {
     presenceStanza.addAttribute(XmppAttribute('to', roomtDotMucDomain.fullJid));
 
     presenceStanza.addChild(
-        AcceptGroupChatroomInvitationConfig().buildAcceptRoomXElement());
+        AcceptGroupChatroomInvitationParams().buildAcceptRoomXElement());
     print(presenceStanza.buildXmlString());
 
     _myUnrespondedPresenceStanzas[presenceStanza.id] =
