@@ -137,6 +137,7 @@ class MultiUserChatManager {
     return completer.future;
   }
 
+  // Get Users by affiliation
   Future<GroupChatroom> _getUsers(Jid groupJid, String affiliation) async {
     var completer = Completer<GroupChatroom>();
 
@@ -174,17 +175,45 @@ class MultiUserChatManager {
   Future<GroupChatroom> getOwners(Jid groupJid) async {
     return await _getUsers(groupJid, 'owner');
   }
-
-  Future<void> _addUsers(Jid groupJid, Iterable<String> memberJids, String affiliation) async {
+  
+  // Add Users by affiliation
+  Future<GroupChatroom> addRemoveMemberInRoom(
+      {required Jid groupJid,
+      required Iterable<String> memberJids,
+      required UserRole userRole,
+      required ActionType actionType,
+      bool isAsync = false}) async {
     final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = groupJid;
-
     final queryElement = XmppElement();
     queryElement.name = 'query';
     queryElement.addAttribute(
         XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
 
+    // Set Users role value
+    var affiliation = '';
+    switch (userRole) {
+      case UserRole.member:
+        affiliation = actionType == ActionType.ADD
+            ? UserRole.member.name
+            : UserRole.none.name;
+        break;
+      case UserRole.admin:
+        affiliation = actionType == ActionType.ADD
+            ? UserRole.admin.name
+            : UserRole.member.name;
+        break;
+      case UserRole.owner:
+        affiliation = actionType == ActionType.ADD
+            ? UserRole.owner.name
+            : UserRole.member.name;
+        break;
+      default:
+      // TODO: throw error
+    }
+
+    // Create Users List
     for (final memberJid in memberJids) {
       final item = XmppElement();
       item.name = 'item';
@@ -199,71 +228,123 @@ class MultiUserChatManager {
 
     iqStanza.addChild(queryElement);
 
-    _connection.writeStanza(iqStanza);
-    print(iqStanza.buildXmlString());
-
-    return Future.value();
-  }
-
-  Future<GroupChatroom> _addUsersAsync(Jid groupJid, Iterable<String> memberJids, String affiliation) async {
-    var completer = Completer<GroupChatroom>();
-
-    final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    iqStanza.fromJid = _connection.fullJid;
-    iqStanza.toJid = groupJid;
-
-    final queryElement = XmppElement();
-    queryElement.name = 'query';
-    queryElement.addAttribute(
-        XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
-
-    for (final memberJid in memberJids) {
-      final item = XmppElement();
-      item.name = 'item';
-      item.addAttribute(XmppAttribute('affiliation', affiliation));
-      item.addAttribute(XmppAttribute('jid', memberJid));
-      // add reason
-      final reason = ReasonElement.build("add member!");
-      item.addChild(reason);
-
-      queryElement.addChild(item);
+    dynamic response;
+    if (isAsync) {
+      var completer = Completer<GroupChatroom>();
+      _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+      _myUnrespondedIqStanzasActions[iqStanza.id] =
+          GroupChatroomAction.ADD_USERS;
+      response = completer.future;
+    } else {
+      response = GroupChatroom(
+          action: null,
+          error: null,
+          isAvailable: null,
+          roomName: '',
+          info: null,
+          groupMembers: []);
     }
-
-    iqStanza.addChild(queryElement);
-
-    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
-    _myUnrespondedIqStanzasActions[iqStanza.id] =
-        GroupChatroomAction.ADD_USERS;
-
     _connection.writeStanza(iqStanza);
     print(iqStanza.buildXmlString());
 
-    return completer.future;
+    return response;
   }
 
-  Future<void> addMembers(Jid groupJid, Iterable<String> memberJids) async {
-    return await _addUsers(groupJid, memberJids, 'member');
-  }
+  // Future<GroupChatroom> _addUsersAsync(Jid groupJid, Iterable<String> memberJids, String affiliation) async {
+  //   var completer = Completer<GroupChatroom>();
 
-  Future<void> addAdmins(Jid groupJid, Iterable<String> memberJids) async {
-    return await _addUsers(groupJid, memberJids, 'admin');
-  }
+  //   final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+  //   iqStanza.fromJid = _connection.fullJid;
+  //   iqStanza.toJid = groupJid;
 
-  Future<void> addOwners(Jid groupJid, Iterable<String> memberJids) async {
-    return await _addUsers(groupJid, memberJids, 'owner');
-  }
+  //   final queryElement = XmppElement();
+  //   queryElement.name = 'query';
+  //   queryElement.addAttribute(
+  //       XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
 
-  Future<GroupChatroom> addMembersAsync(Jid groupJid, Iterable<String> memberJids) async {
-    return await _addUsersAsync(groupJid, memberJids, 'member');
-  }
+  //   for (final memberJid in memberJids) {
+  //     final item = XmppElement();
+  //     item.name = 'item';
+  //     item.addAttribute(XmppAttribute('affiliation', affiliation));
+  //     item.addAttribute(XmppAttribute('jid', memberJid));
+  //     // add reason
+  //     final reason = ReasonElement.build("add member!");
+  //     item.addChild(reason);
 
-  Future<GroupChatroom> addAdminsAsync(Jid groupJid, Iterable<String> memberJids) async {
-    return await _addUsersAsync(groupJid, memberJids, 'admin');
-  }
+  //     queryElement.addChild(item);
+  //   }
 
-  Future<GroupChatroom> addOwnersAsync(Jid groupJid, Iterable<String> memberJids) async {
-    return await _addUsersAsync(groupJid, memberJids, 'owner');
-  }
+  //   iqStanza.addChild(queryElement);
+
+  //   _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+  //   _myUnrespondedIqStanzasActions[iqStanza.id] =
+  //       GroupChatroomAction.ADD_USERS;
+
+  //   _connection.writeStanza(iqStanza);
+  //   print(iqStanza.buildXmlString());
+
+  //   return completer.future;
+  // }
+
+  // Future<GroupChatroom> addMembers(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.member,
+  //       isAsync: false);
+  // }
+
+  // Future<GroupChatroom> addAdmins(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.admin,
+  //       isAsync: false);
+  // }
+
+  // Future<GroupChatroom> addOwners(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.owner,
+  //       isAsync: false);
+  // }
+
+  // Future<GroupChatroom> addMembersAsync(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.member,
+  //       isAsync: true);
+  // }
+
+  // Future<GroupChatroom> addAdminsAsync(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.admin,
+  //       isAsync: true);
+  // }
+
+  // Future<GroupChatroom> addOwnersAsync(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.owner,
+  //       isAsync: true);
+  // }
 
   Future<void> inviteMembers(Jid groupJid, Iterable<String> memberJids) async {
     final stanza =

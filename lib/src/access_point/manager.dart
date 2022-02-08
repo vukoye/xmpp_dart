@@ -380,44 +380,6 @@ class XMPPClientManager {
   }
 
   // Add members in group
-  Future<void> addMembersInGroup(String roomName, Iterable<String> memberJids) async{
-    final mucManager = xmpp.MultiUserChatManager(_connection!);
-    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
-    if (!roomName.contains(mucDomain ?? '')) {
-      roomJid = xmpp.Jid(roomName, mucDomain, '');
-    }
-    return await mucManager.addMembers(roomJid,memberJids);
-  }
-
-  Future<GroupChatroom> addMembersInGroupAsync(String roomName, Iterable<String> memberJids) async{
-    final mucManager = xmpp.MultiUserChatManager(_connection!);
-    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
-    if (!roomName.contains(mucDomain ?? '')) {
-      roomJid = xmpp.Jid(roomName, mucDomain, '');
-    }
-    return await mucManager.addMembersAsync(roomJid,memberJids);
-  }
-
-  // Add admins in group
-  Future<void> addAdminsInGroup(String roomName, Iterable<String> memberJids) async {
-    final mucManager = xmpp.MultiUserChatManager(_connection!);
-    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
-    if (!roomName.contains(mucDomain ?? '')) {
-      roomJid = xmpp.Jid(roomName, mucDomain, '');
-    }
-    return await mucManager.addAdmins(roomJid, memberJids);
-  }
-
-  Future<GroupChatroom> addAdminsInGroupAsync(String roomName, Iterable<String> memberJids) async {
-    final mucManager = xmpp.MultiUserChatManager(_connection!);
-    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
-    if (!roomName.contains(mucDomain ?? '')) {
-      roomJid = xmpp.Jid(roomName, mucDomain, '');
-    }
-    return await mucManager.addAdminsAsync(roomJid, memberJids);
-  }
-
-  // Add members in group
   Future<void> inviteMemberToGroup(
       String roomName, Iterable<String> memberJids) {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
@@ -428,6 +390,192 @@ class XMPPClientManager {
 
     mucManager.inviteMembers(roomJid, memberJids);
     return Future.value();
+  }
+
+  // Add members in group
+  Future<GroupChatroom> addMembersInGroup(String roomName, Iterable<String> memberJids) async{
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.member,
+        isAsync: false);
+    // return await mucManager.addMembers(roomJid,memberJids);
+  }
+
+  Future<GroupChatroom> addMembersInGroupAsync(String roomName, Iterable<String> memberJids) async{
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.member,
+        isAsync: true);
+    // return await mucManager.addMembersAsync(roomJid,memberJids);
+  }
+
+  // Add admins in group
+  Future<GroupChatroom> addAdminsInGroup(String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.admin,
+        isAsync: false);
+    // return await mucManager.addAdmins(roomJid, memberJids);
+  }
+
+  Future<GroupChatroom> addAdminsInGroupAsync(String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.admin,
+        isAsync: true);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  // Add owner in group
+  Future<GroupChatroom> addOwnersInGroup(String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.owner,
+        isAsync: false);
+    // return await mucManager.addAdmins(roomJid, memberJids);
+  }
+
+  Future<GroupChatroom> addOwnersInGroupAsync(String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.owner,
+        isAsync: true);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  // Remove members
+  Future<GroupChatroom> removeMembersInGroup(String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.member,
+        isAsync: false);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  Future<GroupChatroom> removeMembersInGroupAsync(String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.member,
+        isAsync: true);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  // Remove admins
+  Future<GroupChatroom> removeAdminsInGroup(String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.admin,
+        isAsync: false);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  Future<GroupChatroom> removeAdminsInGroupAsync(String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.admin,
+        isAsync: true);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  // Remove owners
+  Future<GroupChatroom> removeOwnersInGroup(String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.owner,
+        isAsync: false);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  Future<GroupChatroom> removeOwnersInGroupAsync(String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.owner,
+        isAsync: true);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
   }
 
   // Send 1-1 message
