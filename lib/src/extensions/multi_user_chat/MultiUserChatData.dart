@@ -21,6 +21,18 @@ enum GroupChatroomAction {
   ADD_USERS,
 }
 
+enum UserRole {
+  owner,
+  admin,
+  member,
+  none,
+}
+
+enum ActionType {
+  ADD,
+  REMOVE,
+}
+
 class GroupChatroomError {
   final String errorCode;
   final String errorMessage;
@@ -60,20 +72,20 @@ class GroupChatroomError {
 }
 
 class GroupChatroom {
-  final GroupChatroomAction action;
+  final GroupChatroomAction? action;
   final String roomName;
-  final bool isAvailable;
-  final XmppElement info;
-  final GroupChatroomError error;
+  final bool? isAvailable;
+  final XmppElement? info;
+  final GroupChatroomError? error;
   final List<Jid> groupMembers;
 
   GroupChatroom(
-      {required this.action,
+      {this.action,
       required this.roomName,
-      required this.info,
-      required this.isAvailable,
+      this.info,
+      this.isAvailable,
       required this.groupMembers,
-      required this.error});
+      this.error});
 }
 
 class InvalidGroupChatroom extends GroupChatroom {
