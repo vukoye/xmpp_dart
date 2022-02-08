@@ -9,6 +9,7 @@ import 'package:image/image.dart' as image;
 final String TAG = 'example';
 
 void main(List<String> arguments) {
+  // TODO: update for easy to test
   Log.logLevel = LogLevel.DEBUG;
   Log.logXmpp = false;
   Log.d(TAG, 'Type user@domain:');
