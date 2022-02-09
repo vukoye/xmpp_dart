@@ -1,5 +1,8 @@
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
+import 'package:xmpp_stone/src/features/message_archive/MessageArchiveData.dart';
 import 'package:xmpp_stone/src/features/message_archive/MessageArchiveListener.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
@@ -55,11 +58,16 @@ class MessageArchiveManager {
   }
 
   void queryByTime(
-      {DateTime? start, DateTime? end, Jid? jid, bool includeGroup = false}) {
+      {DateTime? start,
+      DateTime? end,
+      Jid? jid,
+      bool includeGroup = false,
+      String? id}) {
     if (start == null && end == null && jid == null) {
       queryAll();
     } else {
-      var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+      var iqStanza =
+          IqStanza(id ?? AbstractStanza.getRandomId(), IqStanzaType.SET);
       var query = QueryElement();
       query.setXmlns('urn:xmpp:mam:2');
       query.setQueryId(AbstractStanza.getRandomId());
@@ -93,11 +101,13 @@ class MessageArchiveManager {
       {String? beforeId,
       String? afterId,
       Jid? jid,
+      String? id,
       bool includeGroup = false}) {
     if (beforeId == null && afterId == null && jid == null) {
       queryAll();
     } else {
-      var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+      var iqStanza =
+          IqStanza(id ?? AbstractStanza.getRandomId(), IqStanzaType.SET);
       var query = QueryElement();
       query.setXmlns('urn:xmpp:mam:2');
       query.setQueryId(AbstractStanza.getRandomId());
@@ -107,11 +117,29 @@ class MessageArchiveManager {
       query.addChild(x);
       x.addField(FieldElement.build(
           varAttr: 'FORM_TYPE', typeAttr: 'hidden', value: 'urn:xmpp:mam:2'));
-      if (beforeId != null) {
-        x.addField(FieldElement.build(varAttr: 'before-id', value: beforeId));
-      }
-      if (afterId != null) {
-        x.addField(FieldElement.build(varAttr: 'after-id', value: afterId));
+
+      if (beforeId != null || afterId != null) {
+        final setElement = XmppElement();
+        setElement.name = 'set';
+        setElement.addAttribute(
+            XmppAttribute('xmlns', 'http://jabber.org/protocol/rsm'));
+
+        if (beforeId != null) {
+          final beforeElement = XmppElement();
+          beforeElement.name = 'before';
+          beforeElement.textValue = beforeId;
+          setElement.addChild(beforeElement);
+          x.addField(FieldElement.build(varAttr: 'before-id', value: beforeId));
+        }
+        if (afterId != null) {
+          final afterElement = XmppElement();
+          afterElement.name = 'after';
+          afterElement.textValue = afterId;
+          setElement.addChild(afterElement);
+          x.addField(FieldElement.build(varAttr: 'after-id', value: afterId));
+        }
+        // TODO: add max
+        query.addChild(setElement);
       }
       if (jid != null) {
         x.addField(
@@ -134,7 +162,7 @@ class MessageArchiveManager {
           Log.d(TAG, 'Finished querying result');
 
           if (listener != null) {
-            listener!.onFinish(stanza);
+            listener!.onFinish(MessageArchiveResult.parseFromXml(stanza));
           }
         }
       } else if (stanza.type == IqStanzaType.ERROR) {
