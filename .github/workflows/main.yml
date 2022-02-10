@@ -3,14 +3,29 @@ name: Publish xmpp_dart to Pub.dev
 on: push
 
 jobs:
-  publishing:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: 'Checkout'
         uses: actions/checkout@v2 # required!
         
-      - name: '>> Dart package <<'
-        uses: k-paxian/dart-package-publisher@master
+      - name: Test
+        uses: subosito/flutter-action@v2
         with:
-          accessToken: ${{ secrets.OAUTH_ACCESS_TOKEN }}
-          refreshToken: ${{ secrets.OAUTH_REFRESH_TOKEN }}
+          flutter-version: '2.8.0'
+          channel: 'stable'
+      - run: flutter --version
+      - run: flutter pub get
+      - run: flutter test
+  # Disable publishing
+  # publishing:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: 'Checkout'
+  #       uses: actions/checkout@v2 # required!
+        
+  #     - name: '>> Dart package <<'
+  #       uses: k-paxian/dart-package-publisher@master
+  #       with:
+  #         accessToken: ${{ secrets.OAUTH_ACCESS_TOKEN }}
+  #         refreshToken: ${{ secrets.OAUTH_REFRESH_TOKEN }}
