@@ -2,7 +2,7 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 
 class ItemElement extends XmppElement {
-  static String elementName = 'id';
+  static String elementName = 'item';
   ItemElement() {
     name = elementName;
   }
