@@ -1,10 +1,5 @@
-import 'dart:io';
-
 import 'package:xmpp_stone/src/elements/pubsub/PubSubElement.dart';
 import 'package:test/test.dart';
-import 'package:mockito/mockito.dart';
-
-class MockSocket extends Mock implements Socket {}
 
 void main() {
   group('elements/pubsub/PubSubElement.dart', () {
