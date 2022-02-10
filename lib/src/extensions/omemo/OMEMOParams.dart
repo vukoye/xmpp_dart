@@ -1,3 +1,10 @@
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/encryption/EncryptElement.dart';
+import 'package:xmpp_stone/src/elements/encryption/EncryptHeaderElement.dart';
+import 'package:xmpp_stone/src/elements/encryption/EncryptKeyElement.dart';
+import 'package:xmpp_stone/src/elements/encryption/EncryptKeysElement.dart';
+import 'package:xmpp_stone/src/elements/encryption/EncryptPayloadElement.dart';
+import 'package:xmpp_stone/src/elements/encryption/PlainEnvelope.dart';
 import 'package:xmpp_stone/src/elements/pubsub/ItemElement.dart';
 import 'package:xmpp_stone/src/elements/pubsub/ItemsElement.dart';
 import 'package:xmpp_stone/src/elements/pubsub/PubSubElement.dart';
@@ -22,6 +29,25 @@ class OMEMODeviceInfo {
   final String deviceLabel;
 
   const OMEMODeviceInfo({required this.deviceId, required this.deviceLabel});
+}
+
+class OMEMORecipientDeviceInfo {
+  final String deviceId;
+  final String encoded;
+  final bool keyExchange;
+
+  const OMEMORecipientDeviceInfo(
+      {required this.deviceId,
+      required this.encoded,
+      required this.keyExchange});
+}
+
+class OMEMORecipientInfo {
+  final Jid recipientJid;
+  final Iterable<OMEMORecipientDeviceInfo> recipientKeysInfo;
+
+  const OMEMORecipientInfo(
+      {required this.recipientJid, required this.recipientKeysInfo});
 }
 
 class OMEMOPublishDeviceParams extends OMEMOParams {
@@ -107,17 +133,62 @@ class OMEMOGetBundleParams extends OMEMOParams {
 }
 
 class OMEMOEnvelopePlainTextParams extends OMEMOParams {
+  final String plainText;
+  final String rpad;
+
+  const OMEMOEnvelopePlainTextParams(
+      {required this.plainText, required this.rpad});
   @override
   XmppElement buildRequest({required Jid from}) {
-    // TODO: implement buildRequest
-    throw UnimplementedError();
+    final envelope = PlainEnvelope.build(
+        xmlns: 'urn:xmpp:sce:1', plainText: plainText, rpad: rpad, from: from);
+    return envelope;
   }
 }
 
 class OMEMOEnvelopeEncryptionParams extends OMEMOParams {
+  final String messageId;
+  final MessageStanzaType messageType;
+  final String senderDeviceId;
+  final Jid buddyJid;
+  final Iterable<OMEMORecipientInfo> recipientInfo;
+  final String cipherText;
+
+  const OMEMOEnvelopeEncryptionParams(
+      {required this.messageId,
+      required this.messageType,
+      required this.senderDeviceId,
+      required this.buddyJid,
+      required this.recipientInfo,
+      required this.cipherText});
+
   @override
   XmppElement buildRequest({required Jid from}) {
-    // TODO: implement buildRequest
-    throw UnimplementedError();
+    final message = MessageStanza(messageId, messageType);
+    message.toJid = buddyJid;
+    message.fromJid = from;
+    List<EncryptKeysElement> recipientKeysList = [];
+    recipientInfo.forEach((element) {
+      List<EncryptKeyElement> recipientKeys = [];
+      element.recipientKeysInfo.forEach((key) {
+        recipientKeys.add(EncryptKeyElement.build(
+            rid: key.deviceId,
+            keyExchange: key.keyExchange,
+            encoded: key.encoded));
+      });
+      recipientKeysList.add(EncryptKeysElement.build(
+          to: element.recipientJid, recipientKeys: recipientKeys));
+    });
+    final headerElement = EncryptHeaderElement.build(
+        senderDeviceId: senderDeviceId, recipientKeysList: recipientKeysList);
+    message.addChild(EncryptElement.build(
+        header: headerElement,
+        payload: EncryptPayloadElement.build(cipherText: cipherText),
+        encoded: cipherText));
+    final store = XmppElement();
+    store.name = 'store';
+    store.addAttribute(XmppAttribute('xmlns', 'urn:xmpp:hints'));
+    message.addChild(store);
+    return message;
   }
 }
