@@ -11,6 +11,7 @@ class ManagerQueryArchiveParams {
   String? afterId;
   String? jid;
   bool includeGroup;
+  String? id;
 
   ManagerQueryArchiveParams({
     this.start,
@@ -19,6 +20,7 @@ class ManagerQueryArchiveParams {
     this.afterId,
     this.jid,
     this.includeGroup = false,
+    this.id,
   });
 
   static ManagerQueryArchiveParams build({bool includeGroup = false}) {
