@@ -1,9 +1,12 @@
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/extensions/omemo/OMEMOData.dart';
+import 'package:xmpp_stone/src/extensions/omemo/OMEMOManagerApi.dart';
+import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingListener.dart';
 
-class OMEMOManager {
+class OMEMOManager extends OMEMOManagerApi {
   final Connection _connection;
 
   PingListener? listener;
@@ -49,10 +52,31 @@ class OMEMOManager {
     }
   }
 
-  void listen(PingListener _listener) {
-    if (listener != null) {
-      listener = null;
-    }
-    listener = _listener;
+  @override
+  Future<OMEMOPublishBundleResponse> publishBundle(
+      OMEMOPublishBundleParams params) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<OMEMOEnvelopeEncryptionResponse> envelopeEncryptionContent(
+      OMEMOEnvelopeEncryptionParams params) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<OMEMOEnvelopePlainTextResponse> envelopePlainContent(
+      OMEMOEnvelopePlainTextParams params) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<OMEMOGetBundleResponse> fetchBundle(OMEMOGetBundleParams params) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<OMEMOGetDevicesResponse> fetchDevices(OMEMOGetDevicesParams params) {
+    throw UnimplementedError();
   }
 }
