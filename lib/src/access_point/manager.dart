@@ -12,6 +12,8 @@ import 'package:xmpp_stone/src/extensions/last_activity/LastActivityManager.dart
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
+import 'package:xmpp_stone/src/extensions/omemo/OMEMOData.dart';
+import 'package:xmpp_stone/src/extensions/omemo/OMEMOManager.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/message_archive/MessageArchiveData.dart';
 import 'package:xmpp_stone/src/features/message_archive/MessageArchiveManager.dart';
@@ -64,6 +66,7 @@ class XMPPClientManager {
   late PingManager _pingHandler;
   late MessageArchiveManager _messageArchiveHandler;
   late LastActivityManager _lastActivityManager;
+  late OMEMOManager _omemoManager;
   late ConnectionManagerStateChangedListener _connectionStateListener;
 
   StreamSubscription? messageListener;
@@ -141,6 +144,8 @@ class XMPPClientManager {
     }));
     // Last activity - XEP0012
     _lastActivityManager = xmpp.LastActivityManager.getInstance(_connection!);
+    // Omemo
+    _omemoManager = OMEMOManager.getInstance(_connection!);
     _onReady!(this);
   }
 
@@ -648,6 +653,17 @@ class XMPPClientManager {
   /// Last Activity method
   Future<String> askLastActivity(final String userJid) async {
     return await _lastActivityManager.askLastActivity(Jid.fromFullJid(userJid));
+  }
+
+  // OMEMO Method
+  Future<OMEMOGetDevicesResponse> fetchDevices(
+      xmpp.OMEMOGetDevicesParams params) async {
+    return await _omemoManager.fetchDevices(params);
+  }
+
+  Future<OMEMOPublishDeviceResponse> publishDevices(
+      xmpp.OMEMOPublishDeviceParams params) async {
+    return await _omemoManager.publishDevice(params);
   }
 
   /// Listeners

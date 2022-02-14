@@ -4,18 +4,18 @@ import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOData.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOManagerApi.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
-import 'package:xmpp_stone/src/extensions/ping/PingListener.dart';
+import 'package:xmpp_stone/src/response/response.dart';
 
 class OMEMOManager extends OMEMOManagerApi {
   final Connection _connection;
 
-  PingListener? listener;
-
   static final Map<Connection, OMEMOManager> _instances =
       <Connection, OMEMOManager>{};
 
+  static final ResponseHandler<IqStanza> responseHandler =
+      ResponseHandler<IqStanza>();
+
   OMEMOManager(this._connection) {
-    _connection.connectionStateStream.listen(_connectionStateProcessor);
     _connection.inStanzasStream.listen(_processStanza);
   }
 
@@ -28,27 +28,15 @@ class OMEMOManager extends OMEMOManagerApi {
     return manager;
   }
 
-  void _connectionStateProcessor(XmppConnectionState event) {
-    // connection state processor.
-  }
-
   void _processStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
-      if (stanza.type == IqStanzaType.GET) {
-        var ping = stanza.getChild('ping');
-        if (ping != null) {
-          var iqStanza = IqStanza(stanza.id, IqStanzaType.RESULT);
-          iqStanza.fromJid = _connection.fullJid;
-          iqStanza.toJid = stanza.fromJid;
-          _connection.writeStanza(iqStanza);
-
-          if (listener != null) {
-            listener!.onPing(stanza);
-          }
+      responseHandler.test(stanza.id!, (res) {
+        if (res.item3 == OMEMOGetDevicesResponse) {
+          // handle response
+          final response = OMEMOGetDevicesResponse.parse(stanza);
+          res.item2.complete(response);
         }
-      } else if (stanza.type == IqStanzaType.ERROR) {
-        //todo handle error cases
-      }
+      });
     }
   }
 
@@ -77,6 +65,18 @@ class OMEMOManager extends OMEMOManagerApi {
 
   @override
   Future<OMEMOGetDevicesResponse> fetchDevices(OMEMOGetDevicesParams params) {
-    throw UnimplementedError();
+    final requestStanza = params.buildRequest(from: _connection.fullJid);
+    _connection.writeStanza(requestStanza);
+    return responseHandler.set<OMEMOGetDevicesResponse>(
+        requestStanza.id!, requestStanza);
+  }
+
+  @override
+  Future<OMEMOPublishDeviceResponse> publishDevice(
+      OMEMOPublishDeviceParams params) {
+    final requestStanza = params.buildRequest(from: _connection.fullJid);
+    _connection.writeStanza(requestStanza);
+    return responseHandler.set<OMEMOPublishDeviceResponse>(
+        requestStanza.id!, requestStanza);
   }
 }

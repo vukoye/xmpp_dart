@@ -38,3 +38,6 @@ export 'src/access_point/manager_query_archive_params.dart';
 export 'src/access_point/communication_config.dart';
 export 'src/extensions/chat_states/ChatStateDecoration.dart';
 export 'src/extensions/last_activity/LastActivityManager.dart';
+export 'src/extensions/omemo/OMEMOManager.dart';
+export 'src/extensions/omemo/OMEMOParams.dart';
+export 'src/extensions/omemo/OMEMOData.dart';

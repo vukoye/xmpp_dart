@@ -7,7 +7,7 @@ void main() {
     test('Should create the set device xml correctly', () {
       final publishDeviceParams = OMEMOPublishDeviceParams(
           accessModel: BundleAccessModel.open,
-          bundleId: 'current',
+          itemId: 'current',
           devices: [
             OMEMODeviceInfo(deviceId: '1', deviceLabel: 'Nokia'),
             OMEMODeviceInfo(deviceId: '2', deviceLabel: '')

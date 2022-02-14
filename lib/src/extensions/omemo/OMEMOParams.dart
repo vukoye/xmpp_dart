@@ -16,7 +16,7 @@ import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
 abstract class OMEMOParams {
-  XmppElement buildRequest({required Jid from});
+  buildRequest({required Jid from});
   const OMEMOParams();
 }
 
@@ -52,21 +52,19 @@ class OMEMORecipientInfo {
 
 class OMEMOPublishDeviceParams extends OMEMOParams {
   final Iterable<OMEMODeviceInfo> devices;
-  final String bundleId;
+  final String itemId;
   final BundleAccessModel accessModel;
 
   const OMEMOPublishDeviceParams(
-      {required this.devices,
-      required this.bundleId,
-      required this.accessModel});
+      {required this.devices, required this.itemId, required this.accessModel});
 
   @override
-  XmppElement buildRequest({required Jid from}) {
+  IqStanza buildRequest({required Jid from}) {
     final iqElement = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     iqElement.fromJid = from;
     final pubsubElement = PubSubElement.build();
     final publishElement = PublishElement.build('urn:xmpp:omemo:2:devices');
-    final itemElement = ItemElement.build(bundleId);
+    final itemElement = ItemElement.build(itemId);
     final deviceList = devices.map<DeviceElement>(
         (e) => DeviceElement.build(id: e.deviceId, label: e.deviceLabel));
     final devicesElement = DevicesElement.build(deviceList.toList());
@@ -97,7 +95,7 @@ class OMEMOGetDevicesParams extends OMEMOParams {
   const OMEMOGetDevicesParams({required this.buddyJid});
 
   @override
-  XmppElement buildRequest({required Jid from}) {
+  IqStanza buildRequest({required Jid from}) {
     final iqElement = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqElement.fromJid = from;
     iqElement.toJid = buddyJid;
@@ -115,7 +113,7 @@ class OMEMOGetBundleParams extends OMEMOParams {
 
   const OMEMOGetBundleParams({required this.buddyJid, required this.deviceIds});
   @override
-  XmppElement buildRequest({required Jid from}) {
+  IqStanza buildRequest({required Jid from}) {
     final iqElement = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqElement.fromJid = from;
     iqElement.toJid = buddyJid;
@@ -163,7 +161,7 @@ class OMEMOEnvelopeEncryptionParams extends OMEMOParams {
       required this.cipherText});
 
   @override
-  XmppElement buildRequest({required Jid from}) {
+  MessageStanza buildRequest({required Jid from}) {
     final message = MessageStanza(messageId, messageType);
     message.toJid = buddyJid;
     message.fromJid = from;
