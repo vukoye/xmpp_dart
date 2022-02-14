@@ -65,25 +65,29 @@ class MultiUserChatManager {
       XmppCommunicationConfig communicationConfig, String stanzaId) {
     if (!communicationConfig.shallWaitStanza) {
       Timer(Duration(milliseconds: 200), () {
-        var action = GroupChatroomAction.NONE;
-        if (_myUnrespondedIqStanzasActions.containsKey(stanzaId)) {
-          action = _myUnrespondedIqStanzasActions[stanzaId]!;
-          _myUnrespondedIqStanzasActions
-              .remove(_myUnrespondedIqStanzas[stanzaId]!.item1.id);
-        }
-        var mucResponse = GroupChatroom(
-            action: action,
-            info: _myUnrespondedIqStanzas[stanzaId]!.item1,
-            roomName: '',
-            isAvailable: true,
-            groupMembers: [],
-            error: GroupChatroomError.empty());
+        try {
+          var action = GroupChatroomAction.NONE;
+          if (_myUnrespondedIqStanzasActions.containsKey(stanzaId)) {
+            action = _myUnrespondedIqStanzasActions[stanzaId]!;
+            final id = _myUnrespondedIqStanzas[stanzaId]!.item1.id;
+            _myUnrespondedIqStanzasActions.remove(id);
+          }
+          var mucResponse = GroupChatroom(
+              action: action,
+              info: _myUnrespondedIqStanzas[stanzaId]!.item1,
+              roomName: '',
+              isAvailable: true,
+              groupMembers: [],
+              error: GroupChatroomError.empty());
 
-        if (!_myUnrespondedIqStanzas[stanzaId]!.item2.isCompleted) {
-          _myUnrespondedIqStanzas[stanzaId]!.item2.complete(mucResponse);
+          if (!_myUnrespondedIqStanzas[stanzaId]!.item2.isCompleted) {
+            _myUnrespondedIqStanzas[stanzaId]!.item2.complete(mucResponse);
+          }
+          _myUnrespondedIqStanzas
+              .remove(_myUnrespondedIqStanzas[stanzaId]!.item1.id);
+        } catch (e) {
+          print('error ${e.toString()}');
         }
-        _myUnrespondedIqStanzas
-            .remove(_myUnrespondedIqStanzas[stanzaId]!.item1.id);
       });
     }
   }
