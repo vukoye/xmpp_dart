@@ -41,7 +41,7 @@ class XMPPMessageParams {
   }
 
   bool get isMessageCustom {
-    return message!.body == null && _isCustomMessage();
+    return _isCustomMessage(); // body can contain some data
   }
 
   bool get isMessage {

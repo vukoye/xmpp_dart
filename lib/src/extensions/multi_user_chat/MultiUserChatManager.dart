@@ -8,6 +8,7 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/elements/messages/invitation/InviteElement.dart';
+import 'package:xmpp_stone/src/elements/messages/invitation/ReasonElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
@@ -64,25 +65,29 @@ class MultiUserChatManager {
       XmppCommunicationConfig communicationConfig, String stanzaId) {
     if (!communicationConfig.shallWaitStanza) {
       Timer(Duration(milliseconds: 200), () {
-        var action = GroupChatroomAction.NONE;
-        if (_myUnrespondedIqStanzasActions.containsKey(stanzaId)) {
-          action = _myUnrespondedIqStanzasActions[stanzaId]!;
-          _myUnrespondedIqStanzasActions
-              .remove(_myUnrespondedIqStanzas[stanzaId]!.item1.id);
-        }
-        var mucResponse = GroupChatroom(
-            action: action,
-            info: _myUnrespondedIqStanzas[stanzaId]!.item1,
-            roomName: '',
-            isAvailable: true,
-            groupMembers: [],
-            error: GroupChatroomError.empty());
+        try {
+          var action = GroupChatroomAction.NONE;
+          if (_myUnrespondedIqStanzasActions.containsKey(stanzaId)) {
+            action = _myUnrespondedIqStanzasActions[stanzaId]!;
+            final id = _myUnrespondedIqStanzas[stanzaId]!.item1.id;
+            _myUnrespondedIqStanzasActions.remove(id);
+          }
+          var mucResponse = GroupChatroom(
+              action: action,
+              info: _myUnrespondedIqStanzas[stanzaId]!.item1,
+              roomName: '',
+              isAvailable: true,
+              groupMembers: [],
+              error: GroupChatroomError.empty());
 
-        if (!_myUnrespondedIqStanzas[stanzaId]!.item2.isCompleted) {
-          _myUnrespondedIqStanzas[stanzaId]!.item2.complete(mucResponse);
+          if (!_myUnrespondedIqStanzas[stanzaId]!.item2.isCompleted) {
+            _myUnrespondedIqStanzas[stanzaId]!.item2.complete(mucResponse);
+          }
+          _myUnrespondedIqStanzas
+              .remove(_myUnrespondedIqStanzas[stanzaId]!.item1.id);
+        } catch (e) {
+          print('error ${e.toString()}');
         }
-        _myUnrespondedIqStanzas
-            .remove(_myUnrespondedIqStanzas[stanzaId]!.item1.id);
       });
     }
   }
@@ -136,6 +141,7 @@ class MultiUserChatManager {
     return completer.future;
   }
 
+  // Get Users by affiliation
   Future<GroupChatroom> _getUsers(Jid groupJid, String affiliation) async {
     var completer = Completer<GroupChatroom>();
 
@@ -173,32 +179,176 @@ class MultiUserChatManager {
   Future<GroupChatroom> getOwners(Jid groupJid) async {
     return await _getUsers(groupJid, 'owner');
   }
-
-  Future<void> addMembers(Jid groupJid, Iterable<String> memberJids) async {
+  
+  // Add Users by affiliation
+  Future<GroupChatroom> addRemoveMemberInRoom(
+      {required Jid groupJid,
+      required Iterable<String> memberJids,
+      required UserRole userRole,
+      required ActionType actionType,
+      bool isAsync = false}) async {
     final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = groupJid;
-
     final queryElement = XmppElement();
     queryElement.name = 'query';
     queryElement.addAttribute(
         XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
 
+    // Set Users role value
+    var affiliation = '';
+    switch (userRole) {
+      case UserRole.member:
+        affiliation = actionType == ActionType.ADD
+            ? UserRole.member.name
+            : UserRole.none.name;
+        break;
+      case UserRole.admin:
+        affiliation = actionType == ActionType.ADD
+            ? UserRole.admin.name
+            : UserRole.member.name;
+        break;
+      case UserRole.owner:
+        affiliation = actionType == ActionType.ADD
+            ? UserRole.owner.name
+            : UserRole.member.name;
+        break;
+      default:
+      // TODO: throw error
+    }
+
+    // Create Users List
     for (final memberJid in memberJids) {
       final item = XmppElement();
       item.name = 'item';
-      item.addAttribute(XmppAttribute('affiliation', 'member'));
+      item.addAttribute(XmppAttribute('affiliation', affiliation));
       item.addAttribute(XmppAttribute('jid', memberJid));
+      // add reason
+      final reason = ReasonElement.build("add user!");
+      item.addChild(reason);
+
       queryElement.addChild(item);
     }
 
     iqStanza.addChild(queryElement);
 
+    dynamic response;
+    if (isAsync) {
+      var completer = Completer<GroupChatroom>();
+      _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+      _myUnrespondedIqStanzasActions[iqStanza.id] =
+          GroupChatroomAction.ADD_USERS;
+      response = completer.future;
+    } else {
+      response = GroupChatroom(
+          action: null,
+          error: null,
+          isAvailable: null,
+          roomName: '',
+          info: null,
+          groupMembers: []);
+    }
     _connection.writeStanza(iqStanza);
     print(iqStanza.buildXmlString());
 
-    return Future.value();
+    return response;
   }
+
+  // Future<GroupChatroom> _addUsersAsync(Jid groupJid, Iterable<String> memberJids, String affiliation) async {
+  //   var completer = Completer<GroupChatroom>();
+
+  //   final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+  //   iqStanza.fromJid = _connection.fullJid;
+  //   iqStanza.toJid = groupJid;
+
+  //   final queryElement = XmppElement();
+  //   queryElement.name = 'query';
+  //   queryElement.addAttribute(
+  //       XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#admin'));
+
+  //   for (final memberJid in memberJids) {
+  //     final item = XmppElement();
+  //     item.name = 'item';
+  //     item.addAttribute(XmppAttribute('affiliation', affiliation));
+  //     item.addAttribute(XmppAttribute('jid', memberJid));
+  //     // add reason
+  //     final reason = ReasonElement.build("add member!");
+  //     item.addChild(reason);
+
+  //     queryElement.addChild(item);
+  //   }
+
+  //   iqStanza.addChild(queryElement);
+
+  //   _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+  //   _myUnrespondedIqStanzasActions[iqStanza.id] =
+  //       GroupChatroomAction.ADD_USERS;
+
+  //   _connection.writeStanza(iqStanza);
+  //   print(iqStanza.buildXmlString());
+
+  //   return completer.future;
+  // }
+
+  // Future<GroupChatroom> addMembers(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.member,
+  //       isAsync: false);
+  // }
+
+  // Future<GroupChatroom> addAdmins(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.admin,
+  //       isAsync: false);
+  // }
+
+  // Future<GroupChatroom> addOwners(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.owner,
+  //       isAsync: false);
+  // }
+
+  // Future<GroupChatroom> addMembersAsync(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.member,
+  //       isAsync: true);
+  // }
+
+  // Future<GroupChatroom> addAdminsAsync(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.admin,
+  //       isAsync: true);
+  // }
+
+  // Future<GroupChatroom> addOwnersAsync(
+  //     Jid groupJid, Iterable<String> memberJids) async {
+  //   return await _addRemoveMemberInRoom(
+  //       groupJid: groupJid,
+  //       memberJids: memberJids,
+  //       actionType: ActionType.ADD,
+  //       userRole: UserRole.owner,
+  //       isAsync: true);
+  // }
 
   Future<void> inviteMembers(Jid groupJid, Iterable<String> memberJids) async {
     final stanza =
@@ -253,7 +403,7 @@ class MultiUserChatManager {
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = roomtDotMucDomain;
 
-    var form = GroupChatroomConfigForm(config: params.config);
+    var form = GroupChatroomFormParams(config: params.config);
 
     var queryElement = form.buildForm();
 
@@ -297,7 +447,7 @@ class MultiUserChatManager {
   }
 
   Future<GroupChatroom> joinRoom(
-      Jid _roomtDotMucDomain, JoinGroupChatroomConfig config,
+      Jid _roomtDotMucDomain, JoinGroupChatroomParams config,
       {XmppCommunicationConfig options =
           const XmppCommunicationConfig(shallWaitStanza: false)}) {
     var completer = Completer<GroupChatroom>();
@@ -341,7 +491,7 @@ class MultiUserChatManager {
     presenceStanza.addAttribute(XmppAttribute('to', roomtDotMucDomain.fullJid));
 
     presenceStanza.addChild(
-        AcceptGroupChatroomInvitationConfig().buildAcceptRoomXElement());
+        AcceptGroupChatroomInvitationParams().buildAcceptRoomXElement());
     print(presenceStanza.buildXmlString());
 
     _myUnrespondedPresenceStanzas[presenceStanza.id] =
@@ -370,6 +520,7 @@ class MultiUserChatManager {
       AbstractStanza stanza, GroupChatroomAction action) {
     var queryChild = stanza.getChild('query');
     if (queryChild != null) {
+      // TODO: refactor to use only one return
       if (action == GroupChatroomAction.GET_ROOM_MEMBERS) {
         final items =
             queryChild.children.where((child) => child!.name == 'item');
@@ -460,6 +611,9 @@ class MultiUserChatManager {
         } else if (stanza.type == IqStanzaType.ERROR) {
           unrespondedStanza!.item2.complete(_handleError(stanza, _action));
         }
+        // TODO: to double check
+        _myUnrespondedIqStanzas.remove(stanza.id);
+        
       }
     }
   }

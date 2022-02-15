@@ -13,6 +13,7 @@ import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
+import 'package:xmpp_stone/src/features/message_archive/MessageArchiveData.dart';
 import 'package:xmpp_stone/src/features/message_archive/MessageArchiveManager.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/src/messages/MessageHandler.dart';
@@ -57,7 +58,7 @@ class XMPPClientManager {
   Function(xmpp.PresenceData event)? _onPresence;
   Function(xmpp.XmppConnectionState state)? _onState;
   Function()? _onPing;
-  Function(xmpp.AbstractStanza)? _onArchiveRetrieved;
+  Function(xmpp.MessageArchiveResult)? _onArchiveRetrieved;
   xmpp.Connection? _connection;
   late MessageHandler _messageHandler;
   late PingManager _pingHandler;
@@ -76,7 +77,7 @@ class XMPPClientManager {
       void Function(xmpp.PresenceData event)? onPresence,
       void Function(xmpp.XmppConnectionState state)? onState,
       void Function()? onPing,
-      void Function(xmpp.AbstractStanza)? onArchiveRetrieved,
+      void Function(xmpp.MessageArchiveResult)? onArchiveRetrieved,
       String? host,
       String? this.mucDomain}) {
     personel = XMPPClientPersonel(jid, password);
@@ -132,10 +133,10 @@ class XMPPClientManager {
     }));
     _messageArchiveHandler =
         xmpp.MessageArchiveManager.getInstance(_connection!);
-    _messageArchiveHandler
-        .listen(ClientMAMListener(onResultFinished: (IqStanza stanza) {
+    _messageArchiveHandler.listen(
+        ClientMAMListener(onResultFinished: (MessageArchiveResult result) {
       if (_onArchiveRetrieved != null) {
-        _onArchiveRetrieved!(stanza);
+        _onArchiveRetrieved!(result);
       }
     }));
     // Last activity - XEP0012
@@ -225,17 +226,15 @@ class XMPPClientManager {
     return vCardManager.getVCardFor(receiverJid);
   }
 
-  StreamSubscription? _rosterList = null;
-
   // Get roster list
   Future<List<xmpp.Buddy>> rosterList() {
     var completer = Completer<List<xmpp.Buddy>>();
     var rosterManager = xmpp.RosterManager.getInstance(_connection);
-    if (_rosterList != null) {
-      _rosterList!.cancel();
-    }
+
+    StreamSubscription? _rosterList = null;
     _rosterList = rosterManager.rosterStream.listen((rosterList) {
       completer.complete(rosterList);
+      _rosterList!.cancel();
     });
     rosterManager.queryForRoster().then((result) {});
     return completer.future;
@@ -302,7 +301,7 @@ class XMPPClientManager {
 
   // Create room
   Future<GroupChatroom> setRoomConfig(
-      String roomName, GroupChatroomConfig config) {
+      String roomName, GroupChatroomParams config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -317,7 +316,7 @@ class XMPPClientManager {
 
   // Create room
   Future<GroupChatroom> createInstantRoom(
-      String roomName, GroupChatroomConfig config) {
+      String roomName, GroupChatroomParams config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -328,7 +327,7 @@ class XMPPClientManager {
   }
 
   // Join room
-  Future<GroupChatroom> join(String roomName, JoinGroupChatroomConfig config,
+  Future<GroupChatroom> join(String roomName, JoinGroupChatroomParams config,
       {XmppCommunicationConfig options =
           const XmppCommunicationConfig(shallWaitStanza: false)}) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
@@ -382,18 +381,6 @@ class XMPPClientManager {
   }
 
   // Add members in group
-  Future<void> addMembersInGroup(String roomName, Iterable<String> memberJids) {
-    final mucManager = xmpp.MultiUserChatManager(_connection!);
-    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
-    if (!roomName.contains(mucDomain ?? '')) {
-      roomJid = xmpp.Jid(roomName, mucDomain, '');
-    }
-
-    mucManager.addMembers(roomJid, memberJids);
-    return Future.value();
-  }
-  
-  // Invite members in group
   Future<void> inviteMemberToGroup(
       String roomName, Iterable<String> memberJids) {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
@@ -404,6 +391,204 @@ class XMPPClientManager {
 
     mucManager.inviteMembers(roomJid, memberJids);
     return Future.value();
+  }
+
+  // Add members in group
+  Future<GroupChatroom> addMembersInGroup(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.member,
+        isAsync: false);
+    // return await mucManager.addMembers(roomJid,memberJids);
+  }
+
+  Future<GroupChatroom> addMembersInGroupAsync(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.member,
+        isAsync: true);
+    // return await mucManager.addMembersAsync(roomJid,memberJids);
+  }
+
+  // Add admins in group
+  Future<GroupChatroom> addAdminsInGroup(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.admin,
+        isAsync: false);
+    // return await mucManager.addAdmins(roomJid, memberJids);
+  }
+
+  Future<GroupChatroom> addAdminsInGroupAsync(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.admin,
+        isAsync: true);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  // Add owner in group
+  Future<GroupChatroom> addOwnersInGroup(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.owner,
+        isAsync: false);
+    // return await mucManager.addAdmins(roomJid, memberJids);
+  }
+
+  Future<GroupChatroom> addOwnersInGroupAsync(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.ADD,
+        userRole: UserRole.owner,
+        isAsync: true);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  // Remove members
+  Future<GroupChatroom> removeMembersInGroup(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.member,
+        isAsync: false);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  Future<GroupChatroom> removeMembersInGroupAsync(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.member,
+        isAsync: true);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  // Remove admins
+  Future<GroupChatroom> removeAdminsInGroup(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.admin,
+        isAsync: false);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  Future<GroupChatroom> removeAdminsInGroupAsync(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.admin,
+        isAsync: true);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  // Remove owners
+  Future<GroupChatroom> removeOwnersInGroup(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.owner,
+        isAsync: false);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
+  }
+
+  Future<GroupChatroom> removeOwnersInGroupAsync(
+      String roomName, Iterable<String> memberJids) async {
+    final mucManager = xmpp.MultiUserChatManager(_connection!);
+    xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
+    if (!roomName.contains(mucDomain ?? '')) {
+      roomJid = xmpp.Jid(roomName, mucDomain, '');
+    }
+    return await mucManager.addRemoveMemberInRoom(
+        groupJid: roomJid,
+        memberJids: memberJids,
+        actionType: ActionType.REMOVE,
+        userRole: UserRole.owner,
+        isAsync: true);
+    // return await mucManager.addAdminsAsync(roomJid, memberJids);
   }
 
   // Send 1-1 message
@@ -445,6 +630,7 @@ class XMPPClientManager {
         start: queryParams.start,
         end: queryParams.end,
         jid: Jid.fromFullJid(queryParams.jid ?? ""),
+        id: queryParams.id,
         includeGroup: queryParams.includeGroup);
   }
 
@@ -455,6 +641,7 @@ class XMPPClientManager {
         jid: (queryParams.jid != '' && queryParams.jid != null)
             ? Jid.fromFullJid(queryParams.jid ?? "")
             : null,
+        id: queryParams.id,
         includeGroup: queryParams.includeGroup);
   }
 
@@ -648,7 +835,7 @@ class ClientMAMListener implements xmpp.MessageArchiveListener {
   const ClientMAMListener({required this.onResultFinished});
 
   @override
-  void onFinish(IqStanza? iqStanza) {
+  void onFinish(MessageArchiveResult? iqStanza) {
     onResultFinished(iqStanza);
   }
 }

@@ -358,7 +358,7 @@ xml:lang='en'
         setState(XmppConnectionState.ForcefullyClosed);
       }
     } catch (e) {
-      print('sfd');
+      queueStanzaWrite = [];
       close();
     }
   }
