@@ -13,6 +13,8 @@ abstract class OMEMOResponse {
         final itemNotFound = error.getChild('item-not-found');
         if (itemNotFound != null) {
           errorResponse.message = 'Item not found';
+        } else {
+          errorResponse.message = 'Unidentified error';
         }
       }
       return errorResponse;
@@ -37,7 +39,39 @@ class OMEMOValidResponse extends OMEMOResponse {}
 
 class OMEMOPublishBundleResponse extends OMEMOResponse {}
 
-class OMEMOPublishDeviceResponse extends OMEMOResponse {}
+/// Success case
+///
+/// <xmpp_stone>
+///   <iq from='627775027401@dev2.xmpp.hiapp-chat.com' to='627775027401@dev2.xmpp.hiapp-chat.com/Android-f42af6e50523a5f8-cdbf4a3a-04ec-413e-841e-03e2490c3d87' id='AQCVFXQRG' type='result'>
+///     <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+///       <publish node='urn:xmpp:omemo:2:devices'>
+///         <item id='current'/>
+///       </publish>
+///     </pubsub>
+///   </iq>
+/// </xmpp_stone>
+class OMEMOPublishDeviceResponse extends OMEMOResponse {
+  late OMEMOResponse response;
+  late String deviceStoreItemId;
+  static OMEMOPublishDeviceResponse parse(AbstractStanza stanza) {
+    final response = OMEMOResponse.parseError(stanza);
+    final _response = OMEMOPublishDeviceResponse();
+    _response.response = response;
+    try {
+      if (response.runtimeType == OMEMOValidResponse) {
+        // Parse further
+        final pubsub = stanza.getChild('pubsub')!;
+        final publish = pubsub.getChild('publish')!;
+        final item = publish.getChild('item')!;
+        _response.deviceStoreItemId = item.getAttribute('id')!.value!;
+      }
+    } catch (e) {
+      throw ErrorPublishDeviceException();
+    }
+
+    return _response;
+  }
+}
 
 class OMEMOGetDevicesResponse extends OMEMOResponse {
   late OMEMOResponse response;
@@ -90,7 +124,7 @@ class OMEMOGetDevicesResponse extends OMEMOResponse {
         _response.devices = devicesList;
       }
     } catch (e) {
-      throw InvalidDeviceListException();
+      throw ErrorGetDevicesException();
     }
 
     return _response;

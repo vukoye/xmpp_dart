@@ -35,6 +35,10 @@ class OMEMOManager extends OMEMOManagerApi {
           // handle response
           final response = OMEMOGetDevicesResponse.parse(stanza);
           res.item2.complete(response);
+        } else if (res.item3 == OMEMOPublishDeviceResponse) {
+          // handle response of publish device
+          final response = OMEMOPublishDeviceResponse.parse(stanza);
+          res.item2.complete(response);
         }
       });
     }
