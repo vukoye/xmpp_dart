@@ -15,6 +15,7 @@ import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MultiUserChatNegotiator.dart';
+import 'package:xmpp_stone/src/response/base_response.dart';
 import 'package:xmpp_stone/src/response/response.dart';
 
 class MultiUserChatManager {
@@ -164,27 +165,13 @@ class MultiUserChatManager {
 
     iqStanza.addChild(queryElement);
 
-    // dynamic response;
-    // if (isAsync) {
-    //   var completer = Completer<GroupChatroom>();
-    //   _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
-    //   _myUnrespondedIqStanzasActions[iqStanza.id] =
-    //       GroupChatroomAction.ADD_USERS;
-    //   response = completer.future;
-    // } else {
-    //   response = GroupChatroom(
-    //       action: null,
-    //       error: null,
-    //       isAvailable: null,
-    //       roomName: '',
-    //       info: null,
-    //       groupMembers: []);
-    // }
     _connection.writeStanza(iqStanza);
     print(iqStanza.buildXmlString());
-
-    // return response;
-    return responseIqHandler.set<AddUsersResponse>(iqStanza.id!, iqStanza);
+    if (isAsync) {
+      return responseIqHandler.set<AddUsersResponse>(iqStanza.id!, iqStanza);
+    } else {
+      return AddUsersResponse();
+    }
   }
 
   Future<void> inviteMembers(Jid groupJid, Iterable<String> memberJids) async {
