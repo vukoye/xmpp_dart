@@ -1,6 +1,7 @@
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/response/base_response.dart';
 
 /// <query xmlns='http://jabber.org/protocol/disco#info'/>
 ///       <error code='404' type='cancel'>
@@ -104,3 +105,163 @@ class InvalidGroupChatroom extends GroupChatroom {
             error: error);
 }
 
+abstract class GroupResponse {
+  late bool success;
+  late BaseResponse response;
+}
+
+class CreateRoomResponse extends GroupResponse {
+  static CreateRoomResponse parse(AbstractStanza stanza) {
+    final response = BaseResponse.parseError(stanza);
+
+    final _response = CreateRoomResponse();
+    _response.response = response;
+    if (response.runtimeType == BaseValidResponse) {
+      // Parse further
+      _response.success = true;
+    } else {
+      _response.success = false;
+    }
+
+    return _response;
+  }
+}
+
+class JoinRoomResponse extends GroupResponse {
+  static JoinRoomResponse parse(AbstractStanza stanza) {
+    final response = BaseResponse.parseError(stanza);
+    final _response = JoinRoomResponse();
+    _response.response = response;
+    if (response.runtimeType == BaseValidResponse) {
+      // Parse further
+      try {
+        final xChild = stanza.getChild('x')!;
+        final status = xChild.getChild('status')!;
+        final statusCode = status.getAttribute('code')!.value!; //  == '110
+        if (statusCode == '110') {
+          _response.success = true;
+        }
+      } catch (e) {
+        _response.success = false;
+      }
+    } else {
+      _response.success = false;
+    }
+
+    return _response;
+  }
+}
+
+class GetRoomConfigResponse extends GroupResponse {
+  static GetRoomConfigResponse parse(AbstractStanza stanza) {
+    final response = BaseResponse.parseError(stanza);
+
+    final _response = GetRoomConfigResponse();
+    _response.response = response;
+    if (response.runtimeType == BaseValidResponse) {
+      // Parse further
+      _response.success = true;
+    } else {
+      _response.success = false;
+    }
+
+    return _response;
+  }
+}
+
+class SetRoomConfigResponse extends GroupResponse {
+  static SetRoomConfigResponse parse(AbstractStanza stanza) {
+    final response = BaseResponse.parseError(stanza);
+
+    final _response = SetRoomConfigResponse();
+    _response.response = response;
+    if (response.runtimeType == BaseValidResponse) {
+      // Parse further
+      _response.success = true;
+    } else {
+      _response.success = false;
+    }
+
+    return _response;
+  }
+}
+
+class AcceptRoomResponse extends GroupResponse {
+  static AcceptRoomResponse parse(AbstractStanza stanza) {
+    final response = BaseResponse.parseError(stanza);
+
+    final _response = AcceptRoomResponse();
+    _response.response = response;
+    if (response.runtimeType == BaseValidResponse) {
+      // Parse further
+      _response.success = true;
+    } else {
+      _response.success = false;
+    }
+
+    return _response;
+  }
+}
+
+class DiscoverRoomResponse extends GroupResponse {
+  static DiscoverRoomResponse parse(AbstractStanza stanza) {
+    final response = BaseResponse.parseError(stanza);
+
+    final _response = DiscoverRoomResponse();
+    _response.response = response;
+    if (response.runtimeType == BaseValidResponse) {
+      // Parse further
+      _response.success = true;
+    } else {
+      _response.success = false;
+    }
+
+    return _response;
+  }
+}
+
+class GetUsersResponse extends GroupResponse {
+  late Iterable<Jid> users;
+  static GetUsersResponse parse(AbstractStanza stanza) {
+    final response = BaseResponse.parseError(stanza);
+
+    final _response = GetUsersResponse();
+    _response.response = response;
+    if (response.runtimeType == BaseValidResponse) {
+      // Parse further
+      try {
+        var queryChild = stanza.getChild('query')!;
+        final items =
+            queryChild.children.where((child) => child!.name == 'item');
+        final groupMembers = items.map((item) {
+          return Jid.fromFullJid(item!.getAttribute('jid')!.value!);
+        });
+        _response.users = groupMembers;
+        _response.success = true;
+      } catch (e) {
+        _response.success = false;
+      }
+    } else {
+      _response.success = false;
+    }
+
+    return _response;
+  }
+}
+
+class AddUsersResponse extends GroupResponse {
+  static AddUsersResponse parse(AbstractStanza stanza) {
+    final response = BaseResponse.parseError(stanza);
+
+    final _response = AddUsersResponse();
+    _response.response = response;
+    if (response.runtimeType == BaseValidResponse) {
+      // Parse further
+      _response.success = true;
+    } else {
+      _response.success = false;
+    }
+
+    return _response;
+  }
+}
