@@ -25,4 +25,6 @@ class ResponseHandler<T> {
       unset(id);
     }
   }
+
+  Iterable<String> keys() => _myUnrespondedIqStanzas.keys.map((e) => e ?? "");
 }

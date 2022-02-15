@@ -4,6 +4,7 @@ import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOData.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOManagerApi.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
+import 'package:xmpp_stone/src/response/base_response.dart';
 import 'package:xmpp_stone/src/response/response.dart';
 
 class OMEMOManager extends OMEMOManagerApi {
@@ -16,7 +17,11 @@ class OMEMOManager extends OMEMOManagerApi {
       ResponseHandler<IqStanza>();
 
   OMEMOManager(this._connection) {
-    _connection.inStanzasStream.listen(_processStanza);
+    // Listen only having stanza and id existed
+    _connection.inStanzasStream
+        .where((AbstractStanza? stanza) =>
+            stanza != null && responseHandler.keys().contains(stanza.id ?? ""))
+        .listen(_processStanza);
   }
 
   static OMEMOManager getInstance(Connection connection) {
@@ -31,15 +36,16 @@ class OMEMOManager extends OMEMOManagerApi {
   void _processStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       responseHandler.test(stanza.id!, (res) {
-        if (res.item3 == OMEMOGetDevicesResponse) {
-          // handle response
-          final response = OMEMOGetDevicesResponse.parse(stanza);
-          res.item2.complete(response);
-        } else if (res.item3 == OMEMOPublishDeviceResponse) {
-          // handle response of publish device
-          final response = OMEMOPublishDeviceResponse.parse(stanza);
-          res.item2.complete(response);
+        late BaseResponse response;
+        switch (res.item3) {
+          case OMEMOGetDevicesResponse:
+            response = OMEMOGetDevicesResponse.parse(stanza);
+            break;
+          case OMEMOPublishDeviceResponse:
+            response = OMEMOPublishDeviceResponse.parse(stanza);
+            break;
         }
+        res.item2.complete(response);
       });
     }
   }

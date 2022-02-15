@@ -2,6 +2,7 @@ import 'package:xml/xml.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOData.dart';
 import 'package:test/test.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
+import 'package:xmpp_stone/src/response/base_response.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
 void main() {
@@ -21,7 +22,7 @@ void main() {
 """);
       final stanza = StanzaParser.parseStanza(xmlDoc.rootElement);
       final response = OMEMOPublishDeviceResponse.parse(stanza!);
-      expect(response.response.runtimeType, OMEMOValidResponse);
+      expect(response.response.runtimeType, BaseValidResponse);
       expect(response.deviceStoreItemId, 'current');
     });
 
@@ -42,7 +43,7 @@ void main() {
 """);
       final stanza = StanzaParser.parseStanza(xmlDoc.rootElement);
       final response = OMEMOGetDevicesResponse.parse(stanza!);
-      expect(response.response.runtimeType, OMEMOValidResponse);
+      expect(response.response.runtimeType, BaseValidResponse);
       expect(response.devices.isNotEmpty, true);
       expect(response.devices.first.deviceId, 'f42af6e50523a5f8');
       expect(response.devices.first.deviceLabel, 'Current');
@@ -59,10 +60,10 @@ void main() {
 """);
       final stanza = StanzaParser.parseStanza(xmlDoc.rootElement);
       final response = OMEMOGetDevicesResponse.parse(stanza!);
-      expect(response.response.runtimeType, OMEMOErrorResponse);
-      expect((response.response as OMEMOErrorResponse).code, '404');
+      expect(response.response.runtimeType, BaseErrorResponse);
+      expect((response.response as BaseErrorResponse).code, '404');
       expect(
-          (response.response as OMEMOErrorResponse).message, 'Item not found');
+          (response.response as BaseErrorResponse).message, 'Item not found');
     });
   });
 }

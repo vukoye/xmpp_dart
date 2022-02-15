@@ -1,43 +1,7 @@
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOException.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
-
-abstract class OMEMOResponse {
-  static parseError(AbstractStanza stanza) {
-    final iqType = stanza.getAttribute('type')!.value;
-    if (iqType == 'error') {
-      final error = stanza.getChild('error');
-      final errorResponse = OMEMOErrorResponse();
-      if (error != null) {
-        errorResponse.code = error.getAttribute('code')!.value!;
-        final itemNotFound = error.getChild('item-not-found');
-        if (itemNotFound != null) {
-          errorResponse.message = 'Item not found';
-        } else {
-          errorResponse.message = 'Unidentified error';
-        }
-      }
-      return errorResponse;
-    }
-    if (iqType == 'result') {
-      return OMEMOValidResponse();
-    } else {
-      final errorResponse = OMEMOErrorResponse();
-      errorResponse.code = 'N/A';
-      errorResponse.message = 'Unidentified error';
-      return errorResponse;
-    }
-  }
-}
-
-class OMEMOErrorResponse extends OMEMOResponse {
-  late String code;
-  late String message;
-}
-
-class OMEMOValidResponse extends OMEMOResponse {}
-
-class OMEMOPublishBundleResponse extends OMEMOResponse {}
+import 'package:xmpp_stone/src/response/base_response.dart';
 
 /// Success case
 ///
@@ -50,15 +14,15 @@ class OMEMOPublishBundleResponse extends OMEMOResponse {}
 ///     </pubsub>
 ///   </iq>
 /// </xmpp_stone>
-class OMEMOPublishDeviceResponse extends OMEMOResponse {
-  late OMEMOResponse response;
+class OMEMOPublishDeviceResponse extends BaseResponse {
+  late BaseResponse response;
   late String deviceStoreItemId;
   static OMEMOPublishDeviceResponse parse(AbstractStanza stanza) {
-    final response = OMEMOResponse.parseError(stanza);
+    final response = BaseResponse.parseError(stanza);
     final _response = OMEMOPublishDeviceResponse();
     _response.response = response;
     try {
-      if (response.runtimeType == OMEMOValidResponse) {
+      if (response.runtimeType == BaseValidResponse) {
         // Parse further
         final pubsub = stanza.getChild('pubsub')!;
         final publish = pubsub.getChild('publish')!;
@@ -66,15 +30,15 @@ class OMEMOPublishDeviceResponse extends OMEMOResponse {
         _response.deviceStoreItemId = item.getAttribute('id')!.value!;
       }
     } catch (e) {
-      throw ErrorPublishDeviceException();
+      _response.deviceStoreItemId = "";
     }
 
     return _response;
   }
 }
 
-class OMEMOGetDevicesResponse extends OMEMOResponse {
-  late OMEMOResponse response;
+class OMEMOGetDevicesResponse extends BaseResponse {
+  late BaseResponse response;
   late List<OMEMODeviceInfo> devices;
 
   /// Error case:
@@ -105,23 +69,27 @@ class OMEMOGetDevicesResponse extends OMEMOResponse {
   /// </iq>
   /// </xmpp_stone>
   static OMEMOGetDevicesResponse parse(AbstractStanza stanza) {
-    final response = OMEMOResponse.parseError(stanza);
+    final response = BaseResponse.parseError(stanza);
     final _response = OMEMOGetDevicesResponse();
     _response.response = response;
     try {
-      if (response.runtimeType == OMEMOValidResponse) {
-        // Parse further
-        final pubsub = stanza.getChild('pubsub')!;
-        final items = pubsub.getChild('items')!;
-        final item = items.getChild('item')!;
-        final devices = item.getChild('devices')!;
-        final List<OMEMODeviceInfo> devicesList = [];
-        devices.children.forEach((element) {
-          final id = element!.getAttribute('id')!.value!;
-          final label = element.getAttribute('label')!.value!;
-          devicesList.add(OMEMODeviceInfo(deviceId: id, deviceLabel: label));
-        });
-        _response.devices = devicesList;
+      if (response.runtimeType == BaseValidResponse) {
+        try {
+          // Parse further
+          final pubsub = stanza.getChild('pubsub')!;
+          final items = pubsub.getChild('items')!;
+          final item = items.getChild('item')!;
+          final devices = item.getChild('devices')!;
+          final List<OMEMODeviceInfo> devicesList = [];
+          devices.children.forEach((element) {
+            final id = element!.getAttribute('id')!.value!;
+            final label = element.getAttribute('label')!.value!;
+            devicesList.add(OMEMODeviceInfo(deviceId: id, deviceLabel: label));
+          });
+          _response.devices = devicesList;
+        } catch (e) {
+          _response.devices = [];
+        }
       }
     } catch (e) {
       throw ErrorGetDevicesException();
@@ -131,8 +99,10 @@ class OMEMOGetDevicesResponse extends OMEMOResponse {
   }
 }
 
-class OMEMOGetBundleResponse extends OMEMOResponse {}
+class OMEMOGetBundleResponse extends BaseResponse {}
 
-class OMEMOEnvelopePlainTextResponse extends OMEMOResponse {}
+class OMEMOPublishBundleResponse extends BaseResponse {}
 
-class OMEMOEnvelopeEncryptionResponse extends OMEMOResponse {}
+class OMEMOEnvelopePlainTextResponse extends BaseResponse {}
+
+class OMEMOEnvelopeEncryptionResponse extends BaseResponse {}
