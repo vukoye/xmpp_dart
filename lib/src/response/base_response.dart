@@ -16,7 +16,7 @@ abstract class BaseResponse {
               (element) => element!.name == 'text',
               orElse: () => XmppElement());
 
-          if (textItem != null) {
+          if (textItem != null && textItem.textValue != null) {
             errorResponse.message = textItem.textValue!;
           } else if (itemNotFound != null) {
             errorResponse.message = 'Item not found';
