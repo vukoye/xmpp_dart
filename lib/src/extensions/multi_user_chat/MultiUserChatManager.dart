@@ -322,6 +322,12 @@ class MultiUserChatManager {
         case DiscoverRoomResponse:
           response = DiscoverRoomResponse.parse(stanza);
           break;
+        case GetUsersResponse:
+          response = GetUsersResponse.parse(stanza);
+          break;
+        case AddUsersResponse:
+          response = AddUsersResponse.parse(stanza);
+          break;
       }
       res.item2.complete(response);
     });
