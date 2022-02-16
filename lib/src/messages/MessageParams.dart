@@ -1,5 +1,6 @@
 import 'package:xmpp_stone/src/access_point/communication_config.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpManager.dart';
 import 'package:xmpp_stone/src/extensions/chat_states/ChatStateDecoration.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 
@@ -11,6 +12,7 @@ class MessageParams {
   final MessageStanzaType messageType; // = MessageStanzaType.CHAT;
   final XmppCommunicationConfig options;
   final ChatStateType chatStateType;
+  final AmpMessageType ampMessageType;
 
   const MessageParams({
     required this.receipt,
@@ -20,6 +22,7 @@ class MessageParams {
     required this.messageType,
     required this.options,
     required this.chatStateType,
+    required this.ampMessageType,
   });
 
   static MessageParams build({
@@ -29,6 +32,7 @@ class MessageParams {
     String customString = '',
     MessageStanzaType messageType = MessageStanzaType.CHAT,
     ChatStateType chatStateType = ChatStateType.None,
+    AmpMessageType ampMessageType = AmpMessageType.None,
     XmppCommunicationConfig options =
         const XmppCommunicationConfig(shallWaitStanza: false),
   }) {
@@ -39,6 +43,7 @@ class MessageParams {
         customString: customString,
         messageType: messageType,
         options: options,
-        chatStateType: chatStateType);
+        chatStateType: chatStateType,
+        ampMessageType: ampMessageType);
   }
 }
