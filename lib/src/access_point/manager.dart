@@ -7,6 +7,7 @@ import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpManager.dart';
 import 'package:xmpp_stone/src/extensions/chat_states/ChatStateDecoration.dart';
 import 'package:xmpp_stone/src/extensions/last_activity/LastActivityManager.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
@@ -603,6 +604,7 @@ class XMPPClientManager {
           receipt: ReceiptRequestType.RECEIVED,
           messageType: MessageStanzaType.CHAT,
           chatStateType: ChatStateType.None,
+          ampMessageType: AmpMessageType.None,
           options: XmppCommunicationConfig(shallWaitStanza: false))}) {
     return _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
         additional: additional);
@@ -623,6 +625,7 @@ class XMPPClientManager {
             customString: '',
             chatStateType: ChatStateType.None,
             messageType: MessageStanzaType.CHAT,
+            ampMessageType: AmpMessageType.None,
             options: XmppCommunicationConfig(shallWaitStanza: false)));
   }
 

@@ -41,3 +41,4 @@ export 'src/extensions/last_activity/LastActivityManager.dart';
 export 'src/extensions/omemo/OMEMOManager.dart';
 export 'src/extensions/omemo/OMEMOParams.dart';
 export 'src/extensions/omemo/OMEMOData.dart';
+export 'src/extensions/advanced_messaging_processing/AmpManager.dart';
