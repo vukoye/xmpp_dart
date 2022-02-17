@@ -10,7 +10,7 @@ class ResponseHandler<T> {
     final completer = Completer<P>();
 
     _myUnrespondedIqStanzas[id] = Tuple3(stanza, completer, P);
-    return completer.future.timeout(Duration(seconds: 10),
+    return completer.future.timeout(Duration(seconds: 30),
         onTimeout: () => throw TimeoutException('Requst is timeout'));
   }
 

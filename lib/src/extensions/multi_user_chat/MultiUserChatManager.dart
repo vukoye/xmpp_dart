@@ -257,10 +257,8 @@ class MultiUserChatManager {
     presenceStanza.id = AbstractStanza.getRandomId();
 
     // Change nickname
-    Jid roomtDotMucDomain = Jid(
-        _roomtDotMucDomain.local,
-        _roomtDotMucDomain.domain,
-        '${_connection.fullJid.userAtDomain}#${_connection.fullJid.resource}');
+    Jid roomtDotMucDomain = Jid(_roomtDotMucDomain.local,
+        _roomtDotMucDomain.domain, '${_connection.fullJid.local}');
     presenceStanza.fromJid = _connection.fullJid;
     presenceStanza.addAttribute(XmppAttribute('to', roomtDotMucDomain.fullJid));
 

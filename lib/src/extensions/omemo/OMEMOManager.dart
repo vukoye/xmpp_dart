@@ -44,6 +44,9 @@ class OMEMOManager extends OMEMOManagerApi {
           case OMEMOPublishDeviceResponse:
             response = OMEMOPublishDeviceResponse.parse(stanza);
             break;
+          case OMEMOPublishBundleResponse:
+            response = OMEMOPublishBundleResponse.parse(stanza);
+            break;
         }
         res.item2.complete(response);
       });
@@ -53,7 +56,10 @@ class OMEMOManager extends OMEMOManagerApi {
   @override
   Future<OMEMOPublishBundleResponse> publishBundle(
       OMEMOPublishBundleParams params) {
-    throw UnimplementedError();
+    final requestStanza = params.buildRequest(from: _connection.fullJid);
+    _connection.writeStanza(requestStanza);
+    return responseHandler.set<OMEMOPublishBundleResponse>(
+        requestStanza.id!, requestStanza);
   }
 
   @override

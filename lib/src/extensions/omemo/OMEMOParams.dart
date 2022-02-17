@@ -1,4 +1,10 @@
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/bundles/BundleElement.dart';
+import 'package:xmpp_stone/src/elements/bundles/IKElement.dart';
+import 'package:xmpp_stone/src/elements/bundles/PKElement.dart';
+import 'package:xmpp_stone/src/elements/bundles/PreKeysElement.dart';
+import 'package:xmpp_stone/src/elements/bundles/SPKElement.dart';
+import 'package:xmpp_stone/src/elements/bundles/SPKSElement.dart';
 import 'package:xmpp_stone/src/elements/encryption/EncryptElement.dart';
 import 'package:xmpp_stone/src/elements/encryption/EncryptHeaderElement.dart';
 import 'package:xmpp_stone/src/elements/encryption/EncryptKeyElement.dart';
@@ -79,11 +85,55 @@ class OMEMOPublishDeviceParams extends OMEMOParams {
   }
 }
 
+class OMEMOPreKeyParams {
+  final String id;
+  // as hex
+  final String pk;
+
+  const OMEMOPreKeyParams({required this.id, required this.pk});
+}
+
 class OMEMOPublishBundleParams extends OMEMOParams {
+  final String deviceId;
+  final OMEMOPreKeyParams spk;
+  // In hex
+  final String spks;
+  // In hex
+  final String ik;
+  final List<OMEMOPreKeyParams> preKeys;
+
+  const OMEMOPublishBundleParams(
+      {required this.deviceId,
+      required this.spk,
+      required this.spks,
+      required this.ik,
+      required this.preKeys});
+
   @override
-  XmppElement buildRequest({required Jid from}) {
-    // TODO: implement buildRequest
-    throw UnimplementedError();
+  IqStanza buildRequest({required Jid from}) {
+    final iqElement = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
+    final pubsub = PubSubElement.build();
+    final publish = PublishElement.buildOMEMOBundle();
+    final item = ItemElement.build(deviceId);
+    final bundle = BundleElement.buildOMEMOBundle();
+    final spkElement = SPKElement.build(id: spk.id, encodedData: spk.pk);
+    final spksElement = SPKSElement.build(encodedData: spks);
+    final ikElement = IKElement.build(encodedData: ik);
+    final List<PKElement> pkList = [];
+    preKeys.forEach((element) {
+      pkList.add(PKElement.build(id: element.id, encodedData: element.pk));
+    });
+    bundle.addChild(spkElement);
+    bundle.addChild(spksElement);
+    bundle.addChild(ikElement);
+    bundle.addChild(PreKeysElement.build(pkElements: pkList));
+    item.addChild(bundle);
+    publish.addChild(item);
+    pubsub.addChild(publish);
+
+    iqElement.fromJid = from;
+    iqElement.addChild(pubsub);
+    return iqElement;
   }
   // final Iterable<OMEMODeviceInfo> devices;
   // final String bundleId;

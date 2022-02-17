@@ -17,10 +17,12 @@ import 'package:xmpp_stone/src/response/base_response.dart';
 class OMEMOPublishDeviceResponse extends BaseResponse {
   late BaseResponse response;
   late String deviceStoreItemId;
+  late bool success;
   static OMEMOPublishDeviceResponse parse(AbstractStanza stanza) {
     final response = BaseResponse.parseError(stanza);
     final _response = OMEMOPublishDeviceResponse();
     _response.response = response;
+    _response.success = response.runtimeType == BaseValidResponse;
     try {
       if (response.runtimeType == BaseValidResponse) {
         // Parse further
@@ -39,6 +41,7 @@ class OMEMOPublishDeviceResponse extends BaseResponse {
 
 class OMEMOGetDevicesResponse extends BaseResponse {
   late BaseResponse response;
+  late bool success;
   late List<OMEMODeviceInfo> devices;
 
   /// Error case:
@@ -72,6 +75,7 @@ class OMEMOGetDevicesResponse extends BaseResponse {
     final response = BaseResponse.parseError(stanza);
     final _response = OMEMOGetDevicesResponse();
     _response.response = response;
+    _response.success = response.runtimeType == BaseValidResponse;
     try {
       if (response.runtimeType == BaseValidResponse) {
         try {
@@ -87,8 +91,10 @@ class OMEMOGetDevicesResponse extends BaseResponse {
             devicesList.add(OMEMODeviceInfo(deviceId: id, deviceLabel: label));
           });
           _response.devices = devicesList;
+          _response.success = true;
         } catch (e) {
           _response.devices = [];
+          _response.success = false;
         }
       }
     } catch (e) {
@@ -101,7 +107,41 @@ class OMEMOGetDevicesResponse extends BaseResponse {
 
 class OMEMOGetBundleResponse extends BaseResponse {}
 
-class OMEMOPublishBundleResponse extends BaseResponse {}
+class OMEMOPublishBundleResponse extends BaseResponse {
+  late bool success;
+  late BaseResponse response;
+  late String deviceId;
+
+  /// Success response:
+  /// <xmpp_stone><iq from='627075827401@dev2.xmpp.hiapp-chat.com' to='627075827401@dev2.xmpp.hiapp-chat.com/Android-f42af6e50523a5f8-a556406d-1756-446d-be30-973895f83314' id='JHRVSASTL' type='result'>
+  /// <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+  /// <publish node='urn:xmpp:omemo:2:bundles'>
+  /// <item id='f42af6e50523a5f8'/></publish></pubsub></iq></xmpp_stone>
+  static OMEMOPublishBundleResponse parse(AbstractStanza stanza) {
+    final response = BaseResponse.parseError(stanza);
+    final _response = OMEMOPublishBundleResponse();
+    _response.response = response;
+    _response.success = response.runtimeType == BaseValidResponse;
+    try {
+      if (response.runtimeType == BaseValidResponse) {
+        try {
+          // Parse further
+          final pubsub = stanza.getChild('pubsub')!;
+          final publish = pubsub.getChild('publish')!;
+          final item = publish.getChild('item')!;
+          _response.deviceId = item.getAttribute('id')!.value!;
+          _response.success = true;
+        } catch (e) {
+          _response.success = false;
+        }
+      }
+    } catch (e) {
+      throw ErrorGetDevicesException();
+    }
+
+    return _response;
+  }
+}
 
 class OMEMOEnvelopePlainTextResponse extends BaseResponse {}
 
