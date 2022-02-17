@@ -672,6 +672,11 @@ class XMPPClientManager {
     return await _omemoManager.publishBundle(params);
   }
 
+  Future<OMEMOGetBundleResponse> fetchBundle(
+      xmpp.OMEMOGetBundleParams params) async {
+    return await _omemoManager.fetchBundle(params);
+  }
+
   /// Listeners
 
   void listens() {
