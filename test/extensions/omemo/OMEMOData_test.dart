@@ -65,5 +65,21 @@ void main() {
       expect(
           (response.response as BaseErrorResponse).message, 'Item not found');
     });
+    test('Should parse success response from publish bundle successfully', () {
+      final xmlDoc = XmlDocument.parse("""
+    <iq from='627075827401@dev2.xmpp.hiapp-chat.com' to='627075827401@dev2.xmpp.hiapp-chat.com/Android-f42af6e50523a5f8-a556406d-1756-446d-be30-973895f83314' id='JHRVSASTL' type='result'>
+      <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+        <publish node='urn:xmpp:omemo:2:bundles'>
+          <item id='f42af6e50523a5f8'/>
+        </publish>
+      </pubsub>
+    </iq>
+""");
+      final stanza = StanzaParser.parseStanza(xmlDoc.rootElement);
+      final response = OMEMOPublishBundleResponse.parse(stanza!);
+      expect(response.response.runtimeType, BaseValidResponse);
+      expect(response.success, true);
+      expect(response.deviceId, 'f42af6e50523a5f8');
+    });
   });
 }

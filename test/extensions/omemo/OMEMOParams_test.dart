@@ -74,6 +74,35 @@ void main() {
   </items>
 </pubsub>""");
     });
+    test('Should create the publish bundle xml correctly', () {
+      final publishBundleParams = OMEMOPublishBundleParams(
+          deviceId: '314566',
+          ik: 'encodedIdentityKey',
+          preKeys: [OMEMOPreKeyParams(id: '1', pk: 'encodedKey1')],
+          spk: OMEMOPreKeyParams(id: '1', pk: 'encodedSignedPrekey'),
+          spks: 'encodedSignature');
+
+      final iqElement = publishBundleParams.buildRequest(
+          from: Jid.fromFullJid('bob@capulet.lit'));
+      expect(iqElement.name, 'iq');
+      expect(iqElement.getAttribute('type')!.value, 'set');
+      expect(iqElement.getAttribute('from')!.value, 'bob@capulet.lit');
+      expect(iqElement.getChild('pubsub')!.buildXmlString(),
+          """<pubsub xmlns="http://jabber.org/protocol/pubsub">
+  <publish node="urn:xmpp:omemo:2:bundles">
+    <item id="314566">
+      <bundle xmlns="urn:xmpp:omemo:2">
+        <spk id="1">encodedSignedPrekey</spk>
+        <spks>encodedSignature</spks>
+        <ik>encodedIdentityKey</ik>
+        <prekeys>
+          <pk id="1">encodedKey1</pk>
+        </prekeys>
+      </bundle>
+    </item>
+  </publish>
+</pubsub>""");
+    });
     test('Should create the plaintext envelope', () {
       final publishDeviceParams = OMEMOEnvelopePlainTextParams(
         plainText: 'Hello World',
