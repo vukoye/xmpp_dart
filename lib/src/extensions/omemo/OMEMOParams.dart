@@ -139,7 +139,6 @@ class OMEMOPublishBundleParams extends OMEMOParams {
   // final String bundleId;
 }
 
-
 class OMEMOFetchBundleParams extends OMEMOParams {
   final Jid to;
   final String id;
@@ -172,6 +171,7 @@ class OMEMOFetchBundleParams extends OMEMOParams {
     return stanza;
   }
 }
+
 class OMEMOGetDevicesParams extends OMEMOParams {
   final Jid buddyJid;
 

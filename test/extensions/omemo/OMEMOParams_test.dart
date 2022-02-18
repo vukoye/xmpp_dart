@@ -224,16 +224,23 @@ void main() {
     });
   
     test('Should create fetch bundle params xml correctly', () {
-      const from = 'fromJid';
-      const to = 'toJid';
+      const from = 'fromJid@shakespere.lit';
+      const to = 'toJid@shakespere.lit';
       const id = 'someId';
       const itemId = 'someOtherId';
 
       final params = OMEMOFetchBundleParams(id: id, itemId: itemId, to: Jid.fromFullJid(to));
       
-      final actual = params.buildRequest(from: Jid.fromFullJid(from));
+      final actual = params.buildRequest(from: Jid.fromFullJid(from)).buildXmlString();
 
-      const expected = "<iq type='get' from='$from' to='$to' id='$id'><pubsub xmlns='http://jabber.org/protocol/pubsub'><items node='urn:xmpp:omemo:2:bundles'><item id='$itemId'/><items></pubsub></iq>";
+      const expected = '<iq id="$id" type="get" from="$from" to="$to">\n'+
+      '  <pubsub xmlns="http://jabber.org/protocol/pubsub">\n'+
+      '    <items node="urn:xmpp:omemo:2:bundles">\n'+
+      '      <item id="$itemId"/>\n'+
+      '    </items>\n'+
+      '  </pubsub>\n'+
+      '</iq>';
+
       expect(actual, expected);
     });
   });

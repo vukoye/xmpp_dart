@@ -1,3 +1,4 @@
+
 import 'dart:async';
 
 import 'package:collection/collection.dart' show IterableExtension;
@@ -10,7 +11,6 @@ import 'package:xmpp_stone/src/elements/nonzas/RNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/ResumeNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/ResumedNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/SMNonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamState.dart';
 
 import '../../../xmpp_stone.dart';

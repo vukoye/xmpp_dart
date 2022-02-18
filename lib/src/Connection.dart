@@ -1,25 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
 import 'package:xmpp_stone/src/ReconnectionManager.dart';
-import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 
-import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
-import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
-import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
+import 'package:xmpp_stone/src/features/ConnectionNegotiationManager.dart';
+import 'package:xmpp_stone/src/features/streammanagement/StreamManagementModule.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
-import 'package:xmpp_stone/src/presence/PresenceManager.dart';
-import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
-
-import 'logger/Log.dart';
 
 enum XmppConnectionState {
   Idle,
@@ -120,7 +111,7 @@ class Connection {
 
   Jid get fullJid => account.fullJid;
 
-  late ConnectionNegotiatorManager connectionNegotatiorManager;
+  late ConnectionNegotiationManager connectionNegotiationManager;
 
   void fullJidRetrieved(Jid jid) {
     account.resource = jid.resource;
@@ -142,7 +133,7 @@ class Connection {
     PresenceManager.getInstance(this);
     MessageHandler.getInstance(this);
     PingManager.getInstance(this);
-    connectionNegotatiorManager = ConnectionNegotiatorManager(this, account);
+    connectionNegotiationManager = ConnectionNegotiationManager(this, account);
     reconnectionManager = ReconnectionManager(this);
   }
 
@@ -201,7 +192,7 @@ xml:lang='en'
   }
 
   Future<void> openSocket() async {
-    connectionNegotatiorManager.init();
+    connectionNegotiationManager.init();
     setState(XmppConnectionState.SocketOpening);
     try {
       return await Socket.connect(account.host ?? account.domain, account.port)
@@ -315,7 +306,7 @@ xml:lang='en'
           .whereType<xml.XmlElement>()
           .where((element) => featureMatcher(element))
           .forEach((feature) =>
-              connectionNegotatiorManager.negotiateFeatureList(feature));
+              connectionNegotiationManager.negotiateFeatureList(feature));
 
       //TODO: Probably will introduce bugs!!!
       xmlResponse.children
