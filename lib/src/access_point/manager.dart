@@ -22,6 +22,7 @@ import 'package:xmpp_stone/src/features/message_archive/MessageArchiveManager.da
 import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/src/messages/MessageHandler.dart';
 import 'package:xmpp_stone/src/messages/MessageParams.dart';
+import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 import 'package:console/console.dart';
 import 'package:intl/intl.dart';
@@ -63,15 +64,19 @@ class XMPPClientManager {
   Function(xmpp.XmppConnectionState state)? _onState;
   Function()? _onPing;
   Function(xmpp.MessageArchiveResult)? _onArchiveRetrieved;
+  Function(List<xmpp.Buddy>)? _onRosterList;
   xmpp.Connection? _connection;
   late MessageHandler _messageHandler;
   late PingManager _pingHandler;
   late MessageArchiveManager _messageArchiveHandler;
   late LastActivityManager _lastActivityManager;
   late OMEMOManagerApi _omemoManager;
+  late RosterManager _rosterManager;
+  late xmpp.PresenceManager _presenceManager;
   late ConnectionManagerStateChangedListener _connectionStateListener;
 
   StreamSubscription? messageListener;
+  StreamSubscription? _rosterList;
 
   XMPPClientManager(jid, password,
       {void Function(XMPPClientManager _context)? onReady,
@@ -83,6 +88,7 @@ class XMPPClientManager {
       void Function(xmpp.XmppConnectionState state)? onState,
       void Function()? onPing,
       void Function(xmpp.MessageArchiveResult)? onArchiveRetrieved,
+      void Function(List<xmpp.Buddy>)? onRosterList,
       String? host,
       String? this.mucDomain}) {
     personel = XMPPClientPersonel(jid, password);
@@ -95,6 +101,7 @@ class XMPPClientManager {
     _onPing = onPing;
     _onArchiveRetrieved = onArchiveRetrieved;
     _onPresenceSubscription = onPresenceSubscription;
+    _onRosterList = onRosterList;
     this.host = host;
   }
 
@@ -148,6 +155,16 @@ class XMPPClientManager {
     _lastActivityManager = xmpp.LastActivityManager.getInstance(_connection!);
     // Omemo
     _omemoManager = OMEMOManager.getInstance(_connection!);
+    // Roster manager
+    _rosterManager = xmpp.RosterManager.getInstance(_connection);
+    // Presence Manager
+    _presenceManager = xmpp.PresenceManager.getInstance(_connection);
+
+    _rosterList = _rosterManager.rosterStream.listen((rosterList) {
+      if (_onRosterList != null) {
+        _onRosterList!(rosterList);
+      }
+    });
     _onReady!(this);
   }
 
@@ -195,35 +212,30 @@ class XMPPClientManager {
   // Update presence and status
   void presenceSend(PresenceShowElement presenceShowElement,
       {String description = 'Working'}) {
-    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
     var presenceData = xmpp.PresenceData(
         presenceShowElement, description, xmpp.Jid.fromFullJid(personel.jid),
         priority: presenceShowElement == PresenceShowElement.CHAT ? 1 : 0);
-    presenceManager.sendPresence(presenceData);
+    _presenceManager.sendPresence(presenceData);
   }
 
   void presenceFrom(receiver) {
     var jid = xmpp.Jid.fromFullJid(receiver);
-    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
-    presenceManager.askDirectPresence(jid);
+    _presenceManager.askDirectPresence(jid);
   }
 
   void presenceSubscribe(String receiver) {
     var jid = xmpp.Jid.fromFullJid(receiver);
-    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
-    presenceManager.subscribe(jid);
+    _presenceManager.subscribe(jid);
   }
 
   void presenceReject(String receiver) {
     var jid = xmpp.Jid.fromFullJid(receiver);
-    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
-    presenceManager.declineSubscription(jid);
+    _presenceManager.declineSubscription(jid);
   }
 
   void presenceAccept(String receiver) {
     var jid = xmpp.Jid.fromFullJid(receiver);
-    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
-    presenceManager.acceptSubscription(jid);
+    _presenceManager.acceptSubscription(jid);
   }
 
   // My contact/buddy
@@ -236,14 +248,13 @@ class XMPPClientManager {
   // Get roster list
   Future<List<xmpp.Buddy>> rosterList() {
     var completer = Completer<List<xmpp.Buddy>>();
-    var rosterManager = xmpp.RosterManager.getInstance(_connection);
 
     StreamSubscription? _rosterList = null;
-    _rosterList = rosterManager.rosterStream.listen((rosterList) {
+    _rosterList = _rosterManager.rosterStream.listen((rosterList) {
       completer.complete(rosterList);
       _rosterList!.cancel();
     });
-    rosterManager.queryForRoster().then((result) {});
+    _rosterManager.queryForRoster().then((result) {});
     return completer.future;
   }
 

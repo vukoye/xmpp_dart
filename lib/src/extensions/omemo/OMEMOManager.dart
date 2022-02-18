@@ -47,6 +47,9 @@ class OMEMOManager extends OMEMOManagerApi {
           case OMEMOPublishBundleResponse:
             response = OMEMOPublishBundleResponse.parse(stanza);
             break;
+          case OMEMOGetBundleResponse:
+            response = OMEMOGetBundleResponse.parse(stanza);
+            break;
         }
         res.item2.complete(response);
       });
@@ -78,9 +81,10 @@ class OMEMOManager extends OMEMOManagerApi {
 
   @override
   Future<OMEMOGetBundleResponse> fetchBundle(OMEMOGetBundleParams params) {
-    final stanza = params.buildRequest(from: _connection.fullJid);
-    _connection.writeStanza(stanza);
-    return responseHandler.set<OMEMOGetBundleResponse>(stanza.id!, stanza);
+    final requestStanza = params.buildRequest(from: _connection.fullJid);
+    _connection.writeStanza(requestStanza);
+    return responseHandler.set<OMEMOGetBundleResponse>(
+        requestStanza.id!, requestStanza);
   }
 
   @override

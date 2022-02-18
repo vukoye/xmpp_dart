@@ -1,7 +1,11 @@
+import 'dart:math';
+
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOException.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
 import 'package:xmpp_stone/src/response/base_response.dart';
+
+enum OMEMOEncodedType { utf8, base64, hex, bytes }
 
 /// Success case
 ///
@@ -105,7 +109,87 @@ class OMEMOGetDevicesResponse extends BaseResponse {
   }
 }
 
-class OMEMOGetBundleResponse extends BaseResponse {}
+class OMEMOBundleResult {
+  late String ik;
+  late String spks;
+  late OMEMOPreKeyParams spk;
+  late OMEMOPreKeyParams pk;
+  late String deviceId;
+  late String registrationId;
+}
+
+class OMEMOGetBundleResponse extends BaseResponse {
+  late bool success;
+  late BaseResponse response;
+  late List<OMEMOBundleResult> bundles;
+  final OMEMOEncodedType encoding = OMEMOEncodedType.base64;
+
+  /// Success response:
+  /// <iq from="627775027401@dev2.xmpp.hiapp-chat.com" to="627075027401@dev2.xmpp.hiapp-chat.com/Android-f42af6e50523a5f8-7fb4b60e-90db-4f93-bbff-bc9faa4641a6" id="SFRCDOWSK" type="result">
+  // <pubsub xmlns="http://jabber.org/protocol/pubsub">
+  //   <items node="urn:xmpp:omemo:2:bundles">
+  //     <item id="f42af6e50523a5f8">
+  //       <bundle xmlns="urn:xmpp:omemo:2">
+  //         <spk id="9">CAkSKgogq8kxU9QW7CYQutKrc6cf7aursyn2ftMz3Wf+LHzSOkcSBngyNTUxOQ==</spk>
+  //         <spks>zkZVElag8oB3O9wyeJNqkOYwF+BZig7pKHmXtoCJmxQiwff/FKhRJw2F6nRrzKOgtfoHaW6tUiN7KDEJidHbCA==</spks>
+  //         <ik>CiBfnki2HDbhvU1cX9EKgCSDFLeihStylN6aIG5zPEnxXBIGeDI1NTE5</ik>
+  //         <prekeys>
+  //           <pk id="11453">CL1ZEkwKIEB8J+E0dIdB6t5BM/K2xg1v4YYjncoJ1MTJj2rlwWJvEiDMXoBHI/pWYdAbI4v3t5BrgFjfmMgIvUruKoOy4NRNPhoGeDI1NTE5</pk>
+  //           <pk id="11454">CL5ZEkwKIAgTSu53vrkGiVRWLQ9IYPHIB9Dwql/tAGPJ7oMa7AVQEiAoFUItlHFMMxz381FuqiGpbBqZblMG6GMomnYRjV4GSBoGeDI1NTE5</pk>
+  //        </prekeys>
+//         </bundle>
+//       </item>
+//     </items>
+//   </pubsub>
+// </iq>
+  static OMEMOGetBundleResponse parse(AbstractStanza stanza) {
+    final response = BaseResponse.parseError(stanza);
+    final _response = OMEMOGetBundleResponse();
+    _response.response = response;
+    _response.success = response.runtimeType == BaseValidResponse;
+    try {
+      if (response.runtimeType == BaseValidResponse) {
+        try {
+          final pubsub = stanza.getChild('pubsub')!;
+          final items = pubsub.getChild('items')!;
+          _response.bundles = [];
+          for (var item in items.children) {
+            final bundle = item!.getChild('bundle')!;
+            final spk = bundle.getChild('spk')!;
+            final spks = bundle.getChild('spks')!;
+            final ik = bundle.getChild('ik')!;
+            final preKeys = bundle.getChild('prekeys')!.children;
+            final OMEMOBundleResult bundleResult = OMEMOBundleResult();
+            bundleResult.deviceId = item.getAttribute('id')!.value!;
+            bundleResult.ik = ik.textValue!;
+            bundleResult.spks = spks.textValue!;
+            bundleResult.spk = OMEMOPreKeyParams(
+                id: spk.getAttribute('id')!.value!, pk: spk.textValue!);
+            List<OMEMOPreKeyParams> listPreKeys = [];
+            preKeys.forEach((element) {
+              listPreKeys.add(OMEMOPreKeyParams(
+                  id: element!.getAttribute('id')!.value!,
+                  pk: element.textValue!));
+            });
+            final randomId = Random.secure().nextInt(preKeys.length);
+            final pk = listPreKeys[randomId];
+
+            bundleResult.pk = pk;
+            bundleResult.registrationId = '';
+            _response.bundles.add(bundleResult);
+          }
+          _response.success = true;
+        } catch (e) {
+          _response.success = false;
+        }
+      }
+    } catch (e) {
+      throw ErrorGetDevicesException();
+    }
+
+    return _response;
+  }
+}
 
 class OMEMOPublishBundleResponse extends BaseResponse {
   late bool success;
