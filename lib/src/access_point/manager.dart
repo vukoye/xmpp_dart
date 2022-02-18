@@ -15,6 +15,7 @@ import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOData.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOManager.dart';
+import 'package:xmpp_stone/src/extensions/omemo/OMEMOManagerApi.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/message_archive/MessageArchiveData.dart';
 import 'package:xmpp_stone/src/features/message_archive/MessageArchiveManager.dart';
@@ -67,7 +68,7 @@ class XMPPClientManager {
   late PingManager _pingHandler;
   late MessageArchiveManager _messageArchiveHandler;
   late LastActivityManager _lastActivityManager;
-  late OMEMOManager _omemoManager;
+  late OMEMOManagerApi _omemoManager;
   late ConnectionManagerStateChangedListener _connectionStateListener;
 
   StreamSubscription? messageListener;
@@ -670,6 +671,11 @@ class XMPPClientManager {
   Future<OMEMOPublishBundleResponse> publishBundle(
       xmpp.OMEMOPublishBundleParams params) async {
     return await _omemoManager.publishBundle(params);
+  }
+
+  Future<OMEMOGetBundleResponse> fetchBundle(
+      xmpp.OMEMOGetBundleParams params) async {
+    return await _omemoManager.fetchBundle(params);
   }
 
   /// Listeners

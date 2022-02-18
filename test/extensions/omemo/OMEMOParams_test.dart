@@ -193,5 +193,19 @@ void main() {
   <store xmlns="urn:xmpp:hints"/>
 </message>""");
     });
+  
+    test('Should create fetch bundle params xml correctly', () {
+      const from = 'fromJid';
+      const to = 'toJid';
+      const id = 'someId';
+      const itemId = 'someOtherId';
+
+      final params = OMEMOFetchBundleParams(id: id, itemId: itemId, to: Jid.fromFullJid(to));
+      
+      final actual = params.buildRequest(from: Jid.fromFullJid(from));
+
+      const expected = "<iq type='get' from='$from' to='$to' id='$id'><pubsub xmlns='http://jabber.org/protocol/pubsub'><items node='urn:xmpp:omemo:2:bundles'><item id='$itemId'/><items></pubsub></iq>";
+      expect(actual, expected);
+    });
   });
 }

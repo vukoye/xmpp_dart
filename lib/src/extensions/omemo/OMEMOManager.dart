@@ -65,7 +65,9 @@ class OMEMOManager extends OMEMOManagerApi {
   @override
   Future<OMEMOEnvelopeEncryptionResponse> envelopeEncryptionContent(
       OMEMOEnvelopeEncryptionParams params) {
-    throw UnimplementedError();
+    final stanza = params.buildRequest(from: _connection.fullJid);
+    _connection.writeStanza(stanza);
+    return Future.value(OMEMOEnvelopeEncryptionResponse());
   }
 
   @override
@@ -76,7 +78,9 @@ class OMEMOManager extends OMEMOManagerApi {
 
   @override
   Future<OMEMOGetBundleResponse> fetchBundle(OMEMOGetBundleParams params) {
-    throw UnimplementedError();
+    final stanza = params.buildRequest(from: _connection.fullJid);
+    _connection.writeStanza(stanza);
+    return responseHandler.set<OMEMOGetBundleResponse>(stanza.id!, stanza);
   }
 
   @override

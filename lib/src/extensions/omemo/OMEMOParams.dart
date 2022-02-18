@@ -139,6 +139,39 @@ class OMEMOPublishBundleParams extends OMEMOParams {
   // final String bundleId;
 }
 
+
+class OMEMOFetchBundleParams extends OMEMOParams {
+  final Jid to;
+  final String id;
+  final String itemId;
+
+  const OMEMOFetchBundleParams({
+    required this.id,
+    required this.to,
+    required this.itemId,
+  });
+
+  @override
+  IqStanza buildRequest({required Jid from}) {
+    IqStanza stanza = IqStanza(id, IqStanzaType.GET)
+      ..addAttribute(XmppAttribute('from', from.fullJid))
+      ..addAttribute(XmppAttribute('to', to.fullJid))
+      ..addChild(
+        XmppElement()..name = 'pubsub'
+        ..addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/pubsub'))
+        ..addChild(
+          XmppElement()..name = 'items'
+          ..addAttribute(XmppAttribute('node', 'urn:xmpp:omemo:2:bundles'))
+          ..addChild(
+            XmppElement()..name = 'item'
+            ..addAttribute(XmppAttribute('id', itemId))
+          )
+        )
+      );
+    
+    return stanza;
+  }
+}
 class OMEMOGetDevicesParams extends OMEMOParams {
   final Jid buddyJid;
 
@@ -240,3 +273,26 @@ class OMEMOEnvelopeEncryptionParams extends OMEMOParams {
     return message;
   }
 }
+
+
+// class OMEMOEnvelopeEncryptionContentParams extends OMEMOParams {
+//   final Jid to;
+//   final String payload;
+
+//   const OMEMOEnvelopeEncryptionContentParams({required this.to, required this.payload});
+
+//   @override
+//   buildRequest({required Jid from}) {
+//     final stanza = MessageStanza(null, MessageStanzaType.NONE);
+//     stanza.toJid = to;
+//     stanza.fromJid = from;
+    
+//     XmppElement encryptedElement = XmppElement('encrypted')..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:encryption:stub:sce:1'));
+//     XmppElement payloadElement = XmppElement('payload')..textValue = payload;
+//     encryptedElement.addChild(payloadElement);
+//     stanza.children.add(encryptedElement);
+    
+//     return stanza;
+//   }
+
+// }
