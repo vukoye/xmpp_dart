@@ -227,6 +227,18 @@ class OMEMOPublishBundleResponse extends BaseResponse {
   }
 }
 
-class OMEMOEnvelopePlainTextResponse extends BaseResponse {}
+class OMEMOEnvelopePlainTextResponse extends BaseResponse {
+  late bool success;
+  late BaseResponse response;
+  late String envelopedPlaintext;
+
+  static OMEMOEnvelopePlainTextResponse parse(String envelopedPlaintext) {
+    final response = OMEMOEnvelopePlainTextResponse();
+    response.success = true;
+    response.response = BaseValidResponse();
+    response.envelopedPlaintext = envelopedPlaintext;
+    return response;
+  }
+}
 
 class OMEMOEnvelopeEncryptionResponse extends BaseResponse {}

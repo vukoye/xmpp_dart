@@ -76,7 +76,9 @@ class OMEMOManager extends OMEMOManagerApi {
   @override
   Future<OMEMOEnvelopePlainTextResponse> envelopePlainContent(
       OMEMOEnvelopePlainTextParams params) {
-    throw UnimplementedError();
+    final envelopeElement = params.buildRequest(from: _connection.fullJid);
+    return Future.value(
+        OMEMOEnvelopePlainTextResponse.parse(envelopeElement.buildXmlString()));
   }
 
   @override

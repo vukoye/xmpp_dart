@@ -689,6 +689,11 @@ class XMPPClientManager {
     return await _omemoManager.fetchBundle(params);
   }
 
+  Future<OMEMOEnvelopePlainTextResponse> fetchEnvelopeMessage(
+      xmpp.OMEMOEnvelopePlainTextParams params) async {
+    return await _omemoManager.envelopePlainContent(params);
+  }
+
   /// Listeners
 
   void listens() {

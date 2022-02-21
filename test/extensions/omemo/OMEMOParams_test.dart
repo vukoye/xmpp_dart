@@ -105,15 +105,62 @@ void main() {
     });
     test('Should create the plaintext envelope', () {
       final publishDeviceParams = OMEMOEnvelopePlainTextParams(
-        plainText: 'Hello World',
-        rpad: 'aa',
-      );
+          plainText: 'Hello World', rpad: 'aa', time: '', customString: '');
       final envelope = publishDeviceParams.buildRequest(
           from: Jid.fromFullJid('bob@capulet.lit'));
       print(envelope.buildXmlString());
       expect(envelope.name, 'envelope');
       expect(envelope.buildXmlString(), """<envelope xmlns="urn:xmpp:sce:1">
   <content>
+    <body xmlns="jabber:client">Hello World</body>
+  </content>
+  <rpad>aa</rpad>
+  <from jid="bob@capulet.lit"/>
+</envelope>""");
+    });
+    test('Should create the plaintext envelope with time', () {
+      final publishDeviceParams = OMEMOEnvelopePlainTextParams(
+          plainText: 'Hello World',
+          rpad: 'aa',
+          time: DateTime(2022, 2, 2, 10, 10, 10, 10)
+              .millisecondsSinceEpoch
+              .toString(),
+          customString: '');
+      final envelope = publishDeviceParams.buildRequest(
+          from: Jid.fromFullJid('bob@capulet.lit'));
+      print(envelope.buildXmlString());
+      expect(envelope.name, 'envelope');
+      expect(envelope.buildXmlString(), """<envelope xmlns="urn:xmpp:sce:1">
+  <content>
+    <TIME xmlns="urn:xmpp:time">
+      <ts>1643771410010</ts>
+    </TIME>
+    <body xmlns="jabber:client">Hello World</body>
+  </content>
+  <rpad>aa</rpad>
+  <from jid="bob@capulet.lit"/>
+</envelope>""");
+    });
+    test('Should create the plaintext envelope with custom string', () {
+      final publishDeviceParams = OMEMOEnvelopePlainTextParams(
+          plainText: 'Hello World',
+          rpad: 'aa',
+          time: DateTime(2022, 2, 2, 10, 10, 10, 10)
+              .millisecondsSinceEpoch
+              .toString(),
+          customString: '{"type": 1}');
+      final envelope = publishDeviceParams.buildRequest(
+          from: Jid.fromFullJid('bob@capulet.lit'));
+      print(envelope.buildXmlString());
+      expect(envelope.name, 'envelope');
+      expect(envelope.buildXmlString(), """<envelope xmlns="urn:xmpp:sce:1">
+  <content>
+    <TIME xmlns="urn:xmpp:time">
+      <ts>1643771410010</ts>
+    </TIME>
+    <CUSTOM xmlns="urn:xmpp:custom">
+      <custom>{"type": 1}</custom>
+    </CUSTOM>
     <body xmlns="jabber:client">Hello World</body>
   </content>
   <rpad>aa</rpad>
@@ -222,24 +269,26 @@ void main() {
   <store xmlns="urn:xmpp:hints"/>
 </message>""");
     });
-  
+
     test('Should create fetch bundle params xml correctly', () {
       const from = 'fromJid@shakespere.lit';
       const to = 'toJid@shakespere.lit';
       const id = 'someId';
       const itemId = 'someOtherId';
 
-      final params = OMEMOFetchBundleParams(id: id, itemId: itemId, to: Jid.fromFullJid(to));
-      
-      final actual = params.buildRequest(from: Jid.fromFullJid(from)).buildXmlString();
+      final params = OMEMOFetchBundleParams(
+          id: id, itemId: itemId, to: Jid.fromFullJid(to));
 
-      const expected = '<iq id="$id" type="get" from="$from" to="$to">\n'+
-      '  <pubsub xmlns="http://jabber.org/protocol/pubsub">\n'+
-      '    <items node="urn:xmpp:omemo:2:bundles">\n'+
-      '      <item id="$itemId"/>\n'+
-      '    </items>\n'+
-      '  </pubsub>\n'+
-      '</iq>';
+      final actual =
+          params.buildRequest(from: Jid.fromFullJid(from)).buildXmlString();
+
+      const expected = '<iq id="$id" type="get" from="$from" to="$to">\n' +
+          '  <pubsub xmlns="http://jabber.org/protocol/pubsub">\n' +
+          '    <items node="urn:xmpp:omemo:2:bundles">\n' +
+          '      <item id="$itemId"/>\n' +
+          '    </items>\n' +
+          '  </pubsub>\n' +
+          '</iq>';
 
       expect(actual, expected);
     });

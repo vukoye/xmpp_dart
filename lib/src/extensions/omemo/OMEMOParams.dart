@@ -155,19 +155,17 @@ class OMEMOFetchBundleParams extends OMEMOParams {
     IqStanza stanza = IqStanza(id, IqStanzaType.GET)
       ..addAttribute(XmppAttribute('from', from.fullJid))
       ..addAttribute(XmppAttribute('to', to.fullJid))
-      ..addChild(
-        XmppElement()..name = 'pubsub'
-        ..addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/pubsub'))
-        ..addChild(
-          XmppElement()..name = 'items'
+      ..addChild(XmppElement()
+        ..name = 'pubsub'
+        ..addAttribute(
+            XmppAttribute('xmlns', 'http://jabber.org/protocol/pubsub'))
+        ..addChild(XmppElement()
+          ..name = 'items'
           ..addAttribute(XmppAttribute('node', 'urn:xmpp:omemo:2:bundles'))
-          ..addChild(
-            XmppElement()..name = 'item'
-            ..addAttribute(XmppAttribute('id', itemId))
-          )
-        )
-      );
-    
+          ..addChild(XmppElement()
+            ..name = 'item'
+            ..addAttribute(XmppAttribute('id', itemId)))));
+
     return stanza;
   }
 }
@@ -216,13 +214,23 @@ class OMEMOGetBundleParams extends OMEMOParams {
 class OMEMOEnvelopePlainTextParams extends OMEMOParams {
   final String plainText;
   final String rpad;
+  final String time;
+  final String customString;
 
   const OMEMOEnvelopePlainTextParams(
-      {required this.plainText, required this.rpad});
+      {required this.plainText,
+      required this.rpad,
+      required this.time,
+      required this.customString});
   @override
   XmppElement buildRequest({required Jid from}) {
     final envelope = PlainEnvelope.build(
-        xmlns: 'urn:xmpp:sce:1', plainText: plainText, rpad: rpad, from: from);
+        xmlns: 'urn:xmpp:sce:1',
+        plainText: plainText,
+        rpad: rpad,
+        from: from,
+        time: time,
+        customString: customString);
     return envelope;
   }
 }
