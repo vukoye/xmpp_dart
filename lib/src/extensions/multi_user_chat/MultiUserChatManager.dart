@@ -249,7 +249,7 @@ class MultiUserChatManager {
           groupMembers: []);
     }
     _connection.writeStanza(iqStanza);
-    print(iqStanza.buildXmlString());
+    // print(iqStanza.buildXmlString());
 
     return response;
   }
@@ -365,7 +365,7 @@ class MultiUserChatManager {
     }
 
     stanza.addChild(invitationForm);
-    print(stanza.buildXmlString());
+    // print(stanza.buildXmlString());
     _connection.writeStanza(stanza);
   }
 
@@ -388,7 +388,7 @@ class MultiUserChatManager {
     _myUnrespondedIqStanzasActions[iqStanza.id] =
         GroupChatroomAction.FIND_RESERVED_CONFIG;
     _connection.writeStanza(iqStanza);
-    print(iqStanza.buildXmlString());
+    // print(iqStanza.buildXmlString());
 
     _shallHandleStanzaPrematurely(options, iqStanza.id ?? "");
 
@@ -412,7 +412,7 @@ class MultiUserChatManager {
     _myUnrespondedIqStanzasActions[iqStanza.id] =
         GroupChatroomAction.CREATE_RESERVED_ROOM;
     _connection.writeStanza(iqStanza);
-    print(iqStanza.buildXmlString());
+    // print(iqStanza.buildXmlString());
 
     _shallHandleStanzaPrematurely(params.options, iqStanza.id ?? "");
 
@@ -435,7 +435,7 @@ class MultiUserChatManager {
     xElement
         .addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc'));
     presenceStanza.addChild(xElement);
-    print(presenceStanza.buildXmlString());
+    // print(presenceStanza.buildXmlString());
     _myUnrespondedPresenceStanzas[presenceStanza.id] =
         Tuple2(presenceStanza, completer);
     _myUnrespondedIqStanzasActions[presenceStanza.id] =
@@ -463,7 +463,7 @@ class MultiUserChatManager {
     presenceStanza.addAttribute(XmppAttribute('to', roomtDotMucDomain.fullJid));
 
     presenceStanza.addChild(config.buildJoinRoomXElement());
-    print(presenceStanza.buildXmlString());
+    // print(presenceStanza.buildXmlString());
 
     _myUnrespondedPresenceStanzas[presenceStanza.id] =
         Tuple2(presenceStanza, completer);
@@ -492,7 +492,7 @@ class MultiUserChatManager {
 
     presenceStanza.addChild(
         AcceptGroupChatroomInvitationParams().buildAcceptRoomXElement());
-    print(presenceStanza.buildXmlString());
+    // print(presenceStanza.buildXmlString());
 
     _myUnrespondedPresenceStanzas[presenceStanza.id] =
         Tuple2(presenceStanza, completer);
@@ -603,7 +603,7 @@ class MultiUserChatManager {
         var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
         GroupChatroomAction _action =
             _myUnrespondedIqStanzasActions[stanza.id]!;
-        print('MUC Stanza type: ' + stanza.type.toString());
+        // print('MUC Stanza type: ' + stanza.type.toString());
         if (stanza.type == IqStanzaType.RESULT) {
           var mucResult = _handleMucResponse(stanza, _action);
           unrespondedStanza!.item2.complete(mucResult);
@@ -625,7 +625,7 @@ class MultiUserChatManager {
         var unrespondedPresence = _myUnrespondedPresenceStanzas[stanza.id];
         GroupChatroomAction _action =
             _myUnrespondedIqStanzasActions[stanza.id]!;
-        print('MUC Stanza type: ' + stanza.type.toString());
+        // print('MUC Stanza type: ' + stanza.type.toString());
         final xElement = stanza.getChild('x');
         if (xElement != null) {
           final status = xElement.getChild('status');

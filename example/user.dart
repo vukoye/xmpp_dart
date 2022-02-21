@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:uuid/uuid.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
@@ -28,11 +30,15 @@ class User {
       mucDomain: 'conference.${fullJid.domain}',
       onMessage: (XMPPMessageParams message, ListenerType listenerType) async {
         print('${this.name} recieved message: ${message.message!.body}');
-        xmppCallback.onMessage(message);
+        print('${this.name} ${listenerType.toString()}');
+        if(xmppCallback.onMessage != noFunc){
+          xmppCallback.onMessage(message);
+        }
       },
       onPresence: (PresenceData presenceData) async {
-       
-
+        if(presenceData.presenceStanza!= null){
+          print('${this.name} presenceData ${presenceData.presenceStanza?.buildXmlString()}');
+        }
       },
       onPresenceSubscription: (SubscriptionEvent subscriptionEvent) async {
       
@@ -44,7 +50,7 @@ class User {
       //     log('Flutter dart finishing retrieval of archive : ${stanza.buildXmlString()})');
       // },
       onState: (XmppConnectionState state) {
-        print('status of ${this.name} ' + state.toString());
+        // print('status of ${this.name} ' + state.toString());
       },
     );
     xmppClientManager.createSession();
@@ -82,12 +88,22 @@ class User {
         ));
 
     final success = await xmppClientManager.addMembersInGroupAsync(roomName, usersJid);
-    print(success.toString());
+    return Future.value(success);
   }
 
-  Future<void> removeMembersInGroup({required String roomName, required List<String> usersJid}) async {
+  Future<bool> removeMembersInGroup({required String roomName, required List<String> usersJid}) async {
     final success = await xmppClientManager.removeMembersInGroupAsync(roomName, usersJid);
-    print(success.toString());
+    return Future.value(success.isAvailable);
+  }
+
+  Future<void> addAdminsInGroup({required String roomName, required List<String> usersJid}) async {
+    final success = await xmppClientManager.addAdminsInGroupAsync(roomName, usersJid);
+    return Future.value(success);
+  }
+
+  Future<void> removeAdminsInGroup({required String roomName, required List<String> usersJid}) async {
+    final success = await xmppClientManager.removeAdminsInGroupAsync(roomName, usersJid);
+    return Future.value(success);
   }
 
   Future<List<dynamic>> getMembers({required String roomName}) async {
@@ -108,5 +124,29 @@ class User {
     return members;
   }
 
+  // Group
+
+  Future<void> sendCustomGroupMessage({required String roomName}) async {
+    final messageId = const Uuid().v1();
+    final messageDateTime = DateTime.now();
+    final customMessage = {
+      "iqType": "Notification", 
+      "subType": "Add-User",
+      "groupJid": "test2",
+      "userJids" :["kevin"]
+    };
+    final success = await xmppClientManager.sendMessage('', '${roomName}@conference.localhost',
+          additional: MessageParams(
+            receipt: ReceiptRequestType.NONE,
+            messageId: messageId,
+            millisecondTs: DateTime.now().toUtc().millisecondsSinceEpoch,
+            customString: jsonEncode(customMessage),
+            chatStateType: ChatStateType.None,
+            messageType: MessageStanzaType.GROUPCHAT,
+            // ampMessageType: 'None',
+            options: const XmppCommunicationConfig(shallWaitStanza: false),
+          ));
+    return Future.value();
+  }
 
 }

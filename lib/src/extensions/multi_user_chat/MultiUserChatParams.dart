@@ -178,6 +178,8 @@ class GroupChatroomFormParams {
         varAttr: 'muc#roomconfig_allowvisitorstatus', value: '1'));
     xElement.addField(FieldElement.build(
         varAttr: 'muc#roomconfig_allowvisitornickchange', value: '1'));
+    // xElement.addField(FieldElement.build(
+    //     varAttr: 'muc#roomconfig_presencebroadcast', values: ['moderator','participant']));
     query.addChild(xElement);
     return query;
   }

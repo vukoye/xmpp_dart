@@ -108,7 +108,7 @@ class MessageHandler implements MessageApi {
       ChatStateDecoration(message: stanza).setState(additional.chatStateType);
     }
 
-    print(stanza.buildXmlString());
+    // print(stanza.buildXmlString());
     _connection!.writeStanza(stanza);
 
     _myUnrespondedIqStanzas[stanza.id] = Tuple2(stanza, completer);
