@@ -169,8 +169,6 @@ void main() {
     });
     test('Should create the encrypted message for one to one chat', () {
       final publishDeviceParams = OMEMOEnvelopeEncryptionParams(
-        messageId: '123',
-        messageType: MessageStanzaType.CHAT,
         senderDeviceId: '789',
         recipientInfo: [
           OMEMORecipientInfo(
@@ -189,33 +187,26 @@ void main() {
               ])
         ],
         cipherText: 'Encryped Hello World',
-        buddyJid: Jid.fromFullJid('alice@capulet.lit'),
       );
       final encrypted = publishDeviceParams.buildRequest(
           from: Jid.fromFullJid('bob@capulet.lit'));
       print(encrypted.buildXmlString());
-      expect(encrypted.name, 'message');
-      expect(encrypted.buildXmlString(),
-          """<message id="123" type="chat" to="alice@capulet.lit" from="bob@capulet.lit">
-  <encrypted xmlns="urn:xmpp:omemo:2">
-    <header sid="789">
-      <keys jid="alice@capulet.lit">
-        <key rid="1">encoded-1</key>
-        <key rid="2" kex="true">encoded-2</key>
-      </keys>
-      <keys jid="bob@capulet.lit">
-        <key rid="345">encoded-0</key>
-      </keys>
-    </header>
-    <payload>Encryped Hello World</payload>
-  </encrypted>
-  <store xmlns="urn:xmpp:hints"/>
-</message>""");
+      expect(encrypted.name, 'encrypted');
+      expect(encrypted.buildXmlString(), """<encrypted xmlns="urn:xmpp:omemo:2">
+  <header sid="789">
+    <keys jid="alice@capulet.lit">
+      <key rid="1">encoded-1</key>
+      <key rid="2" kex="true">encoded-2</key>
+    </keys>
+    <keys jid="bob@capulet.lit">
+      <key rid="345">encoded-0</key>
+    </keys>
+  </header>
+  <payload>Encryped Hello World</payload>
+</encrypted>""");
     });
     test('Should create the encrypted message for group chat', () {
       final publishDeviceParams = OMEMOEnvelopeEncryptionParams(
-        messageId: '123',
-        messageType: MessageStanzaType.GROUPCHAT,
         senderDeviceId: '789',
         recipientInfo: [
           OMEMORecipientInfo(
@@ -242,32 +233,27 @@ void main() {
               ])
         ],
         cipherText: 'Encryped Hello World',
-        buddyJid: Jid.fromFullJid('secret-room@conference.capulet.lit'),
       );
       final encrypted = publishDeviceParams.buildRequest(
           from: Jid.fromFullJid('bob@capulet.lit'));
       print(encrypted.buildXmlString());
-      expect(encrypted.name, 'message');
-      expect(encrypted.buildXmlString(),
-          """<message id="123" type="groupchat" to="secret-room@conference.capulet.lit" from="bob@capulet.lit">
-  <encrypted xmlns="urn:xmpp:omemo:2">
-    <header sid="789">
-      <keys jid="alice@capulet.lit">
-        <key rid="1">encoded-1</key>
-        <key rid="2" kex="true">encoded-2</key>
-      </keys>
-      <keys jid="tom@capulet.lit">
-        <key rid="5" kex="true">encoded-5</key>
-        <key rid="6" kex="true">encoded-6</key>
-      </keys>
-      <keys jid="bob@capulet.lit">
-        <key rid="345">encoded-0</key>
-      </keys>
-    </header>
-    <payload>Encryped Hello World</payload>
-  </encrypted>
-  <store xmlns="urn:xmpp:hints"/>
-</message>""");
+      expect(encrypted.name, 'encrypted');
+      expect(encrypted.buildXmlString(), """<encrypted xmlns="urn:xmpp:omemo:2">
+  <header sid="789">
+    <keys jid="alice@capulet.lit">
+      <key rid="1">encoded-1</key>
+      <key rid="2" kex="true">encoded-2</key>
+    </keys>
+    <keys jid="tom@capulet.lit">
+      <key rid="5" kex="true">encoded-5</key>
+      <key rid="6" kex="true">encoded-6</key>
+    </keys>
+    <keys jid="bob@capulet.lit">
+      <key rid="345">encoded-0</key>
+    </keys>
+  </header>
+  <payload>Encryped Hello World</payload>
+</encrypted>""");
     });
 
     test('Should create fetch bundle params xml correctly', () {

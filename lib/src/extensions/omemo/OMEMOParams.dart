@@ -236,26 +236,17 @@ class OMEMOEnvelopePlainTextParams extends OMEMOParams {
 }
 
 class OMEMOEnvelopeEncryptionParams extends OMEMOParams {
-  final String messageId;
-  final MessageStanzaType messageType;
   final String senderDeviceId;
-  final Jid buddyJid;
   final Iterable<OMEMORecipientInfo> recipientInfo;
   final String cipherText;
 
   const OMEMOEnvelopeEncryptionParams(
-      {required this.messageId,
-      required this.messageType,
-      required this.senderDeviceId,
-      required this.buddyJid,
+      {required this.senderDeviceId,
       required this.recipientInfo,
       required this.cipherText});
 
   @override
-  MessageStanza buildRequest({required Jid from}) {
-    final message = MessageStanza(messageId, messageType);
-    message.toJid = buddyJid;
-    message.fromJid = from;
+  EncryptElement buildRequest({required Jid from}) {
     List<EncryptKeysElement> recipientKeysList = [];
     recipientInfo.forEach((element) {
       List<EncryptKeyElement> recipientKeys = [];
@@ -270,15 +261,10 @@ class OMEMOEnvelopeEncryptionParams extends OMEMOParams {
     });
     final headerElement = EncryptHeaderElement.build(
         senderDeviceId: senderDeviceId, recipientKeysList: recipientKeysList);
-    message.addChild(EncryptElement.build(
+    return EncryptElement.build(
         header: headerElement,
         payload: EncryptPayloadElement.build(cipherText: cipherText),
-        encoded: cipherText));
-    final store = XmppElement();
-    store.name = 'store';
-    store.addAttribute(XmppAttribute('xmlns', 'urn:xmpp:hints'));
-    message.addChild(store);
-    return message;
+        encoded: cipherText);
   }
 }
 

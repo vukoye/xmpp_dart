@@ -68,9 +68,8 @@ class OMEMOManager extends OMEMOManagerApi {
   @override
   Future<OMEMOEnvelopeEncryptionResponse> envelopeEncryptionContent(
       OMEMOEnvelopeEncryptionParams params) {
-    final stanza = params.buildRequest(from: _connection.fullJid);
-    _connection.writeStanza(stanza);
-    return Future.value(OMEMOEnvelopeEncryptionResponse());
+    final encryptEnvelope = params.buildRequest(from: _connection.fullJid);
+    return Future.value(OMEMOEnvelopeEncryptionResponse.parse(encryptEnvelope));
   }
 
   @override

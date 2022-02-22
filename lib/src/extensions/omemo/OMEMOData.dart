@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:xmpp_stone/src/elements/encryption/EncryptElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOException.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
@@ -241,4 +242,16 @@ class OMEMOEnvelopePlainTextResponse extends BaseResponse {
   }
 }
 
-class OMEMOEnvelopeEncryptionResponse extends BaseResponse {}
+class OMEMOEnvelopeEncryptionResponse extends BaseResponse {
+  late bool success;
+  late BaseResponse response;
+  late EncryptElement encryptEnvelope;
+
+  static OMEMOEnvelopeEncryptionResponse parse(EncryptElement encryptEnvelope) {
+    final response = OMEMOEnvelopeEncryptionResponse();
+    response.success = true;
+    response.response = BaseValidResponse();
+    response.encryptEnvelope = encryptEnvelope;
+    return response;
+  }
+}

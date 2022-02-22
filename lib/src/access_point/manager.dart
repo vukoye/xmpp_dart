@@ -4,6 +4,7 @@ import 'package:xmpp_stone/src/access_point/communication_config.dart';
 import 'package:xmpp_stone/src/access_point/manager_message_params.dart';
 import 'package:xmpp_stone/src/access_point/manager_query_archive_params.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/encryption/EncryptElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
@@ -617,9 +618,29 @@ class XMPPClientManager {
           messageType: MessageStanzaType.CHAT,
           chatStateType: ChatStateType.None,
           ampMessageType: AmpMessageType.None,
-          options: XmppCommunicationConfig(shallWaitStanza: false))}) {
+          options: XmppCommunicationConfig(shallWaitStanza: false),
+          hasEncryptedBody: false)}) {
     return _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
         additional: additional);
+  }
+
+  Future<xmpp.MessageStanza> sendSecureMessage(
+      EncryptElement encryptBody, String receiver,
+      {MessageParams additional = const MessageParams(
+          millisecondTs: 0,
+          customString: '',
+          messageId: '',
+          receipt: ReceiptRequestType.RECEIVED,
+          messageType: MessageStanzaType.CHAT,
+          chatStateType: ChatStateType.None,
+          ampMessageType: AmpMessageType.None,
+          options: XmppCommunicationConfig(shallWaitStanza: false),
+          hasEncryptedBody: true)}) {
+    return _messageHandler.sendSecureMessage(
+      xmpp.Jid.fromFullJid(receiver),
+      encryptBody,
+      additional: additional,
+    );
   }
 
   Future<xmpp.MessageStanza> sendState(String receiver,
@@ -638,7 +659,8 @@ class XMPPClientManager {
             chatStateType: ChatStateType.None,
             messageType: MessageStanzaType.CHAT,
             ampMessageType: AmpMessageType.None,
-            options: XmppCommunicationConfig(shallWaitStanza: false)));
+            options: XmppCommunicationConfig(shallWaitStanza: false),
+            hasEncryptedBody: false));
   }
 
   /// Archive related methods
@@ -692,6 +714,11 @@ class XMPPClientManager {
   Future<OMEMOEnvelopePlainTextResponse> fetchEnvelopeMessage(
       xmpp.OMEMOEnvelopePlainTextParams params) async {
     return await _omemoManager.envelopePlainContent(params);
+  }
+
+  Future<OMEMOEnvelopeEncryptionResponse> fetchEncryptionEnvelopeMessage(
+      xmpp.OMEMOEnvelopeEncryptionParams params) async {
+    return await _omemoManager.envelopeEncryptionContent(params);
   }
 
   /// Listeners
