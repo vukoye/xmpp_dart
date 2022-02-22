@@ -11,6 +11,8 @@ class XMPPMessageParams {
     if (_isCustomAck()) {
       return ['Delivery-Ack-Group', 'Delivery-Ack']
           .contains(getCustomData!['iqType']);
+    } else if (isReceiptDelivered) {
+      return true;
     } else {
       return false;
     }
@@ -61,6 +63,10 @@ class XMPPMessageParams {
 
   bool get isRequestingReceipt {
     return message!.getRequestReceipt() != null;
+  }
+
+  bool get isReceiptDelivered {
+    return message!.getReceivedReceipt() != null;
   }
 
   bool get isAckDeliveryDirect {
