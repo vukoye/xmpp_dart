@@ -10,6 +10,7 @@ import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpManager.dart';
 import 'package:xmpp_stone/src/extensions/chat_states/ChatStateDecoration.dart';
+import 'package:xmpp_stone/src/extensions/last_activity/LastActivityData.dart';
 import 'package:xmpp_stone/src/extensions/last_activity/LastActivityManager.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
@@ -40,6 +41,7 @@ enum ListenerType {
   onLog,
   onPresence,
   onMessage,
+  onMessage_Encrypted,
   onMessage_Custom,
   onMessage_Sent,
   onMessage_Delivered_Direct,
@@ -686,7 +688,7 @@ class XMPPClientManager {
   }
 
   /// Last Activity method
-  Future<String> askLastActivity(final String userJid) async {
+  Future<LastActivityResponse> askLastActivity(final String userJid) async {
     return await _lastActivityManager.askLastActivity(Jid.fromFullJid(userJid));
   }
 
@@ -789,6 +791,11 @@ class XMPPClientManager {
           _onMessage!(_messageWrapped, ListenerType.onMessage);
           Log.i(LOG_TAG,
               'New `ListenerType.onMessage` with Archive: ${_messageParentWrapped.isArchive.toString()} from ${message!.id}');
+        }
+        if (_messageWrapped.isEncrypted) {
+          _onMessage!(_messageWrapped, ListenerType.onMessage_Encrypted);
+          Log.i(LOG_TAG,
+              'New `ListenerType.onMessage_Encrypted` with Archive: ${_messageParentWrapped.isArchive.toString()} from ${message!.id}');
         }
       }
 

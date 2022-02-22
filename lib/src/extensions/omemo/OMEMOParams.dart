@@ -262,9 +262,9 @@ class OMEMOEnvelopeEncryptionParams extends OMEMOParams {
     final headerElement = EncryptHeaderElement.build(
         senderDeviceId: senderDeviceId, recipientKeysList: recipientKeysList);
     return EncryptElement.build(
-        header: headerElement,
-        payload: EncryptPayloadElement.build(cipherText: cipherText),
-        encoded: cipherText);
+      header: headerElement,
+      payload: EncryptPayloadElement.build(cipherText: cipherText),
+    );
   }
 }
 
