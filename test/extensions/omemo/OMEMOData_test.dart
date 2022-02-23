@@ -82,4 +82,29 @@ void main() {
       expect(response.deviceId, 'f42af6e50523a5f8');
     });
   });
+
+  test('Should parse envelope from encrypt xml', () {
+    final xmlDoc = XmlDocument.parse("""<message>
+        <envelope xmlns="urn:xmpp:sce:1">
+    <content>
+      <TIME xmlns="urn:xmpp:time">
+        <ts>1643771410010</ts>
+      </TIME>
+      <CUSTOM xmlns="urn:xmpp:custom">
+        <custom>{"type": 1}</custom>
+      </CUSTOM>
+      <body xmlns="jabber:client">Hello World</body>
+    </content>
+    <rpad>aa</rpad>
+    <from jid="bob@capulet.lit"/>
+  </envelope>
+</message>""");
+    final stanza = StanzaParser.parseStanza(xmlDoc.rootElement);
+    final value = OMEMOEnvelopePlainTextParseResponse.parse(stanza);
+    expect(value.body, 'Hello World');
+    expect(value.customString, '{"type": 1}');
+    expect(value.time, '1643771410010');
+    expect(value.rpad, 'aa');
+    expect(value.from, 'bob@capulet.lit');
+  });
 }

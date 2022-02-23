@@ -11,6 +11,10 @@ import 'package:xmpp_stone/src/elements/encryption/EncryptKeyElement.dart';
 import 'package:xmpp_stone/src/elements/encryption/EncryptKeysElement.dart';
 import 'package:xmpp_stone/src/elements/encryption/EncryptPayloadElement.dart';
 import 'package:xmpp_stone/src/elements/encryption/PlainEnvelope.dart';
+import 'package:xmpp_stone/src/elements/messages/CustomElement.dart';
+import 'package:xmpp_stone/src/elements/messages/CustomSubElement.dart';
+import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
+import 'package:xmpp_stone/src/elements/messages/TimeStampElement.dart';
 import 'package:xmpp_stone/src/elements/pubsub/ItemElement.dart';
 import 'package:xmpp_stone/src/elements/pubsub/ItemsElement.dart';
 import 'package:xmpp_stone/src/elements/pubsub/PubSubElement.dart';
@@ -232,6 +236,18 @@ class OMEMOEnvelopePlainTextParams extends OMEMOParams {
         time: time,
         customString: customString);
     return envelope;
+  }
+}
+
+class OMEMOEnvelopeParsePlainTextParams extends OMEMOParams {
+  final String elementXml;
+
+  const OMEMOEnvelopeParsePlainTextParams({
+    required this.elementXml,
+  });
+  @override
+  XmppElement buildRequest({required Jid from}) {
+    return XmppElement();
   }
 }
 

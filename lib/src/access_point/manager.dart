@@ -718,6 +718,11 @@ class XMPPClientManager {
     return await _omemoManager.envelopePlainContent(params);
   }
 
+  Future<OMEMOEnvelopePlainTextParseResponse> fetchEnvelopeMessageFromXml(
+      xmpp.OMEMOEnvelopeParsePlainTextParams params) async {
+    return await _omemoManager.parseEnvelopePlainContent(params);
+  }
+
   Future<OMEMOEnvelopeEncryptionResponse> fetchEncryptionEnvelopeMessage(
       xmpp.OMEMOEnvelopeEncryptionParams params) async {
     return await _omemoManager.envelopeEncryptionContent(params);

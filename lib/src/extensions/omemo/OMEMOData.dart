@@ -1,6 +1,11 @@
 import 'dart:math';
 
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/encryption/EncryptElement.dart';
+import 'package:xmpp_stone/src/elements/messages/CustomElement.dart';
+import 'package:xmpp_stone/src/elements/messages/CustomSubElement.dart';
+import 'package:xmpp_stone/src/elements/messages/TimeElement.dart';
+import 'package:xmpp_stone/src/elements/messages/TimeStampElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOException.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
@@ -238,6 +243,49 @@ class OMEMOEnvelopePlainTextResponse extends BaseResponse {
     response.success = true;
     response.response = BaseValidResponse();
     response.envelopedPlaintext = envelopedPlaintext;
+    return response;
+  }
+}
+
+class OMEMOEnvelopePlainTextParseResponse extends BaseResponse {
+  late bool success;
+  late BaseResponse response;
+  late String body;
+  late String time;
+  late String rpad;
+  late String customString;
+  late String from;
+
+  static OMEMOEnvelopePlainTextParseResponse parse(
+      AbstractStanza? xmppElement) {
+    final response = OMEMOEnvelopePlainTextParseResponse();
+    response.success = true;
+    response.response = BaseValidResponse();
+
+    try {
+      final envelope = xmppElement!.getChild('envelope');
+      final content = envelope!.getChild('content');
+      final time =
+          TimeStampElement.parse(TimeElement.parse(content)).textValue!;
+
+      final bool hasCustom = CustomElement.parse(content) != null;
+      final customString = hasCustom
+          ? CustomSubElement.parse(CustomElement.parse(content))!.textValue ??
+              ''
+          : '';
+      final body = content!.getChild('body')!.textValue ?? '';
+      final from = envelope.getChild('from')!.getAttribute('jid')!.value!;
+      final rpad = envelope.getChild('rpad')!.textValue ?? '';
+
+      response.body = body;
+      response.time = time;
+      response.customString = customString;
+      response.from = from;
+      response.rpad = rpad;
+    } catch (e) {
+      response.success = false;
+      response.response = BaseErrorResponse();
+    }
     return response;
   }
 }

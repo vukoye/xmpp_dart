@@ -1,9 +1,11 @@
+import 'package:xml/xml.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOData.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOManagerApi.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
+import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone/src/response/base_response.dart';
 import 'package:xmpp_stone/src/response/response.dart';
 
@@ -78,6 +80,14 @@ class OMEMOManager extends OMEMOManagerApi {
     final envelopeElement = params.buildRequest(from: _connection.fullJid);
     return Future.value(
         OMEMOEnvelopePlainTextResponse.parse(envelopeElement.buildXmlString()));
+  }
+
+  @override
+  Future<OMEMOEnvelopePlainTextParseResponse> parseEnvelopePlainContent(
+      OMEMOEnvelopeParsePlainTextParams params) {
+    final xmlDoc = XmlDocument.parse('<message>${params.elementXml}</message>');
+    final stanza = StanzaParser.parseStanza(xmlDoc.rootElement);
+    return Future.value(OMEMOEnvelopePlainTextParseResponse.parse(stanza));
   }
 
   @override
