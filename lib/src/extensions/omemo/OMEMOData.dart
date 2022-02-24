@@ -226,7 +226,7 @@ class OMEMOPublishBundleResponse extends BaseResponse {
         }
       }
     } catch (e) {
-      throw ErrorGetDevicesException();
+      _response.success = false;
     }
 
     return _response;

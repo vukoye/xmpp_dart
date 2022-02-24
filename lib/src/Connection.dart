@@ -27,6 +27,7 @@ enum XmppConnectionState {
   Resumed,
   SessionInitialized,
   Ready,
+  StreamConflict,
   Closing,
   ForcefullyClosed,
   Reconnecting,
@@ -290,8 +291,16 @@ xml:lang='en'
 //      xmlResponse.descendants.whereType<xml.XmlElement>().forEach((element) {
 //        Log.d("element: " + element.name.local);
 //      });
+
+      //TODO: Probably will introduce bugs!!!
+      xmlResponse!.children
+          .whereType<xml.XmlElement>()
+          .where((element) => nonzaMatcher(element))
+          .map((xmlElement) => Nonza.parse(xmlElement))
+          .forEach((nonza) => _inNonzaStreamController.add(nonza));
+
       //TODO: Improve parser for children only
-      xmlResponse!.descendants
+      xmlResponse.descendants
           .whereType<xml.XmlElement>()
           .where((element) => startMatcher(element))
           .forEach((element) => processInitialStream(element));
@@ -307,13 +316,6 @@ xml:lang='en'
           .where((element) => featureMatcher(element))
           .forEach((feature) =>
               connectionNegotiationManager.negotiateFeatureList(feature));
-
-      //TODO: Probably will introduce bugs!!!
-      xmlResponse.children
-          .whereType<xml.XmlElement>()
-          .where((element) => nonzaMatcher(element))
-          .map((xmlElement) => Nonza.parse(xmlElement))
-          .forEach((nonza) => _inNonzaStreamController.add(nonza));
     }
   }
 
@@ -421,6 +423,11 @@ xml:lang='en'
 
   void startTlsFailed() {
     setState(XmppConnectionState.StartTlsFailed);
+    close();
+  }
+
+  void streamConflict() {
+    setState(XmppConnectionState.StreamConflict);
     close();
   }
 

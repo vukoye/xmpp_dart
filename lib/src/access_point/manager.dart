@@ -695,37 +695,44 @@ class XMPPClientManager {
   // OMEMO Method
   Future<OMEMOGetDevicesResponse> fetchDevices(
       xmpp.OMEMOGetDevicesParams params) async {
-    return await _omemoManager.fetchDevices(params);
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.fetchDevices(params);
   }
 
   Future<OMEMOPublishDeviceResponse> publishDevices(
       xmpp.OMEMOPublishDeviceParams params) async {
-    return await _omemoManager.publishDevice(params);
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.publishDevice(params);
   }
 
   Future<OMEMOPublishBundleResponse> publishBundle(
       xmpp.OMEMOPublishBundleParams params) async {
-    return await _omemoManager.publishBundle(params);
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.publishBundle(params);
   }
 
   Future<OMEMOGetBundleResponse> fetchBundle(
       xmpp.OMEMOGetBundleParams params) async {
-    return await _omemoManager.fetchBundle(params);
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.fetchBundle(params);
   }
 
   Future<OMEMOEnvelopePlainTextResponse> fetchEnvelopeMessage(
       xmpp.OMEMOEnvelopePlainTextParams params) async {
-    return await _omemoManager.envelopePlainContent(params);
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.envelopePlainContent(params);
   }
 
   Future<OMEMOEnvelopePlainTextParseResponse> fetchEnvelopeMessageFromXml(
       xmpp.OMEMOEnvelopeParsePlainTextParams params) async {
-    return await _omemoManager.parseEnvelopePlainContent(params);
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.parseEnvelopePlainContent(params);
   }
 
   Future<OMEMOEnvelopeEncryptionResponse> fetchEncryptionEnvelopeMessage(
       xmpp.OMEMOEnvelopeEncryptionParams params) async {
-    return await _omemoManager.envelopeEncryptionContent(params);
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.envelopeEncryptionContent(params);
   }
 
   /// Listeners
