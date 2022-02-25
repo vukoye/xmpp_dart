@@ -121,7 +121,7 @@ void main() {
       final publishDeviceParams = OMEMOEnvelopePlainTextParams(
           plainText: 'Hello World',
           rpad: 'aa',
-          time: DateTime(2022, 2, 2, 10, 10, 10, 10)
+          time: DateTime.utc(2022, 2, 2, 10, 10, 10, 10)
               .millisecondsSinceEpoch
               .toString(),
           customString: '');
@@ -132,7 +132,7 @@ void main() {
       expect(envelope.buildXmlString(), """<envelope xmlns="urn:xmpp:sce:1">
   <content>
     <TIME xmlns="urn:xmpp:time">
-      <ts>1643771410010</ts>
+      <ts>1643796610010</ts>
     </TIME>
     <body xmlns="jabber:client">Hello World</body>
   </content>
@@ -144,7 +144,7 @@ void main() {
       final publishDeviceParams = OMEMOEnvelopePlainTextParams(
           plainText: 'Hello World',
           rpad: 'aa',
-          time: DateTime(2022, 2, 2, 10, 10, 10, 10)
+          time: DateTime.utc(2022, 2, 2, 10, 10, 10, 10)
               .millisecondsSinceEpoch
               .toString(),
           customString: '{"type": 1}');
@@ -155,7 +155,7 @@ void main() {
       expect(envelope.buildXmlString(), """<envelope xmlns="urn:xmpp:sce:1">
   <content>
     <TIME xmlns="urn:xmpp:time">
-      <ts>1643771410010</ts>
+      <ts>1643796610010</ts>
     </TIME>
     <CUSTOM xmlns="urn:xmpp:custom">
       <custom>{"type": 1}</custom>
