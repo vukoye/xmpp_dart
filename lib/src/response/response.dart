@@ -3,29 +3,29 @@ import 'dart:async';
 import 'package:tuple/tuple.dart';
 
 class ResponseHandler<T> {
-  final Map<String?, Tuple3<T, Completer, dynamic>> _myUnrespondedIqStanzas =
+  final Map<String?, Tuple3<T, Completer, dynamic>> _queuedStanzas =
       <String?, Tuple3<T, Completer, dynamic>>{};
 
   Future<P> set<P>(String id, T stanza) {
     final completer = Completer<P>();
 
-    _myUnrespondedIqStanzas[id] = Tuple3(stanza, completer, P);
+    _queuedStanzas[id] = Tuple3(stanza, completer, P);
     return completer.future.timeout(Duration(seconds: 30),
-        onTimeout: () => throw TimeoutException('Requst is timeout'));
+        onTimeout: () => throw TimeoutException('Request is timeout'));
   }
 
   void unset(String id) {
-    if (_myUnrespondedIqStanzas.containsKey(id)) {
-      _myUnrespondedIqStanzas.remove(id);
+    if (_queuedStanzas.containsKey(id)) {
+      _queuedStanzas.remove(id);
     }
   }
 
   void test(String id, callback(Tuple3<T, Completer, dynamic> item)) {
-    if (_myUnrespondedIqStanzas.containsKey(id)) {
-      callback(_myUnrespondedIqStanzas[id]!);
+    if (_queuedStanzas.containsKey(id)) {
+      callback(_queuedStanzas[id]!);
       unset(id);
     }
   }
 
-  Iterable<String> keys() => _myUnrespondedIqStanzas.keys.map((e) => e ?? "");
+  Iterable<String> keys() => _queuedStanzas.keys.map((e) => e ?? "");
 }
