@@ -11,6 +11,7 @@ class LastActivityResponse extends BaseResponse {
     final _response = LastActivityResponse();
     _response.response = response;
     _response.success = response.runtimeType == BaseValidResponse;
+    _response.lastActivitySeconds = "";
     try {
       if (response.runtimeType == BaseValidResponse) {
         final queryElement = stanza.getChild('query');
