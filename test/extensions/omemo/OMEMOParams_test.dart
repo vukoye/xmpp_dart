@@ -122,6 +122,7 @@ void main() {
           plainText: 'Hello World',
           rpad: 'aa',
           time: DateTime(2022, 2, 2, 10, 10, 10, 10)
+              .toUtc()
               .millisecondsSinceEpoch
               .toString(),
           customString: '');
@@ -145,6 +146,7 @@ void main() {
           plainText: 'Hello World',
           rpad: 'aa',
           time: DateTime(2022, 2, 2, 10, 10, 10, 10)
+              .toUtc()
               .millisecondsSinceEpoch
               .toString(),
           customString: '{"type": 1}');
