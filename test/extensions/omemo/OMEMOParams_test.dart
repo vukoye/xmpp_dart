@@ -1,4 +1,3 @@
-import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
 import 'package:test/test.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
