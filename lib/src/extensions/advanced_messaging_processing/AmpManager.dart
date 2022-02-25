@@ -25,7 +25,7 @@ class AmpManager {
   AmpManager(this._connection);
 
   bool isReady() {
-    return _connection.connectionNegotatiorManager
-        .isNegotiateorSupport((element) => element is AmpNegotiator);
+    return _connection.connectionNegotiationManager
+        .isNegotiatorSupport((element) => element is AmpNegotiator);
   }
 }

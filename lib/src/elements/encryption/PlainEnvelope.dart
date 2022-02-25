@@ -15,10 +15,13 @@ class PlainEnvelope extends XmppElement {
       {required String xmlns,
       required String plainText,
       required String rpad,
-      required Jid from}) {
+      required Jid from,
+      String time = '',
+      String customString = ''}) {
     name = PlainEnvelope.elementName;
     addAttribute(XmppAttribute('xmlns', xmlns));
-    addChild(EnvelopeContent.build(plainText: plainText));
+    addChild(EnvelopeContent.build(
+        plainText: plainText, time: time, customString: customString));
     addChild(EnvelopeRpad.build(rpad: rpad));
     addChild(EnvelopeFrom.build(jid: from));
   }

@@ -1,25 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
 import 'package:xmpp_stone/src/ReconnectionManager.dart';
-import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 
-import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
-import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
-import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
+import 'package:xmpp_stone/src/features/ConnectionNegotiationManager.dart';
+import 'package:xmpp_stone/src/features/streammanagement/StreamManagementModule.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
-import 'package:xmpp_stone/src/presence/PresenceManager.dart';
-import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
-
-import 'logger/Log.dart';
 
 enum XmppConnectionState {
   Idle,
@@ -36,6 +27,7 @@ enum XmppConnectionState {
   Resumed,
   SessionInitialized,
   Ready,
+  StreamConflict,
   Closing,
   ForcefullyClosed,
   Reconnecting,
@@ -118,11 +110,9 @@ class Connection {
     return _connectionStateStreamController.stream;
   }
 
-  List<String> queueStanzaWrite = [];
-
   Jid get fullJid => account.fullJid;
 
-  late ConnectionNegotiatorManager connectionNegotatiorManager;
+  late ConnectionNegotiationManager connectionNegotiationManager;
 
   void fullJidRetrieved(Jid jid) {
     account.resource = jid.resource;
@@ -144,7 +134,7 @@ class Connection {
     PresenceManager.getInstance(this);
     MessageHandler.getInstance(this);
     PingManager.getInstance(this);
-    connectionNegotatiorManager = ConnectionNegotiatorManager(this, account);
+    connectionNegotiationManager = ConnectionNegotiationManager(this, account);
     reconnectionManager = ReconnectionManager(this);
   }
 
@@ -156,8 +146,7 @@ to='${fullJid.domain}'
 xml:lang='en'
 >
 """;
-    queueStanzaWrite.add(streamOpeningString);
-    write();
+    write(streamOpeningString);
   }
 
   String restOfResponse = '';
@@ -204,7 +193,7 @@ xml:lang='en'
   }
 
   Future<void> openSocket() async {
-    connectionNegotatiorManager.init();
+    connectionNegotiationManager.init();
     setState(XmppConnectionState.SocketOpening);
     try {
       return await Socket.connect(account.host ?? account.domain, account.port)
@@ -221,7 +210,6 @@ xml:lang='en'
           _openStream();
         } else {
           Log.d(TAG, 'Closed in meantime');
-          queueStanzaWrite = [];
           socket.flush();
           socket.close();
         }
@@ -245,7 +233,6 @@ xml:lang='en'
           _socket!.write('</stream:stream>');
         } catch (e) {
           Log.d(TAG, 'Socket already closed');
-          queueStanzaWrite = [];
           setState(XmppConnectionState.Closed);
         }
       }
@@ -304,8 +291,16 @@ xml:lang='en'
 //      xmlResponse.descendants.whereType<xml.XmlElement>().forEach((element) {
 //        Log.d("element: " + element.name.local);
 //      });
+
+      //TODO: Probably will introduce bugs!!!
+      xmlResponse!.children
+          .whereType<xml.XmlElement>()
+          .where((element) => nonzaMatcher(element))
+          .map((xmlElement) => Nonza.parse(xmlElement))
+          .forEach((nonza) => _inNonzaStreamController.add(nonza));
+
       //TODO: Improve parser for children only
-      xmlResponse!.descendants
+      xmlResponse.descendants
           .whereType<xml.XmlElement>()
           .where((element) => startMatcher(element))
           .forEach((element) => processInitialStream(element));
@@ -320,14 +315,7 @@ xml:lang='en'
           .whereType<xml.XmlElement>()
           .where((element) => featureMatcher(element))
           .forEach((feature) =>
-              connectionNegotatiorManager.negotiateFeatureList(feature));
-
-      //TODO: Probably will introduce bugs!!!
-      xmlResponse.children
-          .whereType<xml.XmlElement>()
-          .where((element) => nonzaMatcher(element))
-          .map((xmlElement) => Nonza.parse(xmlElement))
-          .forEach((nonza) => _inNonzaStreamController.add(nonza));
+              connectionNegotiationManager.negotiateFeatureList(feature));
     }
   }
 
@@ -346,33 +334,26 @@ xml:lang='en'
         state != XmppConnectionState.SocketOpening;
   }
 
-  void write() {
-    String message = queueStanzaWrite.removeAt(0);
+  void write(message) {
     Log.xmppp_sending(message);
     try {
       if (isOpened()) {
         Log.d(TAG, 'Writing to stanza/socket:\n${message}');
         _socket!.write(message);
-      } else {
-        // Trigger to reconnect
-        setState(XmppConnectionState.ForcefullyClosed);
       }
     } catch (e) {
-      queueStanzaWrite = [];
       close();
     }
   }
 
   void writeStanza(AbstractStanza stanza) {
     _outStanzaStreamController.add(stanza);
-    queueStanzaWrite.add(stanza.buildXmlString());
-    write();
+    write(stanza.buildXmlString());
   }
 
   void writeNonza(Nonza nonza) {
     _outNonzaStreamController.add(nonza);
-    queueStanzaWrite.add(nonza.buildXmlString());
-    write();
+    write(nonza.buildXmlString());
   }
 
   void setState(XmppConnectionState state) {
@@ -442,6 +423,11 @@ xml:lang='en'
 
   void startTlsFailed() {
     setState(XmppConnectionState.StartTlsFailed);
+    close();
+  }
+
+  void streamConflict() {
+    setState(XmppConnectionState.StreamConflict);
     close();
   }
 

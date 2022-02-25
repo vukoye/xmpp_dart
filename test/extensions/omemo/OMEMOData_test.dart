@@ -65,5 +65,46 @@ void main() {
       expect(
           (response.response as BaseErrorResponse).message, 'Item not found');
     });
+    test('Should parse success response from publish bundle successfully', () {
+      final xmlDoc = XmlDocument.parse("""
+    <iq from='627075827401@dev2.xmpp.hiapp-chat.com' to='627075827401@dev2.xmpp.hiapp-chat.com/Android-f42af6e50523a5f8-a556406d-1756-446d-be30-973895f83314' id='JHRVSASTL' type='result'>
+      <pubsub xmlns='http://jabber.org/protocol/pubsub'>
+        <publish node='urn:xmpp:omemo:2:bundles'>
+          <item id='f42af6e50523a5f8'/>
+        </publish>
+      </pubsub>
+    </iq>
+""");
+      final stanza = StanzaParser.parseStanza(xmlDoc.rootElement);
+      final response = OMEMOPublishBundleResponse.parse(stanza!);
+      expect(response.response.runtimeType, BaseValidResponse);
+      expect(response.success, true);
+      expect(response.deviceId, 'f42af6e50523a5f8');
+    });
+  });
+
+  test('Should parse envelope from encrypt xml', () {
+    final xmlDoc = XmlDocument.parse("""<message>
+        <envelope xmlns="urn:xmpp:sce:1">
+    <content>
+      <TIME xmlns="urn:xmpp:time">
+        <ts>1643771410010</ts>
+      </TIME>
+      <CUSTOM xmlns="urn:xmpp:custom">
+        <custom>{"type": 1}</custom>
+      </CUSTOM>
+      <body xmlns="jabber:client">Hello World</body>
+    </content>
+    <rpad>aa</rpad>
+    <from jid="bob@capulet.lit"/>
+  </envelope>
+</message>""");
+    final stanza = StanzaParser.parseStanza(xmlDoc.rootElement);
+    final value = OMEMOEnvelopePlainTextParseResponse.parse(stanza);
+    expect(value.body, 'Hello World');
+    expect(value.customString, '{"type": 1}');
+    expect(value.time, '1643771410010');
+    expect(value.rpad, 'aa');
+    expect(value.from, 'bob@capulet.lit');
   });
 }

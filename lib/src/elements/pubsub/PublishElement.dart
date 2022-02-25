@@ -16,6 +16,10 @@ class PublishElement extends XmppElement {
     name = PublishElement.elementName;
     addAttribute(XmppAttribute('node', 'urn:xmpp:omemo:2:devices'));
   }
+  PublishElement.buildOMEMOBundle() {
+    name = PublishElement.elementName;
+    addAttribute(XmppAttribute('node', 'urn:xmpp:omemo:2:bundles'));
+  }
 
   static XmppElement? parse(parent) {
     return parent.children.firstWhere(
