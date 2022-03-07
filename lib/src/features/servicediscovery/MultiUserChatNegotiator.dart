@@ -77,7 +77,7 @@ class MultiUserChatNegotiator extends Negotiator {
         XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#items'));
     iqStanza.addChild(element);
     _myUnrespondedIqStanza = iqStanza;
-    _connection!.writeStanza(iqStanza);
+    _connection!.writeStanza(iqStanza, postInitialization: false);
   }
 
   void checkStanzas(AbstractStanza? stanza) {

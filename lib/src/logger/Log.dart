@@ -37,20 +37,19 @@ class Log {
     }
   }
 
-  static void xmppp_receiving(String message) {
+  static void xmppReceiving(String message) {
     if (logXmpp) {
       log('---Xmpp Receiving:---');
       log('$message');
     }
   }
 
-  static void xmppp_sending(String message) {
+  static void xmppSending(String message) {
     if (logXmpp) {
       log('---Xmpp Sending:---');
       log('$message');
     }
   }
-
 }
 
 enum LogLevel { VERBOSE, DEBUG, INFO, WARNING, ERROR, OFF }

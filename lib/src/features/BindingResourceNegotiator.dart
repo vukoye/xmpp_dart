@@ -62,6 +62,6 @@ class BindingResourceConnectionNegotiator extends Negotiator {
     var attribute = XmppAttribute('xmlns', BIND_ATTRIBUTE);
     bindElement.addAttribute(attribute);
     stanza.addChild(bindElement);
-    _connection!.writeStanza(stanza);
+    _connection!.writeStanza(stanza, postInitialization: false);
   }
 }
