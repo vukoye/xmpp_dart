@@ -8,6 +8,10 @@ import 'package:xmpp_stone/src/ReconnectionManager.dart';
 
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotiationManager.dart';
+import 'package:xmpp_stone/src/features/error/StreamConflictHandler.dart';
+import 'package:xmpp_stone/src/features/queue/ConnectionExecutionQueue.dart';
+import 'package:xmpp_stone/src/features/queue/WriteQueue.dart';
+import 'package:xmpp_stone/src/features/socket/ConnectionSocket.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagementModule.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
@@ -113,12 +117,16 @@ class Connection {
   Jid get fullJid => account.fullJid;
 
   late ConnectionNegotiationManager connectionNegotiationManager;
+  late WriteQueue writeQueue;
+  late ConnectionExecutionQueue connExecutionQueue;
+  StreamConflictHandler? streamConflictHandler;
 
   void fullJidRetrieved(Jid jid) {
     account.resource = jid.resource;
   }
 
   Socket? _socket;
+  StreamSubscription? _socketSubscription;
 
   // for testing purpose
   set socket(Socket value) {
@@ -136,6 +144,8 @@ class Connection {
     PingManager.getInstance(this);
     connectionNegotiationManager = ConnectionNegotiationManager(this, account);
     reconnectionManager = ReconnectionManager(this);
+    connExecutionQueue = ConnectionExecutionQueue(this);
+    writeQueue = WriteQueue(this);
   }
 
   void _openStream() {
@@ -156,7 +166,7 @@ xml:lang='en'
   }
 
   String prepareStreamResponse(String response) {
-    Log.xmppp_receiving(response);
+    Log.xmppReceiving(response);
     var response1 = extractWholeChild(restOfResponse + response);
     if (response1.contains('</stream:stream>')) {
       close();
@@ -176,7 +186,10 @@ xml:lang='en'
   void reconnect() {
     if (_state == XmppConnectionState.ForcefullyClosed) {
       setState(XmppConnectionState.Reconnecting);
-      openSocket();
+      // Prevent open socket run too many times
+      connExecutionQueue.put(
+          ConnectionExecutionQueueContent(openSocket, true, {}, 'openSocket'));
+      connExecutionQueue.resume();
     }
   }
 
@@ -188,55 +201,81 @@ xml:lang='en'
       _state = XmppConnectionState.Idle;
     }
     if (_state == XmppConnectionState.Idle) {
-      openSocket();
+      // Prevent open socket run too many times
+      connExecutionQueue.put(
+          ConnectionExecutionQueueContent(openSocket, true, {}, 'openSocket'));
+      connExecutionQueue.resume();
     }
   }
 
   Future<void> openSocket() async {
     connectionNegotiationManager.init();
+    if (state == XmppConnectionState.SocketOpening) {
+      return;
+    }
     setState(XmppConnectionState.SocketOpening);
     try {
-      return await Socket.connect(account.host ?? account.domain, account.port)
-          .then((Socket socket) {
-        // if not closed in meantime
-        if (_state != XmppConnectionState.Closed) {
-          setState(XmppConnectionState.SocketOpened);
-          _socket = socket;
-          socket
+      if (ConnectionSocket.hasInstance() != null) {
+        ConnectionSocket.dispose();
+        // return;
+      }
+      final instance = await ConnectionSocket.getInstance(account);
+      _socket = instance.socket;
+      // if not closed in meantime
+      if (_state != XmppConnectionState.Closed) {
+        streamConflictHandler = StreamConflictHandler(this);
+        streamConflictHandler!.init();
+        setState(XmppConnectionState.SocketOpened);
+        if (_socketSubscription == null) {
+          _socketSubscription = _socket!
               .cast<List<int>>()
               .transform(utf8.decoder)
               .map(prepareStreamResponse)
               .listen(handleResponse, onDone: handleConnectionDone);
-          _openStream();
-        } else {
-          Log.d(TAG, 'Closed in meantime');
-          socket.flush();
-          socket.close();
         }
-      });
+        _openStream();
+      } else {
+        print(_state);
+        Log.d(TAG, 'Closed in meantime');
+        writeClose(_socket);
+      }
     } on SocketException catch (error) {
       Log.e(TAG, 'Socket Exception' + error.toString());
       handleConnectionError(error.toString());
     }
   }
 
-  void close() {
+  void close() async {
+    // Prevent open socket run too many times
+    connExecutionQueue
+        .put(ConnectionExecutionQueueContent(_close, true, {}, '_close'));
+    connExecutionQueue.resume();
+  }
+
+  void _close() async {
     if (state == XmppConnectionState.SocketOpening) {
-      throw Exception('Closing is not possible during this state');
-    }
-    if (state != XmppConnectionState.Closed &&
-        state != XmppConnectionState.ForcefullyClosed &&
-        state != XmppConnectionState.Closing) {
+      // throw Exception('Closing is not possible during this state');
+    } else if (state == XmppConnectionState.StreamConflict) {
+      // Close socket and re-open
+      connectionNegotiationManager.cleanNegotiators();
+      setState(XmppConnectionState.Closing);
       if (_socket != null) {
-        try {
-          setState(XmppConnectionState.Closing);
-          _socket!.write('</stream:stream>');
-        } catch (e) {
-          Log.d(TAG, 'Socket already closed');
-          setState(XmppConnectionState.Closed);
-        }
+        writeClose(_socket);
       }
       authenticated = false;
+
+      setState(XmppConnectionState.Closed);
+    } else {
+      if (state != XmppConnectionState.Closed &&
+          state != XmppConnectionState.ForcefullyClosed &&
+          state != XmppConnectionState.Closing) {
+        if (_socket != null) {
+          setState(XmppConnectionState.Closing);
+          ConnectionSocket.dispose();
+          _socket!.write('</stream:stream>');
+        }
+        authenticated = false;
+      }
     }
   }
 
@@ -293,29 +332,30 @@ xml:lang='en'
 //      });
 
       //TODO: Probably will introduce bugs!!!
-      xmlResponse!.children
+      final inNonza = xmlResponse!.children
           .whereType<xml.XmlElement>()
           .where((element) => nonzaMatcher(element))
-          .map((xmlElement) => Nonza.parse(xmlElement))
-          .forEach((nonza) => _inNonzaStreamController.add(nonza));
+          .map((xmlElement) => Nonza.parse(xmlElement));
+      inNonza.forEach((nonza) => _inNonzaStreamController.add(nonza));
 
       //TODO: Improve parser for children only
-      xmlResponse.descendants
+      final initialStream = xmlResponse.descendants
           .whereType<xml.XmlElement>()
-          .where((element) => startMatcher(element))
-          .forEach((element) => processInitialStream(element));
+          .where((element) => startMatcher(element));
+      initialStream.forEach((element) => processInitialStream(element));
 
-      xmlResponse.children
+      final inStanza = xmlResponse.children
           .whereType<xml.XmlElement>()
           .where((element) => stanzaMatcher(element))
-          .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
-          .forEach((stanza) => _inStanzaStreamController.add(stanza));
+          .map((xmlElement) => StanzaParser.parseStanza(xmlElement));
+      inStanza.forEach((stanza) => _inStanzaStreamController.add(stanza));
 
-      xmlResponse.descendants
+      final featureNegotiate = xmlResponse.descendants
           .whereType<xml.XmlElement>()
-          .where((element) => featureMatcher(element))
-          .forEach((feature) =>
-              connectionNegotiationManager.negotiateFeatureList(feature));
+          .where((element) => featureMatcher(element));
+
+      featureNegotiate.forEach((feature) =>
+          connectionNegotiationManager.negotiateFeatureList(feature));
     }
   }
 
@@ -334,8 +374,17 @@ xml:lang='en'
         state != XmppConnectionState.SocketOpening;
   }
 
+  Future writeClose(socket) async {
+    if (_socketSubscription != null) {
+      _socketSubscription!.cancel();
+    }
+    socket.write('</stream:stream>');
+    await socket.flush();
+    await socket.close();
+  }
+
   void write(message) {
-    Log.xmppp_sending(message);
+    Log.xmppSending(message);
     try {
       if (isOpened()) {
         Log.d(TAG, 'Writing to stanza/socket:\n${message}');
@@ -346,9 +395,15 @@ xml:lang='en'
     }
   }
 
-  void writeStanza(AbstractStanza stanza) {
-    _outStanzaStreamController.add(stanza);
-    write(stanza.buildXmlString());
+  /// - stanza: AbstractStanza => Stanza in xml structure to write
+  /// - postInitialization: bool => Is the bool defined if connection are writing to stanza after all connection and initialization done or not
+  void writeStanza(AbstractStanza stanza, {bool postInitialization = true}) {
+    if (postInitialization && !writeQueue.isEligible()) {
+      writeQueue.put(WriteQueueContent(stanza, postInitialization));
+    } else {
+      _outStanzaStreamController.add(stanza);
+      write(stanza.buildXmlString());
+    }
   }
 
   void writeNonza(Nonza nonza) {
@@ -426,7 +481,12 @@ xml:lang='en'
     close();
   }
 
-  void streamConflict() {
+  void criticalStreamErrorThrown() {
+    if (state == XmppConnectionState.Closing ||
+        state == XmppConnectionState.StreamConflict) {
+      return;
+    }
+    streamConflictHandler!.dispose();
     setState(XmppConnectionState.StreamConflict);
     close();
   }

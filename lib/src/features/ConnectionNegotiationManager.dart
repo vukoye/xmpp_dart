@@ -5,7 +5,6 @@ import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/BindingResourceNegotiator.dart';
-import 'package:xmpp_stone/src/features/ConflictStreamNegotatior.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 import 'package:xmpp_stone/src/features/SessionInitiationNegotiator.dart';
 import 'package:xmpp_stone/src/features/StartTlsNegotatior.dart';
@@ -104,7 +103,6 @@ class ConnectionNegotiationManager {
   void _initSupportedNegotiatorList() {
     var streamManagement = StreamManagementModule.getInstance(_connection);
     streamManagement.reset();
-    supportedNegotiatorList.add(StreamConflict(_connection)); //priority 1
     supportedNegotiatorList.add(StartTlsNegotiator(_connection)); //priority 1
     supportedNegotiatorList
         .add(SaslAuthenticationFeature(_connection, _accountSettings.password));

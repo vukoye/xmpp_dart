@@ -58,6 +58,6 @@ class SessionInitiationNegotiator extends Negotiator {
     stanza.toJid = _connection!.serverName;
     stanza.addChild(sessionElement);
     sentRequest = stanza;
-    _connection!.writeStanza(stanza);
+    _connection!.writeStanza(stanza, postInitialization: false);
   }
 }

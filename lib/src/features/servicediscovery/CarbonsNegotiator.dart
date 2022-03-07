@@ -1,14 +1,10 @@
 import 'dart:async';
 
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
 import '../../../xmpp_stone.dart';
-import '../../Connection.dart';
 import '../../elements/XmppAttribute.dart';
-import '../../elements/XmppElement.dart';
 import '../../elements/nonzas/Nonza.dart';
-import '../../elements/stanzas/AbstractStanza.dart';
 import '../../elements/stanzas/IqStanza.dart';
 import '../Negotiator.dart';
 import 'Feature.dart';
@@ -65,7 +61,7 @@ class CarbonsNegotiator extends Negotiator {
     element.addAttribute(XmppAttribute('xmlns', 'urn:xmpp:carbons:2'));
     iqStanza.addChild(element);
     _myUnrespondedIqStanza = iqStanza;
-    _connection!.writeStanza(iqStanza);
+    _connection!.writeStanza(iqStanza, postInitialization: false);
   }
 
   void checkStanzas(AbstractStanza? stanza) {

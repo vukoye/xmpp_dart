@@ -6,7 +6,6 @@ void main() {
     test('Should test create element correctly with acccess model', () {
       final publishElement = PublishOptionsElement.build(accessModel: 'open');
       expect(publishElement.name, 'publish-options');
-      print(publishElement.buildXmlString());
       expect(publishElement.getChild('x') != null, true);
       expect(publishElement.buildXmlString(), """<publish-options>
   <x xmlns="jabber:x:data" type="submit">
@@ -22,7 +21,6 @@ void main() {
     test('Should test create element correctly with max item', () {
       final publishElement = PublishOptionsElement.build(maxItems: 'max');
       expect(publishElement.name, 'publish-options');
-      print(publishElement.buildXmlString());
       expect(publishElement.getChild('x') != null, true);
       expect(publishElement.buildXmlString(), """<publish-options>
   <x xmlns="jabber:x:data" type="submit">
