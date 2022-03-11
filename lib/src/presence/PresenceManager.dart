@@ -106,7 +106,7 @@ class PresenceManager implements PresenceApi {
     presenceStanza.status = presence.status;
     if (presence.priority != -1) {
       presenceStanza.priority = presence.priority;
-      presenceStanza.fromJid = _connection.fullJid;
+      // presenceStanza.fromJid = _connection.fullJid;
     }
     Log.d(LOG_TAG, presenceStanza.buildXmlString());
     _connection.writeStanza(presenceStanza);
@@ -177,15 +177,16 @@ class PresenceManager implements PresenceApi {
 
   void _connectionStateHandler(XmppConnectionState state) {
     if (state == XmppConnectionState.Ready) {
-      //_getRosters();
-      _sendInitialPresence();
+      // _sendInitialPresence();
+      sendPresence(PresenceData(
+          PresenceShowElement.CHAT, 'Working', _connection.fullJid));
     }
   }
 
-  void _sendInitialPresence() {
-    var initialPresence = PresenceStanza();
-    _connection.writeStanza(initialPresence);
-  }
+  // void _sendInitialPresence() {
+  //   var initialPresence = PresenceStanza();
+  //   _connection.writeStanza(initialPresence);
+  // }
 
   void _handleErrorEvent(PresenceStanza presenceStanza) {
     //TODO Add more handling

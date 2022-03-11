@@ -16,6 +16,7 @@ import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MultiUserChatNegotiator.dart';
 import 'package:xmpp_stone/src/response/response.dart';
+import 'package:xmpp_stone/src/utils/random.dart';
 
 class MultiUserChatManager {
   static Map<Connection, MultiUserChatManager> instances =
@@ -239,8 +240,10 @@ class MultiUserChatManager {
   Future<JoinRoomResponse> joinRoom(
       Jid _roomDotMucDomain, JoinGroupChatroomParams config) {
     // Change nickname
-    final roomDotMucDomain = Jid(_roomDotMucDomain.local,
-        _roomDotMucDomain.domain, '${_connection.fullJid.local}');
+    final roomDotMucDomain = Jid(
+        _roomDotMucDomain.local,
+        _roomDotMucDomain.domain,
+        '${_connection.fullJid.local}#${generateId()}');
 
     final presenceStanza = PresenceStanza()
       ..id = AbstractStanza.getRandomId()

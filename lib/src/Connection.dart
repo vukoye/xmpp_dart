@@ -5,16 +5,24 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
 import 'package:xmpp_stone/src/ReconnectionManager.dart';
+import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
+import 'package:xmpp_stone/src/data/Jid.dart';
 
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/exception/fail_exception.dart';
+import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotiationManager.dart';
 import 'package:xmpp_stone/src/features/error/StreamConflictHandler.dart';
 import 'package:xmpp_stone/src/features/queue/ConnectionExecutionQueue.dart';
 import 'package:xmpp_stone/src/features/queue/WriteQueue.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagementModule.dart';
+import 'package:xmpp_stone/src/logger/Log.dart';
+import 'package:xmpp_stone/src/messages/MessageHandler.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
+import 'package:xmpp_stone/src/presence/PresenceManager.dart';
+import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/src/utils/Random.dart';
-import 'package:xmpp_stone/xmpp_stone.dart';
 
 enum XmppConnectionState {
   Idle,
@@ -400,6 +408,7 @@ xml:lang='en'
       }
     } catch (e) {
       close();
+      throw FailWriteSocketException();
     }
   }
 
