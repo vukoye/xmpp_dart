@@ -11,9 +11,9 @@ import 'package:xmpp_stone/src/features/ConnectionNegotiationManager.dart';
 import 'package:xmpp_stone/src/features/error/StreamConflictHandler.dart';
 import 'package:xmpp_stone/src/features/queue/ConnectionExecutionQueue.dart';
 import 'package:xmpp_stone/src/features/queue/WriteQueue.dart';
-import 'package:xmpp_stone/src/features/socket/ConnectionSocket.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagementModule.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
+import 'package:xmpp_stone/src/utils/Random.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
 enum XmppConnectionState {
@@ -57,6 +57,8 @@ class Connection {
       return Jid.fromFullJid(fullJid.domain!); //todo move to account.domain!
     }
   } //move this somewhere
+
+  late String connectionId;
 
   String? _serverName;
 
@@ -146,6 +148,14 @@ class Connection {
     reconnectionManager = ReconnectionManager(this);
     connExecutionQueue = ConnectionExecutionQueue(this);
     writeQueue = WriteQueue(this);
+
+    connectionId = generateId();
+    Log.v(this.toString(), 'Create new connection instance');
+  }
+
+  @override
+  String toString() {
+    return '$TAG/$connectionId';
   }
 
   void _openStream() {
@@ -215,17 +225,16 @@ xml:lang='en'
     }
     setState(XmppConnectionState.SocketOpening);
     try {
-      if (ConnectionSocket.hasInstance() != null) {
-        ConnectionSocket.dispose();
-        // return;
-      }
-      final instance = await ConnectionSocket.getInstance(account);
-      _socket = instance.socket;
       // if not closed in meantime
       if (_state != XmppConnectionState.Closed) {
         streamConflictHandler = StreamConflictHandler(this);
         streamConflictHandler!.init();
         setState(XmppConnectionState.SocketOpened);
+        _socket =
+            await Socket.connect(account.host ?? account.domain, account.port)
+                .then((socket) => socket, onError: (error, stack) {
+          handleConnectionError(error);
+        });
         if (_socketSubscription == null) {
           _socketSubscription = _socket!
               .cast<List<int>>()
@@ -236,11 +245,11 @@ xml:lang='en'
         _openStream();
       } else {
         print(_state);
-        Log.d(TAG, 'Closed in meantime');
+        Log.d(this.toString(), 'Closed in meantime');
         writeClose(_socket);
       }
     } on SocketException catch (error) {
-      Log.e(TAG, 'Socket Exception' + error.toString());
+      Log.e(this.toString(), 'Socket Exception' + error.toString());
       handleConnectionError(error.toString());
     }
   }
@@ -254,7 +263,7 @@ xml:lang='en'
 
   void _close() async {
     if (state == XmppConnectionState.SocketOpening) {
-      // throw Exception('Closing is not possible during this state');
+      throw Exception('Closing is not possible during this state');
     } else if (state == XmppConnectionState.StreamConflict) {
       // Close socket and re-open
       connectionNegotiationManager.cleanNegotiators();
@@ -271,7 +280,6 @@ xml:lang='en'
           state != XmppConnectionState.Closing) {
         if (_socket != null) {
           setState(XmppConnectionState.Closing);
-          ConnectionSocket.dispose();
           _socket!.write('</stream:stream>');
         }
         authenticated = false;
@@ -319,7 +327,7 @@ xml:lang='en'
 
     if (fullResponse != null && fullResponse.isNotEmpty) {
       xml.XmlNode? xmlResponse;
-      Log.d(TAG, 'Receiving full response:\n: ${fullResponse}');
+      Log.d(this.toString(), 'Receiving full response:\n: ${fullResponse}');
       try {
         xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
       } catch (e) {
@@ -360,7 +368,7 @@ xml:lang='en'
   }
 
   void processInitialStream(xml.XmlElement initialStream) {
-    Log.d(TAG, 'processInitialStream');
+    Log.d(this.toString(), 'processInitialStream');
     var from = initialStream.getAttribute('from');
     if (from != null) {
       _serverName = from;
@@ -387,7 +395,7 @@ xml:lang='en'
     Log.xmppSending(message);
     try {
       if (isOpened()) {
-        Log.d(TAG, 'Writing to stanza/socket:\n${message}');
+        Log.d(this.toString(), 'Writing to stanza/socket:\n${message}');
         _socket!.write(message);
       }
     } catch (e) {
@@ -415,7 +423,7 @@ xml:lang='en'
     _state = state;
     _fireConnectionStateChangedEvent(state);
     _processState(state);
-    Log.d(TAG, 'State: ${_state}');
+    Log.d(this.toString(), 'State: ${_state}');
   }
 
   XmppConnectionState get state {
@@ -434,7 +442,7 @@ xml:lang='en'
   }
 
   void startSecureSocket() {
-    Log.d(TAG, 'startSecureSocket');
+    Log.d(this.toString(), 'startSecureSocket');
     SecureSocket.secure(_socket!, onBadCertificate: _validateBadCertificate)
         .then((secureSocket) {
       _socket = secureSocket;
@@ -500,12 +508,12 @@ xml:lang='en'
   }
 
   void handleConnectionDone() {
-    Log.d(TAG, 'Handle connection done');
+    Log.d(this.toString(), 'Handle connection done');
     handleCloseState();
   }
 
   void handleSecuredConnectionDone() {
-    Log.d(TAG, 'Handle secured connection done');
+    Log.d(this.toString(), 'Handle secured connection done');
     handleCloseState();
   }
 
@@ -525,7 +533,7 @@ xml:lang='en'
   }
 
   void handleSecuredConnectionError(String error) {
-    Log.d(TAG, 'Handle Secured Error  $error');
+    Log.d(this.toString(), 'Handle Secured Error  $error');
     handleCloseState();
   }
 

@@ -3,6 +3,8 @@ import 'dart:async';
 import 'package:xmpp_stone/src/features/queue/QueueApi.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
+const tag = 'WriteQueue';
+
 class WriteQueueContent {
   final AbstractStanza stanza;
   final bool postInitializationStanza;
@@ -73,7 +75,8 @@ class WriteQueue extends QueueApi<WriteQueueContent> {
   @override
   Future<bool> execute(WriteQueueContent content) async {
     final Completer<bool> completer = Completer<bool>();
-    Timer(const Duration(milliseconds: 300), () {
+    Timer(const Duration(milliseconds: 100), () {
+      Log.d(tag, 'Executing write to stanza queue');
       _connection!.writeStanza(content.stanza,
           postInitialization: content.postInitializationStanza);
       completer.complete(true);
