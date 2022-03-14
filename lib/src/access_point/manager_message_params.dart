@@ -7,10 +7,21 @@ class XMPPMessageParams {
   final xmpp.MessageStanza? message;
   const XMPPMessageParams({this.message});
 
+  bool get isEncrypted {
+    return message!.getChild('encrypted') != null;
+  }
+
+  xmpp.OMEMOEnvelopeEncryptionParams? getEncryptedMessage() {
+    final result = xmpp.EncryptElement.parseEncryption(message);
+    return result != null ? result.item2 : null;
+  }
+
   bool _isCustomDelivery() {
     if (_isCustomAck()) {
       return ['Delivery-Ack-Group', 'Delivery-Ack']
           .contains(getCustomData!['iqType']);
+    } else if (isReceiptDelivered) {
+      return true;
     } else {
       return false;
     }
@@ -61,6 +72,10 @@ class XMPPMessageParams {
 
   bool get isRequestingReceipt {
     return message!.getRequestReceipt() != null;
+  }
+
+  bool get isReceiptDelivered {
+    return message!.getReceivedReceipt() != null;
   }
 
   bool get isAckDeliveryDirect {

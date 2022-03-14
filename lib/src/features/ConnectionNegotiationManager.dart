@@ -5,25 +5,25 @@ import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/BindingResourceNegotiator.dart';
+import 'package:xmpp_stone/src/features/ConflictStreamNegotatior.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 import 'package:xmpp_stone/src/features/SessionInitiationNegotiator.dart';
 import 'package:xmpp_stone/src/features/StartTlsNegotatior.dart';
 import 'package:xmpp_stone/src/features/sasl/SaslAuthenticationFeature.dart';
-import 'package:xmpp_stone/src/features/servicediscovery/AmpNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MultiUserChatNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xml/xml.dart' as xml;
-import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
+import 'package:xmpp_stone/src/features/streammanagement/StreamManagementModule.dart';
 
 import '../elements/nonzas/Nonza.dart';
 import '../logger/Log.dart';
 import 'Negotiator.dart';
 import 'servicediscovery/ServiceDiscoveryNegotiator.dart';
 
-class ConnectionNegotiatorManager {
+class ConnectionNegotiationManager {
   static const String TAG = 'ConnectionNegotiatorManager';
   List<Negotiator> supportedNegotiatorList = <Negotiator>[];
   Negotiator? activeNegotiator;
@@ -35,7 +35,7 @@ class ConnectionNegotiatorManager {
 
   StreamSubscription<NegotiatorState>? activeSubscription;
 
-  ConnectionNegotiatorManager(
+  ConnectionNegotiationManager(
       Connection connection, XmppAccountSettings accountSettings) {
     _connection = connection;
     _accountSettings = accountSettings;
@@ -104,6 +104,7 @@ class ConnectionNegotiatorManager {
   void _initSupportedNegotiatorList() {
     var streamManagement = StreamManagementModule.getInstance(_connection);
     streamManagement.reset();
+    supportedNegotiatorList.add(StreamConflict(_connection)); //priority 1
     supportedNegotiatorList.add(StartTlsNegotiator(_connection)); //priority 1
     supportedNegotiatorList
         .add(SaslAuthenticationFeature(_connection, _accountSettings.password));
@@ -125,7 +126,7 @@ class ConnectionNegotiatorManager {
         .add(MultiUserChatNegotiator.getInstance(_connection));
   }
 
-  bool isNegotiateorSupport(Function checkType) {
+  bool isNegotiatorSupport(Function checkType) {
     var negotiators =
         supportedNegotiatorList.where((element) => checkType(element)).toList();
     // AmpNegotiator

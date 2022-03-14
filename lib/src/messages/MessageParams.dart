@@ -1,5 +1,7 @@
 import 'package:xmpp_stone/src/access_point/communication_config.dart';
+import 'package:xmpp_stone/src/elements/encryption/EncryptElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpManager.dart';
 import 'package:xmpp_stone/src/extensions/chat_states/ChatStateDecoration.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 
@@ -11,6 +13,8 @@ class MessageParams {
   final MessageStanzaType messageType; // = MessageStanzaType.CHAT;
   final XmppCommunicationConfig options;
   final ChatStateType chatStateType;
+  final AmpMessageType ampMessageType;
+  final bool hasEncryptedBody;
 
   const MessageParams({
     required this.receipt,
@@ -20,6 +24,8 @@ class MessageParams {
     required this.messageType,
     required this.options,
     required this.chatStateType,
+    required this.ampMessageType,
+    required this.hasEncryptedBody,
   });
 
   static MessageParams build({
@@ -29,16 +35,21 @@ class MessageParams {
     String customString = '',
     MessageStanzaType messageType = MessageStanzaType.CHAT,
     ChatStateType chatStateType = ChatStateType.None,
+    AmpMessageType ampMessageType = AmpMessageType.None,
     XmppCommunicationConfig options =
         const XmppCommunicationConfig(shallWaitStanza: false),
+    bool hasEncryptedBody = false,
   }) {
     return MessageParams(
-        receipt: receipt,
-        messageId: messageId,
-        millisecondTs: millisecondTs,
-        customString: customString,
-        messageType: messageType,
-        options: options,
-        chatStateType: chatStateType);
+      receipt: receipt,
+      messageId: messageId,
+      millisecondTs: millisecondTs,
+      customString: customString,
+      messageType: messageType,
+      options: options,
+      chatStateType: chatStateType,
+      ampMessageType: ampMessageType,
+      hasEncryptedBody: hasEncryptedBody,
+    );
   }
 }

@@ -4,20 +4,27 @@ import 'package:xmpp_stone/src/access_point/communication_config.dart';
 import 'package:xmpp_stone/src/access_point/manager_message_params.dart';
 import 'package:xmpp_stone/src/access_point/manager_query_archive_params.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/encryption/EncryptElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
+import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpManager.dart';
 import 'package:xmpp_stone/src/extensions/chat_states/ChatStateDecoration.dart';
+import 'package:xmpp_stone/src/extensions/last_activity/LastActivityData.dart';
 import 'package:xmpp_stone/src/extensions/last_activity/LastActivityManager.dart';
 import 'package:xmpp_stone/src/extensions/message_delivery/ReceiptInterface.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
+import 'package:xmpp_stone/src/extensions/omemo/OMEMOData.dart';
+import 'package:xmpp_stone/src/extensions/omemo/OMEMOManager.dart';
+import 'package:xmpp_stone/src/extensions/omemo/OMEMOManagerApi.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/message_archive/MessageArchiveData.dart';
 import 'package:xmpp_stone/src/features/message_archive/MessageArchiveManager.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/src/messages/MessageHandler.dart';
 import 'package:xmpp_stone/src/messages/MessageParams.dart';
+import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 import 'package:console/console.dart';
 import 'package:intl/intl.dart';
@@ -34,6 +41,7 @@ enum ListenerType {
   onLog,
   onPresence,
   onMessage,
+  onMessage_Encrypted,
   onMessage_Custom,
   onMessage_Sent,
   onMessage_Delivered_Direct,
@@ -59,14 +67,19 @@ class XMPPClientManager {
   Function(xmpp.XmppConnectionState state)? _onState;
   Function()? _onPing;
   Function(xmpp.MessageArchiveResult)? _onArchiveRetrieved;
+  Function(List<xmpp.Buddy>)? _onRosterList;
   xmpp.Connection? _connection;
   late MessageHandler _messageHandler;
   late PingManager _pingHandler;
   late MessageArchiveManager _messageArchiveHandler;
   late LastActivityManager _lastActivityManager;
+  late OMEMOManagerApi _omemoManager;
+  late RosterManager _rosterManager;
+  late xmpp.PresenceManager _presenceManager;
   late ConnectionManagerStateChangedListener _connectionStateListener;
 
   StreamSubscription? messageListener;
+  StreamSubscription? _rosterList;
 
   XMPPClientManager(jid, password,
       {void Function(XMPPClientManager _context)? onReady,
@@ -78,6 +91,7 @@ class XMPPClientManager {
       void Function(xmpp.XmppConnectionState state)? onState,
       void Function()? onPing,
       void Function(xmpp.MessageArchiveResult)? onArchiveRetrieved,
+      void Function(List<xmpp.Buddy>)? onRosterList,
       String? host,
       String? this.mucDomain}) {
     personel = XMPPClientPersonel(jid, password);
@@ -90,6 +104,7 @@ class XMPPClientManager {
     _onPing = onPing;
     _onArchiveRetrieved = onArchiveRetrieved;
     _onPresenceSubscription = onPresenceSubscription;
+    _onRosterList = onRosterList;
     this.host = host;
   }
 
@@ -141,6 +156,18 @@ class XMPPClientManager {
     }));
     // Last activity - XEP0012
     _lastActivityManager = xmpp.LastActivityManager.getInstance(_connection!);
+    // Omemo
+    _omemoManager = OMEMOManager.getInstance(_connection!);
+    // Roster manager
+    _rosterManager = xmpp.RosterManager.getInstance(_connection);
+    // Presence Manager
+    _presenceManager = xmpp.PresenceManager.getInstance(_connection);
+
+    _rosterList = _rosterManager.rosterStream.listen((rosterList) {
+      if (_onRosterList != null) {
+        _onRosterList!(rosterList);
+      }
+    });
     _onReady!(this);
   }
 
@@ -188,35 +215,30 @@ class XMPPClientManager {
   // Update presence and status
   void presenceSend(PresenceShowElement presenceShowElement,
       {String description = 'Working'}) {
-    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
     var presenceData = xmpp.PresenceData(
         presenceShowElement, description, xmpp.Jid.fromFullJid(personel.jid),
         priority: presenceShowElement == PresenceShowElement.CHAT ? 1 : 0);
-    presenceManager.sendPresence(presenceData);
+    _presenceManager.sendPresence(presenceData);
   }
 
   void presenceFrom(receiver) {
     var jid = xmpp.Jid.fromFullJid(receiver);
-    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
-    presenceManager.askDirectPresence(jid);
+    _presenceManager.askDirectPresence(jid);
   }
 
   void presenceSubscribe(String receiver) {
     var jid = xmpp.Jid.fromFullJid(receiver);
-    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
-    presenceManager.subscribe(jid);
+    _presenceManager.subscribe(jid);
   }
 
   void presenceReject(String receiver) {
     var jid = xmpp.Jid.fromFullJid(receiver);
-    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
-    presenceManager.declineSubscription(jid);
+    _presenceManager.declineSubscription(jid);
   }
 
   void presenceAccept(String receiver) {
     var jid = xmpp.Jid.fromFullJid(receiver);
-    var presenceManager = xmpp.PresenceManager.getInstance(_connection);
-    presenceManager.acceptSubscription(jid);
+    _presenceManager.acceptSubscription(jid);
   }
 
   // My contact/buddy
@@ -229,14 +251,13 @@ class XMPPClientManager {
   // Get roster list
   Future<List<xmpp.Buddy>> rosterList() {
     var completer = Completer<List<xmpp.Buddy>>();
-    var rosterManager = xmpp.RosterManager.getInstance(_connection);
 
     StreamSubscription? _rosterList = null;
-    _rosterList = rosterManager.rosterStream.listen((rosterList) {
+    _rosterList = _rosterManager.rosterStream.listen((rosterList) {
       completer.complete(rosterList);
       _rosterList!.cancel();
     });
-    rosterManager.queryForRoster().then((result) {});
+    _rosterManager.queryForRoster().then((result) {});
     return completer.future;
   }
 
@@ -281,7 +302,7 @@ class XMPPClientManager {
 
   // Multi user chat
 
-  Future<GroupChatroom> getRoom(String roomName) {
+  Future<DiscoverRoomResponse> getRoom(String roomName) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -290,7 +311,7 @@ class XMPPClientManager {
     return mucManager.discoverRoom(roomJid);
   }
 
-  Future<GroupChatroom> getReservedRoomConfig(String roomName) {
+  Future<GetRoomConfigResponse> getReservedRoomConfig(String roomName) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -300,7 +321,7 @@ class XMPPClientManager {
   }
 
   // Create room
-  Future<GroupChatroom> setRoomConfig(
+  Future<SetRoomConfigResponse> setRoomConfig(
       String roomName, GroupChatroomParams config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -315,30 +336,28 @@ class XMPPClientManager {
   }
 
   // Create room
-  Future<GroupChatroom> createInstantRoom(
+  Future<CreateRoomResponse> createInstantRoom(
       String roomName, GroupChatroomParams config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
       roomJid = xmpp.Jid(roomName, mucDomain, '');
     }
-    return mucManager.createRoom(roomJid,
-        options: XmppCommunicationConfig(shallWaitStanza: false));
+    return mucManager.createRoom(roomJid);
   }
 
   // Join room
-  Future<GroupChatroom> join(String roomName, JoinGroupChatroomParams config,
-      {XmppCommunicationConfig options =
-          const XmppCommunicationConfig(shallWaitStanza: false)}) {
+  Future<JoinRoomResponse> join(
+      String roomName, JoinGroupChatroomParams config) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
       roomJid = xmpp.Jid(roomName, mucDomain, '');
     }
-    return mucManager.joinRoom(roomJid, config, options: options);
+    return mucManager.joinRoom(roomJid, config);
   }
 
-  Future<GroupChatroom> acceptInvitation(String roomName) {
+  Future<AcceptRoomResponse> acceptInvitation(String roomName) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -348,7 +367,7 @@ class XMPPClientManager {
   }
 
   // Get group members
-  Future<GroupChatroom> getMembers(String roomName) async {
+  Future<GetUsersResponse> getMembers(String roomName) async {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -359,7 +378,7 @@ class XMPPClientManager {
   }
 
   // Get group owners
-  Future<GroupChatroom> getOwners(String roomName) async {
+  Future<GetUsersResponse> getOwners(String roomName) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -370,7 +389,7 @@ class XMPPClientManager {
   }
 
   // Get group admins
-  Future<GroupChatroom> getAdmins(String roomName) async {
+  Future<GetUsersResponse> getAdmins(String roomName) async {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -394,7 +413,7 @@ class XMPPClientManager {
   }
 
   // Add members in group
-  Future<GroupChatroom> addMembersInGroup(
+  Future<AddUsersResponse> addMembersInGroup(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -410,7 +429,7 @@ class XMPPClientManager {
     // return await mucManager.addMembers(roomJid,memberJids);
   }
 
-  Future<GroupChatroom> addMembersInGroupAsync(
+  Future<AddUsersResponse> addMembersInGroupAsync(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -427,7 +446,7 @@ class XMPPClientManager {
   }
 
   // Add admins in group
-  Future<GroupChatroom> addAdminsInGroup(
+  Future<AddUsersResponse> addAdminsInGroup(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -443,7 +462,7 @@ class XMPPClientManager {
     // return await mucManager.addAdmins(roomJid, memberJids);
   }
 
-  Future<GroupChatroom> addAdminsInGroupAsync(
+  Future<AddUsersResponse> addAdminsInGroupAsync(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -460,7 +479,7 @@ class XMPPClientManager {
   }
 
   // Add owner in group
-  Future<GroupChatroom> addOwnersInGroup(
+  Future<AddUsersResponse> addOwnersInGroup(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -476,7 +495,7 @@ class XMPPClientManager {
     // return await mucManager.addAdmins(roomJid, memberJids);
   }
 
-  Future<GroupChatroom> addOwnersInGroupAsync(
+  Future<AddUsersResponse> addOwnersInGroupAsync(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -493,7 +512,7 @@ class XMPPClientManager {
   }
 
   // Remove members
-  Future<GroupChatroom> removeMembersInGroup(
+  Future<AddUsersResponse> removeMembersInGroup(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -509,7 +528,7 @@ class XMPPClientManager {
     // return await mucManager.addAdminsAsync(roomJid, memberJids);
   }
 
-  Future<GroupChatroom> removeMembersInGroupAsync(
+  Future<AddUsersResponse> removeMembersInGroupAsync(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -526,7 +545,7 @@ class XMPPClientManager {
   }
 
   // Remove admins
-  Future<GroupChatroom> removeAdminsInGroup(
+  Future<AddUsersResponse> removeAdminsInGroup(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -542,7 +561,7 @@ class XMPPClientManager {
     // return await mucManager.addAdminsAsync(roomJid, memberJids);
   }
 
-  Future<GroupChatroom> removeAdminsInGroupAsync(
+  Future<AddUsersResponse> removeAdminsInGroupAsync(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -559,7 +578,7 @@ class XMPPClientManager {
   }
 
   // Remove owners
-  Future<GroupChatroom> removeOwnersInGroup(
+  Future<AddUsersResponse> removeOwnersInGroup(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -575,7 +594,7 @@ class XMPPClientManager {
     // return await mucManager.addAdminsAsync(roomJid, memberJids);
   }
 
-  Future<GroupChatroom> removeOwnersInGroupAsync(
+  Future<AddUsersResponse> removeOwnersInGroupAsync(
       String roomName, Iterable<String> memberJids) async {
     final mucManager = xmpp.MultiUserChatManager(_connection!);
     xmpp.Jid roomJid = xmpp.Jid.fromFullJid(roomName);
@@ -600,9 +619,30 @@ class XMPPClientManager {
           receipt: ReceiptRequestType.RECEIVED,
           messageType: MessageStanzaType.CHAT,
           chatStateType: ChatStateType.None,
-          options: XmppCommunicationConfig(shallWaitStanza: false))}) {
+          ampMessageType: AmpMessageType.None,
+          options: XmppCommunicationConfig(shallWaitStanza: false),
+          hasEncryptedBody: false)}) {
     return _messageHandler.sendMessage(xmpp.Jid.fromFullJid(receiver), message,
         additional: additional);
+  }
+
+  Future<xmpp.MessageStanza> sendSecureMessage(
+      EncryptElement encryptBody, String receiver,
+      {MessageParams additional = const MessageParams(
+          millisecondTs: 0,
+          customString: '',
+          messageId: '',
+          receipt: ReceiptRequestType.RECEIVED,
+          messageType: MessageStanzaType.CHAT,
+          chatStateType: ChatStateType.None,
+          ampMessageType: AmpMessageType.None,
+          options: XmppCommunicationConfig(shallWaitStanza: false),
+          hasEncryptedBody: true)}) {
+    return _messageHandler.sendSecureMessage(
+      xmpp.Jid.fromFullJid(receiver),
+      encryptBody,
+      additional: additional,
+    );
   }
 
   Future<xmpp.MessageStanza> sendState(String receiver,
@@ -620,7 +660,9 @@ class XMPPClientManager {
             customString: '',
             chatStateType: ChatStateType.None,
             messageType: MessageStanzaType.CHAT,
-            options: XmppCommunicationConfig(shallWaitStanza: false)));
+            ampMessageType: AmpMessageType.None,
+            options: XmppCommunicationConfig(shallWaitStanza: false),
+            hasEncryptedBody: false));
   }
 
   /// Archive related methods
@@ -646,8 +688,51 @@ class XMPPClientManager {
   }
 
   /// Last Activity method
-  Future<String> askLastActivity(final String userJid) async {
+  Future<LastActivityResponse> askLastActivity(final String userJid) async {
     return await _lastActivityManager.askLastActivity(Jid.fromFullJid(userJid));
+  }
+
+  // OMEMO Method
+  Future<OMEMOGetDevicesResponse> fetchDevices(
+      xmpp.OMEMOGetDevicesParams params) async {
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.fetchDevices(params);
+  }
+
+  Future<OMEMOPublishDeviceResponse> publishDevices(
+      xmpp.OMEMOPublishDeviceParams params) async {
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.publishDevice(params);
+  }
+
+  Future<OMEMOPublishBundleResponse> publishBundle(
+      xmpp.OMEMOPublishBundleParams params) async {
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.publishBundle(params);
+  }
+
+  Future<OMEMOGetBundleResponse> fetchBundle(
+      xmpp.OMEMOGetBundleParams params) async {
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.fetchBundle(params);
+  }
+
+  Future<OMEMOEnvelopePlainTextResponse> fetchEnvelopeMessage(
+      xmpp.OMEMOEnvelopePlainTextParams params) async {
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.envelopePlainContent(params);
+  }
+
+  Future<OMEMOEnvelopePlainTextParseResponse> fetchEnvelopeMessageFromXml(
+      xmpp.OMEMOEnvelopeParsePlainTextParams params) async {
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.parseEnvelopePlainContent(params);
+  }
+
+  Future<OMEMOEnvelopeEncryptionResponse> fetchEncryptionEnvelopeMessage(
+      xmpp.OMEMOEnvelopeEncryptionParams params) async {
+    final omemoManager = OMEMOManager.getInstance(_connection!);
+    return await omemoManager.envelopeEncryptionContent(params);
   }
 
   /// Listeners
@@ -718,6 +803,11 @@ class XMPPClientManager {
           _onMessage!(_messageWrapped, ListenerType.onMessage);
           Log.i(LOG_TAG,
               'New `ListenerType.onMessage` with Archive: ${_messageParentWrapped.isArchive.toString()} from ${message!.id}');
+        }
+        if (_messageWrapped.isEncrypted) {
+          _onMessage!(_messageWrapped, ListenerType.onMessage_Encrypted);
+          Log.i(LOG_TAG,
+              'New `ListenerType.onMessage_Encrypted` with Archive: ${_messageParentWrapped.isArchive.toString()} from ${message!.id}');
         }
       }
 

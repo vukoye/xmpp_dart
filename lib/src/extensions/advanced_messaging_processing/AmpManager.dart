@@ -2,6 +2,11 @@
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/AmpNegotiator.dart';
 
+enum AmpMessageType {
+  None,
+  Delivery,
+}
+
 class AmpManager {
   static Map<Connection, AmpManager> instances = <Connection, AmpManager>{};
 
@@ -20,7 +25,7 @@ class AmpManager {
   AmpManager(this._connection);
 
   bool isReady() {
-    return _connection.connectionNegotatiorManager
-        .isNegotiateorSupport((element) => element is AmpNegotiator);
+    return _connection.connectionNegotiationManager
+        .isNegotiatorSupport((element) => element is AmpNegotiator);
   }
 }
