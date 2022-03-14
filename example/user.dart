@@ -70,7 +70,7 @@ class User {
           customString: '',
           chatStateType: ChatStateType.None,
           messageType: MessageStanzaType.CHAT,
-          options: const XmppCommunicationConfig(shallWaitStanza: false),
+          options: const XmppCommunicationConfig(shallWaitStanza: false), ampMessageType: AmpMessageType.None, hasEncryptedBody: false,
         ),);
   }
 
@@ -92,8 +92,8 @@ class User {
   }
 
   Future<bool> removeMembersInGroup({required String roomName, required List<String> usersJid}) async {
-    final success = await xmppClientManager.removeMembersInGroupAsync(roomName, usersJid);
-    return Future.value(success.isAvailable);
+    final AddUsersResponse success = await xmppClientManager.removeMembersInGroupAsync(roomName, usersJid);
+    return Future.value(success.success);
   }
 
   Future<void> addAdminsInGroup({required String roomName, required List<String> usersJid}) async {
@@ -107,20 +107,20 @@ class User {
   }
 
   Future<List<dynamic>> getMembers({required String roomName}) async {
-    final GroupChatroom gc = await xmppClientManager.getMembers(roomName);
-    final members = gc.groupMembers.map((member) => member.fullJid).toList();
+    final GetUsersResponse gc = await xmppClientManager.getMembers(roomName);
+    final members = gc.users.map((member) => member.fullJid).toList();
     return members;
   }
 
   Future<List<dynamic>> getAdmins({required String roomName}) async {
-    final GroupChatroom gc = await xmppClientManager.getAdmins(roomName);
-    final members = gc.groupMembers.map((member) => member.fullJid).toList();
+    final GetUsersResponse gc = await xmppClientManager.getAdmins(roomName);
+    final members = gc.users.map((member) => member.fullJid).toList();
     return members;
   }
 
   Future<List<dynamic>> getOwners({required String roomName}) async {
-    final GroupChatroom gc = await xmppClientManager.getOwners(roomName);
-    final members = gc.groupMembers.map((member) => member.fullJid).toList();
+    final GetUsersResponse gc = await xmppClientManager.getOwners(roomName);
+    final members = gc.users.map((member) => member.fullJid).toList();
     return members;
   }
 
@@ -144,7 +144,7 @@ class User {
             chatStateType: ChatStateType.None,
             messageType: MessageStanzaType.GROUPCHAT,
             // ampMessageType: 'None',
-            options: const XmppCommunicationConfig(shallWaitStanza: false),
+            options: const XmppCommunicationConfig(shallWaitStanza: false), hasEncryptedBody: false, ampMessageType: AmpMessageType.None,
           ));
     return Future.value();
   }
