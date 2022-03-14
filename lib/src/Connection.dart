@@ -145,7 +145,7 @@ class Connection {
     MessageHandler.getInstance(this);
     PingManager.getInstance(this);
     connectionNegotatiorManager = ConnectionNegotiatorManager(this, account);
-    // reconnectionManager = ReconnectionManager(this);
+    reconnectionManager = ReconnectionManager(this);
   }
 
   void _openStream() {
