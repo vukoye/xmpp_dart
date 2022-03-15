@@ -112,7 +112,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
       }
     }
     subscription.cancel();
-    _connection.connectionNegotatiorManager.addFeatures(_supportedFeatures);
+    _connection.connectionNegotiationManager.addFeatures(_supportedFeatures);
     state = NegotiatorState.DONE;
   }
 

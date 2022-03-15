@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/access_point/communication_config.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
+import 'package:xmpp_stone/src/elements/encryption/EncryptElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/extensions/advanced_messaging_processing/AmpManager.dart';
@@ -46,15 +47,17 @@ class MessageHandler implements MessageApi {
   @override
   Future<MessageStanza> sendMessage(Jid? to, String text,
       {MessageParams additional = const MessageParams(
-          millisecondTs: 0,
-          customString: '',
-          messageId: '',
-          receipt: ReceiptRequestType.NONE,
-          messageType: MessageStanzaType.CHAT,
-          chatStateType: ChatStateType.None,
-          ampMessageType: AmpMessageType.None,
-          options: XmppCommunicationConfig(shallWaitStanza: false))}) {
-    return _sendMessageStanza(to, text, additional);
+        millisecondTs: 0,
+        customString: '',
+        messageId: '',
+        receipt: ReceiptRequestType.NONE,
+        messageType: MessageStanzaType.CHAT,
+        chatStateType: ChatStateType.None,
+        ampMessageType: AmpMessageType.None,
+        hasEncryptedBody: false,
+        options: XmppCommunicationConfig(shallWaitStanza: false),
+      )}) {
+    return _sendMessageStanza(to, text, additional, null);
   }
 
   Future<MessageStanza> sendState(
@@ -73,11 +76,13 @@ class MessageHandler implements MessageApi {
             messageType: messageType,
             chatStateType: chatStateType,
             ampMessageType: AmpMessageType.None,
-            options: XmppCommunicationConfig(shallWaitStanza: false)));
+            hasEncryptedBody: false,
+            options: XmppCommunicationConfig(shallWaitStanza: false)),
+        null);
   }
 
-  Future<MessageStanza> _sendMessageStanza(
-      Jid? jid, String text, MessageParams additional) async {
+  Future<MessageStanza> _sendMessageStanza(Jid? jid, String text,
+      MessageParams additional, EncryptElement? encryptElement) async {
     final stanza = MessageStanza(
         additional.messageId.isEmpty
             ? AbstractStanza.getRandomId()
@@ -85,8 +90,24 @@ class MessageHandler implements MessageApi {
         additional.messageType);
     stanza.toJid = jid;
     stanza.fromJid = _connection!.fullJid;
-    if (text.isNotEmpty) {
-      stanza.body = text;
+
+    if (additional.hasEncryptedBody && encryptElement != null) {
+      stanza.addChild(encryptElement);
+    } else {
+      if (text.isNotEmpty) {
+        stanza.body = text;
+      }
+      if (additional.millisecondTs != 0) {
+        stanza.addTime(additional.millisecondTs);
+      }
+
+      if (additional.customString.isNotEmpty) {
+        stanza.addCustom(additional.customString);
+      }
+
+      if (additional.chatStateType != ChatStateType.None) {
+        ChatStateDecoration(message: stanza).setState(additional.chatStateType);
+      }
     }
 
     // Add receipt delivery
@@ -101,19 +122,7 @@ class MessageHandler implements MessageApi {
       stanza.addAmpDeliverDirect();
     }
 
-    if (additional.millisecondTs != 0) {
-      stanza.addTime(additional.millisecondTs);
-    }
-
-    if (additional.customString.isNotEmpty) {
-      stanza.addCustom(additional.customString);
-    }
-
-    if (additional.chatStateType != ChatStateType.None) {
-      ChatStateDecoration(message: stanza).setState(additional.chatStateType);
-    }
-
-    print(stanza.buildXmlString());
+    // print(stanza.buildXmlString());
     _connection!.writeStanza(stanza);
 
     return stanza;
@@ -138,5 +147,20 @@ class MessageHandler implements MessageApi {
           break;
       }
     });
+  }
+
+  @override
+  Future<MessageStanza> sendSecureMessage(Jid to, EncryptElement encryptElement,
+      {MessageParams additional = const MessageParams(
+          millisecondTs: 0,
+          customString: '',
+          messageId: '',
+          receipt: ReceiptRequestType.NONE,
+          messageType: MessageStanzaType.CHAT,
+          chatStateType: ChatStateType.None,
+          ampMessageType: AmpMessageType.None,
+          options: XmppCommunicationConfig(shallWaitStanza: false),
+          hasEncryptedBody: false)}) {
+    return _sendMessageStanza(to, '', additional, encryptElement);
   }
 }

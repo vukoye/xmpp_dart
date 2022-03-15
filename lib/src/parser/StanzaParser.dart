@@ -2,6 +2,8 @@ import 'package:xml/xml.dart' as xml;
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/encryption/EncryptElement.dart';
+import 'package:xmpp_stone/src/elements/encryption/PlainEnvelope.dart';
 import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/elements/messages/Amp.dart';
@@ -47,6 +49,8 @@ class StanzaParser {
     'message#delay': () => DelayElement(),
     // Carbon feature
     'message#sent': () => SentElement(),
+    // Message encrypt
+    'message#envelope': () => PlainEnvelope(),
     'sent#forwarded': () => ForwardedElement(),
     // MAM
     'message#result': () => ResultElement(),

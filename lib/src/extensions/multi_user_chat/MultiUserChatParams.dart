@@ -178,6 +178,8 @@ class GroupChatroomFormParams {
         varAttr: 'muc#roomconfig_allowvisitorstatus', value: '1'));
     xElement.addField(FieldElement.build(
         varAttr: 'muc#roomconfig_allowvisitornickchange', value: '1'));
+    // xElement.addField(FieldElement.build(
+    //     varAttr: 'muc#roomconfig_presencebroadcast', values: ['moderator','participant']));
     query.addChild(xElement);
     return query;
   }
@@ -330,14 +332,13 @@ class JoinGroupChatroomParams {
 
   XmppElement buildJoinRoomXElement() {
     XElement xElement = XElement.build();
-    xElement.addAttribute(
-        XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#user'));
+    xElement
+        .addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc'));
 
-    XmppElement itemRole = XmppElement();
-    itemRole.name = 'item';
-    itemRole.addAttribute(XmppAttribute('affiliation', affiliation));
-    itemRole.addAttribute(XmppAttribute('role', role));
-    xElement.addChild(itemRole);
+    XmppElement itemHistory = XmppElement();
+    itemHistory.name = 'history';
+    itemHistory.addAttribute(XmppAttribute('since', historySince.toString()));
+    xElement.addChild(itemHistory);
 
     return xElement;
   }

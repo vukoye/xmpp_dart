@@ -54,7 +54,7 @@ class VCardManager {
     iqStanza.addChild(vCardElement);
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
     // TODO: remove
-    print(iqStanza.buildXmlString());
+    // print(iqStanza.buildXmlString());
     _connection.writeStanza(iqStanza);
     return completer.future;
   }

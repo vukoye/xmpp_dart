@@ -11,17 +11,25 @@ abstract class BaseResponse {
         if (error != null) {
           errorResponse.code = error.getAttribute('code')!.value!;
           final itemNotFound = error.getChild('item-not-found');
+          final serviceUnavailable = error.getChild('service-unavailable');
 
           XmppElement? textItem = error.children.firstWhere(
               (element) => element!.name == 'text',
               orElse: () => XmppElement());
 
+          if (itemNotFound != null) {
+            errorResponse.errorType = 'item-not-found';
+            errorResponse.message = 'Item not found';
+          } else if (serviceUnavailable != null) {
+            errorResponse.errorType = 'service-unavailable';
+            errorResponse.message = 'Service unavailable';
+          } else {
+            errorResponse.errorType = 'n/a';
+            errorResponse.message = 'Unidentified error';
+          }
+
           if (textItem != null && textItem.textValue != null) {
             errorResponse.message = textItem.textValue!;
-          } else if (itemNotFound != null) {
-            errorResponse.message = 'Item not found';
-          } else {
-            errorResponse.message = 'Unidentified error';
           }
         }
         return errorResponse;
@@ -43,6 +51,7 @@ abstract class BaseResponse {
 class BaseErrorResponse extends BaseResponse {
   late String code;
   late String message;
+  late String errorType;
 }
 
 class BaseValidResponse extends BaseResponse {}

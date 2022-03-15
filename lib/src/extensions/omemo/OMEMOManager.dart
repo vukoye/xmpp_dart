@@ -1,9 +1,11 @@
+import 'package:xml/xml.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOData.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOManagerApi.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
+import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone/src/response/base_response.dart';
 import 'package:xmpp_stone/src/response/response.dart';
 
@@ -44,6 +46,12 @@ class OMEMOManager extends OMEMOManagerApi {
           case OMEMOPublishDeviceResponse:
             response = OMEMOPublishDeviceResponse.parse(stanza);
             break;
+          case OMEMOPublishBundleResponse:
+            response = OMEMOPublishBundleResponse.parse(stanza);
+            break;
+          case OMEMOGetBundleResponse:
+            response = OMEMOGetBundleResponse.parse(stanza);
+            break;
         }
         res.item2.complete(response);
       });
@@ -53,24 +61,41 @@ class OMEMOManager extends OMEMOManagerApi {
   @override
   Future<OMEMOPublishBundleResponse> publishBundle(
       OMEMOPublishBundleParams params) {
-    throw UnimplementedError();
+    final requestStanza = params.buildRequest(from: _connection.fullJid);
+    _connection.writeStanza(requestStanza);
+    return responseHandler.set<OMEMOPublishBundleResponse>(
+        requestStanza.id!, requestStanza);
   }
 
   @override
   Future<OMEMOEnvelopeEncryptionResponse> envelopeEncryptionContent(
       OMEMOEnvelopeEncryptionParams params) {
-    throw UnimplementedError();
+    final encryptEnvelope = params.buildRequest(from: _connection.fullJid);
+    return Future.value(OMEMOEnvelopeEncryptionResponse.parse(encryptEnvelope));
   }
 
   @override
   Future<OMEMOEnvelopePlainTextResponse> envelopePlainContent(
       OMEMOEnvelopePlainTextParams params) {
-    throw UnimplementedError();
+    final envelopeElement = params.buildRequest(from: _connection.fullJid);
+    return Future.value(
+        OMEMOEnvelopePlainTextResponse.parse(envelopeElement.buildXmlString()));
+  }
+
+  @override
+  Future<OMEMOEnvelopePlainTextParseResponse> parseEnvelopePlainContent(
+      OMEMOEnvelopeParsePlainTextParams params) {
+    final xmlDoc = XmlDocument.parse('<message>${params.elementXml}</message>');
+    final stanza = StanzaParser.parseStanza(xmlDoc.rootElement);
+    return Future.value(OMEMOEnvelopePlainTextParseResponse.parse(stanza));
   }
 
   @override
   Future<OMEMOGetBundleResponse> fetchBundle(OMEMOGetBundleParams params) {
-    throw UnimplementedError();
+    final requestStanza = params.buildRequest(from: _connection.fullJid);
+    _connection.writeStanza(requestStanza);
+    return responseHandler.set<OMEMOGetBundleResponse>(
+        requestStanza.id!, requestStanza);
   }
 
   @override
