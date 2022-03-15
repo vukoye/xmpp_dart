@@ -132,7 +132,7 @@ class PresenceManager implements PresenceApi {
 
   void _processPresenceStanza(PresenceStanza? presenceStanza) {
     Log.d(LOG_TAG, presenceStanza!.buildXmlString());
-    if (presenceStanza!.type == null) {
+    if (presenceStanza.type == null) {
       //presence event
       _presenceStreamController.add(PresenceData(
           presenceStanza.show, presenceStanza.status, presenceStanza.fromJid,

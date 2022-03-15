@@ -15,7 +15,7 @@ class User {
 
   User(this.name, this.jid, this.password, this.xmppCallback);
 
-  void connect(onReady){
+  void connect(onReady) {
     var fullJid = Jid.fromFullJid(this.jid);
     xmppClientManager = XMPPClientManager(
       this.jid,
@@ -31,21 +31,18 @@ class User {
       onMessage: (XMPPMessageParams message, ListenerType listenerType) async {
         print('${this.name} recieved message: ${message.message!.body}');
         print('${this.name} ${listenerType.toString()}');
-        if(xmppCallback.onMessage != noFunc){
+        if (xmppCallback.onMessage != noFunc) {
           xmppCallback.onMessage(message);
         }
       },
       onPresence: (PresenceData presenceData) async {
-        if(presenceData.presenceStanza!= null){
-          print('${this.name} presenceData ${presenceData.presenceStanza?.buildXmlString()}');
+        if (presenceData.presenceStanza != null) {
+          print(
+              '${this.name} presenceData ${presenceData.presenceStanza?.buildXmlString()}');
         }
       },
-      onPresenceSubscription: (SubscriptionEvent subscriptionEvent) async {
-      
-      },
-      onPing: () async {
-      
-      },
+      onPresenceSubscription: (SubscriptionEvent subscriptionEvent) async {},
+      onPing: () async {},
       // onArchiveRetrieved: (AbstractStanza stanza) {
       //     log('Flutter dart finishing retrieval of archive : ${stanza.buildXmlString()})');
       // },
@@ -56,29 +53,32 @@ class User {
     xmppClientManager.createSession();
   }
 
-  void sendMessage({required String message, required User user}){
+  void sendMessage({required String message, required User user}) {
     const _uuid = Uuid();
     final messageId = _uuid.v1();
     final time = DateTime.now().toUtc().millisecondsSinceEpoch.toString();
-    xmppClientManager.sendMessage(message,
-        user.jid.replaceAll("+", ""),
-        additional: MessageParams(
-          receipt: ReceiptRequestType.REQUEST,
-          messageId: messageId,
-          millisecondTs: int.tryParse(time) ??
-              DateTime.now().toUtc().millisecondsSinceEpoch,
-          customString: '',
-          chatStateType: ChatStateType.None,
-          messageType: MessageStanzaType.CHAT,
-          options: const XmppCommunicationConfig(shallWaitStanza: false), ampMessageType: AmpMessageType.None, hasEncryptedBody: false,
-        ),);
+    xmppClientManager.sendMessage(
+      message,
+      user.jid.replaceAll("+", ""),
+      additional: MessageParams(
+        receipt: ReceiptRequestType.REQUEST,
+        messageId: messageId,
+        millisecondTs:
+            int.tryParse(time) ?? DateTime.now().toUtc().millisecondsSinceEpoch,
+        customString: '',
+        chatStateType: ChatStateType.None,
+        messageType: MessageStanzaType.CHAT,
+        options: const XmppCommunicationConfig(shallWaitStanza: false),
+        ampMessageType: AmpMessageType.None,
+        hasEncryptedBody: false,
+      ),
+    );
   }
 
-  Future<void> createGroup({required String roomName, required List<String> usersJid}) async {
-    xmppClientManager.createInstantRoom(
-        roomName,
-        GroupChatroomParams.build(
-            name: roomName, description: roomName));
+  Future<void> createGroup(
+      {required String roomName, required List<String> usersJid}) async {
+    xmppClientManager.createInstantRoom(roomName,
+        GroupChatroomParams.build(name: roomName, description: roomName));
     xmppClientManager.getReservedRoomConfig(roomName);
     xmppClientManager.setRoomConfig(
         roomName,
@@ -87,22 +87,29 @@ class User {
           description: roomName,
         ));
 
-    final success = await xmppClientManager.addMembersInGroupAsync(roomName, usersJid);
+    final success =
+        await xmppClientManager.addMembersInGroupAsync(roomName, usersJid);
     return Future.value(success);
   }
 
-  Future<bool> removeMembersInGroup({required String roomName, required List<String> usersJid}) async {
-    final AddUsersResponse success = await xmppClientManager.removeMembersInGroupAsync(roomName, usersJid);
+  Future<bool> removeMembersInGroup(
+      {required String roomName, required List<String> usersJid}) async {
+    final AddUsersResponse success =
+        await xmppClientManager.removeMembersInGroupAsync(roomName, usersJid);
     return Future.value(success.success);
   }
 
-  Future<void> addAdminsInGroup({required String roomName, required List<String> usersJid}) async {
-    final success = await xmppClientManager.addAdminsInGroupAsync(roomName, usersJid);
+  Future<void> addAdminsInGroup(
+      {required String roomName, required List<String> usersJid}) async {
+    final success =
+        await xmppClientManager.addAdminsInGroupAsync(roomName, usersJid);
     return Future.value(success);
   }
 
-  Future<void> removeAdminsInGroup({required String roomName, required List<String> usersJid}) async {
-    final success = await xmppClientManager.removeAdminsInGroupAsync(roomName, usersJid);
+  Future<void> removeAdminsInGroup(
+      {required String roomName, required List<String> usersJid}) async {
+    final success =
+        await xmppClientManager.removeAdminsInGroupAsync(roomName, usersJid);
     return Future.value(success);
   }
 
@@ -130,23 +137,24 @@ class User {
     final messageId = const Uuid().v1();
     final messageDateTime = DateTime.now();
     final customMessage = {
-      "iqType": "Notification", 
+      "iqType": "Notification",
       "subType": "Add-User",
       "groupJid": "test2",
-      "userJids" :["kevin"]
+      "userJids": ["kevin"]
     };
-    final success = await xmppClientManager.sendMessage('', '${roomName}@conference.localhost',
-          additional: MessageParams(
-            receipt: ReceiptRequestType.NONE,
-            messageId: messageId,
-            millisecondTs: DateTime.now().toUtc().millisecondsSinceEpoch,
-            customString: jsonEncode(customMessage),
-            chatStateType: ChatStateType.None,
-            messageType: MessageStanzaType.GROUPCHAT,
-            // ampMessageType: 'None',
-            options: const XmppCommunicationConfig(shallWaitStanza: false), hasEncryptedBody: false, ampMessageType: AmpMessageType.None,
-          ));
+    final success = await xmppClientManager.sendMessage(
+        '', '${roomName}@conference.localhost',
+        additional: MessageParams(
+          receipt: ReceiptRequestType.NONE,
+          messageId: messageId,
+          millisecondTs: DateTime.now().toUtc().millisecondsSinceEpoch,
+          customString: jsonEncode(customMessage),
+          chatStateType: ChatStateType.None,
+          messageType: MessageStanzaType.GROUPCHAT,
+          // ampMessageType: 'None',
+          options: const XmppCommunicationConfig(shallWaitStanza: false),
+          hasEncryptedBody: false, ampMessageType: AmpMessageType.None,
+        ));
     return Future.value();
   }
-
 }

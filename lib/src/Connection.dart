@@ -15,7 +15,6 @@ import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotiationManager.dart';
 import 'package:xmpp_stone/src/features/error/StreamConflictHandler.dart';
 import 'package:xmpp_stone/src/features/queue/ConnectionExecutionQueue.dart';
-import 'package:xmpp_stone/src/features/queue/WriteQueue.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagementModule.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/src/messages/MessageHandler.dart';
@@ -127,7 +126,6 @@ class Connection {
   Jid get fullJid => account.fullJid;
 
   late ConnectionNegotiationManager connectionNegotiationManager;
-  late WriteQueue writeQueue;
   late ConnectionExecutionQueue connExecutionQueue;
   StreamConflictHandler? streamConflictHandler;
 
@@ -155,7 +153,6 @@ class Connection {
     connectionNegotiationManager = ConnectionNegotiationManager(this, account);
     reconnectionManager = ReconnectionManager(this);
     connExecutionQueue = ConnectionExecutionQueue(this);
-    writeQueue = WriteQueue(this);
 
     connectionId = generateId();
     Log.v(this.toString(), 'Create new connection instance');
@@ -243,13 +240,11 @@ xml:lang='en'
                 .then((socket) => socket, onError: (error, stack) {
           handleConnectionError(error);
         });
-        if (_socketSubscription == null) {
-          _socketSubscription = _socket!
-              .cast<List<int>>()
-              .transform(utf8.decoder)
-              .map(prepareStreamResponse)
-              .listen(handleResponse, onDone: handleConnectionDone);
-        }
+        _socketSubscription = _socket!
+            .cast<List<int>>()
+            .transform(utf8.decoder)
+            .map(prepareStreamResponse)
+            .listen(handleResponse, onDone: handleConnectionDone);
         _openStream();
       } else {
         print(_state);
@@ -415,12 +410,8 @@ xml:lang='en'
   /// - stanza: AbstractStanza => Stanza in xml structure to write
   /// - postInitialization: bool => Is the bool defined if connection are writing to stanza after all connection and initialization done or not
   void writeStanza(AbstractStanza stanza, {bool postInitialization = true}) {
-    if (postInitialization && !writeQueue.isEligible()) {
-      writeQueue.put(WriteQueueContent(stanza, postInitialization));
-    } else {
-      _outStanzaStreamController.add(stanza);
-      write(stanza.buildXmlString());
-    }
+    _outStanzaStreamController.add(stanza);
+    write(stanza.buildXmlString());
   }
 
   void writeNonza(Nonza nonza) {
