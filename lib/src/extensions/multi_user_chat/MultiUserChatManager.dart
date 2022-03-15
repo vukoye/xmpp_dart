@@ -120,11 +120,11 @@ class MultiUserChatManager {
       required UserRole userRole,
       required ActionType actionType,
       bool isAsync = false}) async {
-    
+
     final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET)
       ..fromJid = _connection.fullJid
       ..toJid = groupJid;
-    
+
     final queryElement = XmppElement()
       ..name = 'query'
       ..addAttribute(
@@ -166,7 +166,7 @@ class MultiUserChatManager {
     iqStanza.addChild(queryElement);
 
     _connection.writeStanza(iqStanza);
-    print(iqStanza.buildXmlString());
+   // print(iqStanza.buildXmlString());
     if (isAsync) {
       return responseIqHandler.set<AddUsersResponse>(iqStanza.id!, iqStanza);
     } else {
@@ -182,14 +182,14 @@ class MultiUserChatManager {
 
     XElement invitationForm = XElement()
       ..addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#user'));
-    
+
     for (final memberJid in memberJids) {
       invitationForm.addChild(InviteElement.build(
           Jid.fromFullJid(memberJid), 'Invitation to groupchat'));
     }
 
     stanza.addChild(invitationForm);
-    print(stanza.buildXmlString());
+    // print(stanza.buildXmlString());
     _connection.writeStanza(stanza);
   }
 
@@ -208,7 +208,7 @@ class MultiUserChatManager {
       );
 
     _connection.writeStanza(iqStanza);
-    print(iqStanza.buildXmlString());
+    // print(iqStanza.buildXmlString());
 
     return responseIqHandler.set<GetRoomConfigResponse>(iqStanza.id!, iqStanza);
   }
@@ -223,9 +223,9 @@ class MultiUserChatManager {
       ..fromJid = _connection.fullJid
       ..toJid = roomDotMucDomain
       ..addChild(queryElement);
-    
+
     _connection.writeStanza(iqStanza);
-    print(iqStanza.buildXmlString());
+    // print(iqStanza.buildXmlString());
 
     return responseIqHandler.set<SetRoomConfigResponse>(iqStanza.id!, iqStanza);
   }
@@ -242,6 +242,15 @@ class MultiUserChatManager {
         XElement()..addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc'))
       );
 
+    // XElement xElement = XElement();
+    // xElement
+    //     .addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc'));
+    // presenceStanza.addChild(xElement);
+    // // print(presenceStanza.buildXmlString());
+    // _myUnrespondedPresenceStanzas[presenceStanza.id] =
+    //     Tuple2(presenceStanza, completer);
+    // _myUnrespondedIqStanzasActions[presenceStanza.id] =
+    //     GroupChatroomAction.CREATE_ROOM;
     _connection.writeStanza(presenceStanza);
     print(presenceStanza.buildXmlString());
 
@@ -260,7 +269,7 @@ class MultiUserChatManager {
       ..fromJid = _connection.fullJid
       ..addAttribute(XmppAttribute('to', roomDotMucDomain.fullJid))
       ..addChild(config.buildJoinRoomXElement());
-    
+
     print(presenceStanza.buildXmlString());
 
     _connection.writeStanza(presenceStanza);
@@ -283,9 +292,9 @@ class MultiUserChatManager {
       ..fromJid = _connection.fullJid
       ..addAttribute(XmppAttribute('to', roomDotMucDomain.fullJid))
       ..addChild(AcceptGroupChatroomInvitationParams().buildAcceptRoomXElement());
-    
+
     print(presenceStanza.buildXmlString());
-    
+
     _connection.writeStanza(presenceStanza);
 
     return responsePresenceHandler.set<AcceptRoomResponse>(

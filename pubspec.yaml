@@ -27,3 +27,4 @@ dependencies:
 dev_dependencies:
   test: ^1.20.1
   mockito: ^5.0.17
+  uuid: ^3.0.5

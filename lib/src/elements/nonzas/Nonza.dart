@@ -47,4 +47,9 @@ class Nonza extends XmppElement {
     });
     return nonza;
   }
+
+  // @override
+  // String toString() {
+  //   return this.buildXmlString();
+  // }
 }

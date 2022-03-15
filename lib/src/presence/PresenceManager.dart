@@ -96,7 +96,7 @@ class PresenceManager implements PresenceApi {
     var presenceStanza = PresenceStanza.withType(PresenceType.PROBE);
     presenceStanza.toJid = to;
     presenceStanza.fromJid = _connection.fullJid;
-    print(presenceStanza.buildXmlString());
+    // print(presenceStanza.buildXmlString());
     _connection.writeStanza(presenceStanza);
   }
 
@@ -132,10 +132,11 @@ class PresenceManager implements PresenceApi {
   }
 
   void _processPresenceStanza(PresenceStanza? presenceStanza) {
+    Log.d(LOG_TAG, presenceStanza!.buildXmlString());
     if (presenceStanza!.type == null) {
       //presence event
       _presenceStreamController.add(PresenceData(
-          presenceStanza.show, presenceStanza.status, presenceStanza.fromJid));
+          presenceStanza.show, presenceStanza.status, presenceStanza.fromJid, presenceStanza: presenceStanza));
     } else {
       switch (presenceStanza.type!) {
         case PresenceType.SUBSCRIBE:
@@ -166,7 +167,7 @@ class PresenceManager implements PresenceApi {
         case PresenceType.UNAVAILABLE:
           //presence event
           _presenceStreamController.add(PresenceData(
-              PresenceShowElement.XA, 'Unavailable', presenceStanza.fromJid));
+              PresenceShowElement.XA, 'Unavailable', presenceStanza.fromJid, presenceStanza: presenceStanza));
           break;
       }
     }
