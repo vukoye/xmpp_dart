@@ -231,6 +231,15 @@ class MultiUserChatManager {
         ..addAttribute(
             XmppAttribute('xmlns', 'http://jabber.org/protocol/muc')));
 
+    // XElement xElement = XElement();
+    // xElement
+    //     .addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc'));
+    // presenceStanza.addChild(xElement);
+    // // print(presenceStanza.buildXmlString());
+    // _myUnrespondedPresenceStanzas[presenceStanza.id] =
+    //     Tuple2(presenceStanza, completer);
+    // _myUnrespondedIqStanzasActions[presenceStanza.id] =
+    //     GroupChatroomAction.CREATE_ROOM;
     _connection.writeStanza(presenceStanza);
 
     return responsePresenceHandler.set<CreateRoomResponse>(
