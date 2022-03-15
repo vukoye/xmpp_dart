@@ -400,6 +400,8 @@ xml:lang='en'
       if (isOpened()) {
         Log.d(this.toString(), 'Writing to stanza/socket:\n${message}');
         _socket!.write(message);
+      } else {
+        throw FailWriteSocketException();
       }
     } catch (e) {
       close();
