@@ -22,9 +22,8 @@ void main() {
 
       final stanza = StanzaParser.parseStanza(xmlDoc.rootElement);
       final encryptedMessage = EncryptElement.parseElement(stanza);
-      print(encryptedMessage!.buildXmlString());
       expect(encryptedMessage != null, true);
-      expect(encryptedMessage.buildXmlString(),
+      expect(encryptedMessage!.buildXmlString(),
           """<encrypted xmlns="urn:xmpp:omemo:2">
   <header sid="9bbd97e55c84849a">
     <keys jid="627075027401@staging.xmpp.hiapp-chat.com">

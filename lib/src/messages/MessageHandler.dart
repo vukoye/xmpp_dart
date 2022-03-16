@@ -122,7 +122,6 @@ class MessageHandler implements MessageApi {
       stanza.addAmpDeliverDirect();
     }
 
-    // print(stanza.buildXmlString());
     _connection!.writeStanza(stanza);
 
     return stanza;

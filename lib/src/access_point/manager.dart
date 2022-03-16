@@ -123,7 +123,7 @@ class XMPPClientManager {
     return this;
   }
 
-  void close() {
+  Future close() async {
     _connection!.close();
     _connectionStateListener.close();
   }

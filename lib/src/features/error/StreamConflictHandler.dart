@@ -3,36 +3,33 @@ import 'dart:async';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/StreamConflictNonza.dart';
-import 'package:xmpp_stone/src/features/Negotiator.dart';
+import 'package:xmpp_stone/src/features/error/StreamErrorApi.dart';
+import 'package:xmpp_stone/src/logger/Log.dart';
 
-import '../elements/nonzas/Nonza.dart';
-import '../logger/Log.dart';
-
-class StreamConflict extends Negotiator {
+class StreamConflictHandler extends StreamErrorApi {
   static const TAG = 'StreamConflict';
   Connection? _connection;
   late StreamSubscription<Nonza> subscription;
 
-  StreamConflict(Connection? connection) {
+  StreamConflictHandler(Connection? connection) {
     _connection = connection;
-    expectedName = 'StreamConflict';
-    expectedNameSpace = 'urn:ietf:params:xml:ns:xmpp-streams';
-    priorityLevel = 1;
   }
 
-  @override
-  void negotiate(List<Nonza> nonzas) {
+  void init() {
     Log.d(TAG, 'checking stream conflict');
-    if (match(nonzas) != null) {
-      subscription = _connection!.inNonzasStream.listen(checkNonzas);
-    }
+    subscription = _connection!.inNonzasStream.listen(checkNonzas);
+  }
+
+  void dispose() {
+    subscription.cancel();
   }
 
   void checkNonzas(Nonza nonza) {
-    _connection!.streamConflict();
+    if (match([nonza]).isNotEmpty && _connection!.isOpened()) {
+      _connection!.criticalStreamErrorThrown();
+    }
   }
 
-  @override
   List<Nonza> match(List<Nonza> requests) {
     return requests
         .where((element) => StreamConflictNonza.match(element))
