@@ -79,7 +79,7 @@ class MAMNegotiator extends Negotiator {
     query.addAttribute(XmppAttribute('xmlns', 'urn:xmpp:mam:2'));
     iqStanza.addChild(query);
     _myUnrespondedIqStanza = iqStanza;
-    _connection!.writeStanza(iqStanza);
+    _connection!.writeStanza(iqStanza, postInitialization: false);
   }
 
   void checkStanzas(AbstractStanza? stanza) {

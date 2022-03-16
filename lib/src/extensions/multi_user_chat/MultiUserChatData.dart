@@ -240,8 +240,10 @@ class GetUsersResponse extends GroupResponse {
         _response.success = true;
       } catch (e) {
         _response.success = false;
+        _response.users = [];
       }
     } else {
+      _response.users = [];
       _response.success = false;
     }
 

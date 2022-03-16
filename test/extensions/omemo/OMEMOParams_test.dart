@@ -13,7 +13,6 @@ void main() {
           ]);
       final iqElement = publishDeviceParams.buildRequest(
           from: Jid.fromFullJid('alice@capulet.lit'));
-      print(iqElement.getChild('pubsub')!.buildXmlString());
       expect(iqElement.getAttribute('from')!.value, 'alice@capulet.lit');
       expect(iqElement.name, 'iq');
       expect(iqElement.getAttribute('type')!.value, 'set');
@@ -44,7 +43,6 @@ void main() {
           OMEMOGetDevicesParams(buddyJid: Jid.fromFullJid('alice@capulet.lit'));
       final iqElement = publishDeviceParams.buildRequest(
           from: Jid.fromFullJid('bob@capulet.lit'));
-      print(iqElement.getChild('pubsub')!.buildXmlString());
       expect(iqElement.name, 'iq');
       expect(iqElement.getAttribute('type')!.value, 'get');
       expect(iqElement.getAttribute('from')!.value, 'bob@capulet.lit');
@@ -60,7 +58,6 @@ void main() {
           deviceIds: ['1', '2']);
       final iqElement = publishDeviceParams.buildRequest(
           from: Jid.fromFullJid('bob@capulet.lit'));
-      print(iqElement.getChild('pubsub')!.buildXmlString());
       expect(iqElement.name, 'iq');
       expect(iqElement.getAttribute('type')!.value, 'get');
       expect(iqElement.getAttribute('from')!.value, 'bob@capulet.lit');
@@ -107,7 +104,6 @@ void main() {
           plainText: 'Hello World', rpad: 'aa', time: '', customString: '');
       final envelope = publishDeviceParams.buildRequest(
           from: Jid.fromFullJid('bob@capulet.lit'));
-      print(envelope.buildXmlString());
       expect(envelope.name, 'envelope');
       expect(envelope.buildXmlString(), """<envelope xmlns="urn:xmpp:sce:1">
   <content>
@@ -127,7 +123,6 @@ void main() {
           customString: '');
       final envelope = publishDeviceParams.buildRequest(
           from: Jid.fromFullJid('bob@capulet.lit'));
-      print(envelope.buildXmlString());
       expect(envelope.name, 'envelope');
       expect(envelope.buildXmlString(), """<envelope xmlns="urn:xmpp:sce:1">
   <content>
@@ -150,7 +145,6 @@ void main() {
           customString: '{"type": 1}');
       final envelope = publishDeviceParams.buildRequest(
           from: Jid.fromFullJid('bob@capulet.lit'));
-      print(envelope.buildXmlString());
       expect(envelope.name, 'envelope');
       expect(envelope.buildXmlString(), """<envelope xmlns="urn:xmpp:sce:1">
   <content>
@@ -189,7 +183,6 @@ void main() {
       );
       final encrypted = publishDeviceParams.buildRequest(
           from: Jid.fromFullJid('bob@capulet.lit'));
-      print(encrypted.buildXmlString());
       expect(encrypted.name, 'encrypted');
       expect(encrypted.buildXmlString(), """<encrypted xmlns="urn:xmpp:omemo:2">
   <header sid="789">
@@ -235,7 +228,6 @@ void main() {
       );
       final encrypted = publishDeviceParams.buildRequest(
           from: Jid.fromFullJid('bob@capulet.lit'));
-      print(encrypted.buildXmlString());
       expect(encrypted.name, 'encrypted');
       expect(encrypted.buildXmlString(), """<encrypted xmlns="urn:xmpp:omemo:2">
   <header sid="789">

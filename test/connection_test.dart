@@ -1,6 +1,6 @@
-import 'dart:async';
 import 'dart:io';
 
+import 'package:xmpp_stone/src/features/error/StreamConflictHandler.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
@@ -8,6 +8,21 @@ import 'package:mockito/mockito.dart';
 class MockSocket extends Mock implements Socket {}
 
 void main() {
+  group('connection.dart', () {
+    group('handleResponse()', () {
+      test('should handle conflict response', () {
+        final accountSetting =
+            XmppAccountSettings('Alice', 'alice', 'lit', 'foo', 5222);
+        final connection = Connection(accountSetting);
+        connection.streamConflictHandler = StreamConflictHandler(connection);
+        connection.streamConflictHandler!.init();
+        final conflictResponse =
+            "<xmpp_stone><stream:error><conflict xmlns='urn:ietf:params:xml:ns:xmpp-streams'/><text xml:lang='en' xmlns='urn:ietf:params:xml:ns:xmpp-streams'>Replaced by new connection</text></stream:error></xmpp_stone>";
+        connection.handleResponse(conflictResponse);
+        expect(1, 1);
+      });
+    });
+  });
   // group('connection tests plain authentication', () {
   //   final firstResponse =
   //       """<?xml version='1.0'?><stream:stream id='5440668505555980289' version='1.0' xml:lang='en' xmlns:stream='http://etherx.jabber.org/streams' to='test@test.cp,' from='test.com' xmlns='jabber:client'><stream:features></stream:features></stream>""";
