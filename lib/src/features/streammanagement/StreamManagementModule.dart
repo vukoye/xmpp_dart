@@ -16,6 +16,8 @@ import 'package:xmpp_stone/src/features/streammanagement/StreamState.dart';
 import '../../../xmpp_stone.dart';
 import '../Negotiator.dart';
 
+const tag = 'stream-management';
+
 class StreamManagementModule extends Negotiator {
   static const TAG = 'StreamManagementModule';
 
@@ -38,6 +40,7 @@ class StreamManagementModule extends Negotiator {
   StreamSubscription<Nonza>? inNonzaSubscription;
 
   bool ackTurnedOn = true;
+  bool enablingStream = false;
   Timer? timer;
 
   final StreamController<AbstractStanza> _deliveredStanzasStreamController =
@@ -109,7 +112,7 @@ class StreamManagementModule extends Negotiator {
       if (streamState.isResumeAvailable()) {
         tryToResumeStream();
       } else {
-          //sendEnableStreamManagement();
+        //sendEnableStreamManagement();
       }
     }
   }
@@ -125,11 +128,19 @@ class StreamManagementModule extends Negotiator {
   void parseNonza(Nonza nonza) {
     if (state == NegotiatorState.NEGOTIATING) {
       if (EnabledNonza.match(nonza)) {
+        print('<enable state done?  ${state}');
+        Log.d(tag, 'Handle <enable> stream done');
+
+        enablingStream = false;
         handleEnabled(nonza);
       } else if (ResumedNonza.match(nonza)) {
         resumeState(nonza);
-      } else if(StreamNonza.match(nonza)){
-        sendEnableStreamManagement();
+      } else if (StreamNonza.match(nonza)) {
+        Log.d(tag, 'Handle <enable> stream started');
+        if (!enablingStream) {
+          sendEnableStreamManagement();
+          enablingStream = true;
+        }
       } else if (FailedNonza.match(nonza)) {
         if (streamState.tryingToResume) {
           Log.d(TAG, 'Resuming failed');
@@ -139,7 +150,7 @@ class StreamManagementModule extends Negotiator {
           state = NegotiatorState.IDLE; //we will try again
         } else {
           Log.d(TAG,
-              'StreamManagmentFailed'); //try to send an error down to client
+              'Stream Management Failed'); // try to send an error down to client
           state = NegotiatorState.DONE;
         }
       }
