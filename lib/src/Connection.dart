@@ -238,7 +238,7 @@ xml:lang='en'
         _socket =
             await Socket.connect(account.host ?? account.domain, account.port)
                 .then((socket) => socket, onError: (error, stack) {
-          handleConnectionError(error);
+          handleConnectionError(error.toString());
         });
         _socketSubscription = _socket!
             .cast<List<int>>()
