@@ -201,7 +201,7 @@ class StreamManagementModule extends Negotiator {
   }
 
   void sendEnableStreamManagement() =>
-      _connection.writeNonza(EnableNonza(false));
+      _connection.writeNonza(EnableNonza(true));
 
   void sendAckResponse() =>
       _connection.writeNonza(ANonza(streamState.lastReceivedStanza));
