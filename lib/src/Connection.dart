@@ -398,7 +398,8 @@ xml:lang='en'
     Log.xmppSending(message);
     try {
       if (isOpened()) {
-        Log.d(this.toString(), 'Writing to stanza/socket:\n${message}');
+        Log.d(this.toString(),
+            'Writing to stanza/socket[${DateTime.now().toIso8601String()}]:\n${message}');
         _socket!.write(message);
       } else {
         throw FailWriteSocketException();
