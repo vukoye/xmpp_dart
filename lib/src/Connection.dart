@@ -265,6 +265,10 @@ xml:lang='en'
   }
 
   void _close() async {
+    if (_socketSubscription != null) {
+      _socketSubscription!.cancel();
+      _socketSubscription = null;
+    }
     if (state == XmppConnectionState.SocketOpening) {
       throw Exception('Closing is not possible during this state');
     } else if (state == XmppConnectionState.StreamConflict) {
@@ -274,6 +278,7 @@ xml:lang='en'
       if (_socket != null) {
         writeClose(_socket);
       }
+      _socket = null;
       authenticated = false;
 
       setState(XmppConnectionState.Closed);
@@ -285,6 +290,10 @@ xml:lang='en'
           setState(XmppConnectionState.Closing);
           _socket!.write('</stream:stream>');
         }
+        if (_socket != null) {
+          writeClose(_socket);
+        }
+        _socket = null;
         authenticated = false;
       }
     }
@@ -386,9 +395,6 @@ xml:lang='en'
   }
 
   Future writeClose(socket) async {
-    if (_socketSubscription != null) {
-      _socketSubscription!.cancel();
-    }
     socket.write('</stream:stream>');
     await socket.flush();
     await socket.close();

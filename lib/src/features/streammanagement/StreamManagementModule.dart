@@ -139,7 +139,7 @@ class StreamManagementModule extends Negotiator {
         Log.d(tag, 'Handle <enable> stream started');
         if (!enablingStream) {
           sendEnableStreamManagement();
-          enablingStream = true;
+          // enablingStream = true;
         }
       } else if (FailedNonza.match(nonza)) {
         if (streamState.tryingToResume) {
@@ -201,7 +201,7 @@ class StreamManagementModule extends Negotiator {
   }
 
   void sendEnableStreamManagement() =>
-      _connection.writeNonza(EnableNonza(true));
+      _connection.writeNonza(EnableNonza(false));
 
   void sendAckResponse() =>
       _connection.writeNonza(ANonza(streamState.lastReceivedStanza));
