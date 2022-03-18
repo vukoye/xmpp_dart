@@ -129,7 +129,6 @@ class XMPPClientManager {
   }
 
   void reconnect() {
-    // _connection!.reconnect();
     _connection!.reconnectionManager!.handleReconnection(reset: true);
   }
 

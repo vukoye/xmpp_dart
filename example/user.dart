@@ -9,11 +9,14 @@ class User {
   String name = '';
   String jid = '';
   String password = '';
-  XmppCommunicationCallback xmppCallback;
+  String countryCode = '62';
+  String phoneNumber = '';
+
+  XmppCommunicationCallback? xmppCallback;
 
   late XMPPClientManager xmppClientManager;
 
-  User(this.name, this.jid, this.password, this.xmppCallback);
+  User({required this.name, required this.jid, required this.password,required this.phoneNumber, this.countryCode = '62', this.xmppCallback = null});
 
   void connect(onReady) {
     var fullJid = Jid.fromFullJid(this.jid);
@@ -31,8 +34,8 @@ class User {
       onMessage: (XMPPMessageParams message, ListenerType listenerType) async {
         print('${this.name} recieved message: ${message.message!.body}');
         print('${this.name} ${listenerType.toString()}');
-        if (xmppCallback.onMessage != noFunc) {
-          xmppCallback.onMessage(message);
+        if (xmppCallback!.onMessage != noFunc) {
+          xmppCallback!.onMessage(message);
         }
       },
       onPresence: (PresenceData presenceData) async {

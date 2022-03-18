@@ -200,7 +200,7 @@ xml:lang='en'
   }
 
   void reconnect() {
-    if (_state == XmppConnectionState.ForcefullyClosed) {
+    if (!isOpened()) {
       // Prevent open socket run too many times
       connExecutionQueue.put(
           ConnectionExecutionQueueContent(openSocket, true, {}, 'openSocket'));
@@ -258,7 +258,9 @@ xml:lang='en'
       Log.e(this.toString(), 'Socket Exception' + error.toString());
       handleConnectionError(error.toString());
     } catch (e) {
-      Log.e(this.toString(), 'Exception' + e.toString());
+      Log.e(this.toString(), 'Exception in open socket' + e.toString());
+      handleConnectionError(e.toString());
+      ;
     }
   }
 
@@ -419,9 +421,9 @@ xml:lang='en'
     Log.xmppSending(message);
     try {
       if (isOpened()) {
-      Log.d(this.toString(),
-          'Writing to stanza/socket[${DateTime.now().toIso8601String()}]:\n${message}');
-      _socket!.write(message);
+        Log.d(this.toString(),
+            'Writing to stanza/socket[${DateTime.now().toIso8601String()}]:\n${message}');
+        _socket!.write(message);
       } else {
         throw FailWriteSocketException();
       }

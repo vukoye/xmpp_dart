@@ -249,10 +249,8 @@ class MultiUserChatManager {
   Future<JoinRoomResponse> joinRoom(
       Jid _roomDotMucDomain, JoinGroupChatroomParams config) {
     // Change nickname
-    final roomDotMucDomain = Jid(
-        _roomDotMucDomain.local,
-        _roomDotMucDomain.domain,
-        '${_connection.fullJid.local}#${generateId()}');
+    final roomDotMucDomain = Jid(_roomDotMucDomain.local,
+        _roomDotMucDomain.domain, _connection.fullJid.local);
 
     final presenceStanza = PresenceStanza()
       ..id = AbstractStanza.getRandomId()
@@ -270,10 +268,8 @@ class MultiUserChatManager {
       {XmppCommunicationConfig options =
           const XmppCommunicationConfig(shallWaitStanza: false)}) {
     // Change nickname
-    Jid roomDotMucDomain = Jid(
-        _roomDotMucDomain.local,
-        _roomDotMucDomain.domain,
-        '${_connection.fullJid.userAtDomain}#${_connection.fullJid.resource}');
+    final roomDotMucDomain = Jid(_roomDotMucDomain.local,
+        _roomDotMucDomain.domain, _connection.fullJid.local);
 
     final presenceStanza = PresenceStanza()
       ..id = AbstractStanza.getRandomId()
