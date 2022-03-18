@@ -200,7 +200,7 @@ xml:lang='en'
   }
 
   void reconnect() {
-    if (_state == XmppConnectionState.ForcefullyClosed) {
+    if (!isOpened()) {
       // Prevent open socket run too many times
       connExecutionQueue.put(
           ConnectionExecutionQueueContent(openSocket, true, {}, 'openSocket'));
