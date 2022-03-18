@@ -84,12 +84,11 @@ class StreamManagementModule extends Negotiator {
         backToIdle();
       }
       if (!_connection.isOpened() && timer != null) {
-        timer!.cancel();
+        resetAckTimer();
       }
       ;
       if (state == XmppConnectionState.Closed) {
         streamState = StreamState();
-        //state = XmppConnectionState.Idle;
       }
     });
   }
@@ -108,11 +107,10 @@ class StreamManagementModule extends Negotiator {
         SMNonza.match(nonzas[0]) &&
         _connection.authenticated) {
       state = NegotiatorState.NEGOTIATING;
-      inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);
-      if (streamState.isResumeAvailable()) {
-        tryToResumeStream();
-      } else {
-        //sendEnableStreamManagement();
+      enablingStream = false;
+      // Somehow, it listens too many times, if we don't clear or check.
+      if (inNonzaSubscription == null) {
+        inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);
       }
     }
   }
@@ -136,14 +134,15 @@ class StreamManagementModule extends Negotiator {
       } else if (ResumedNonza.match(nonza)) {
         resumeState(nonza);
       } else if (StreamNonza.match(nonza)) {
-        Log.d(tag, 'Handle <enable> stream started');
+        Log.d(tag, 'Handle <enable> stream started: $enablingStream');
         if (!enablingStream) {
           sendEnableStreamManagement();
-          // enablingStream = true;
+          enablingStream = true;
         }
       } else if (FailedNonza.match(nonza)) {
         if (streamState.tryingToResume) {
           Log.d(TAG, 'Resuming failed');
+          enablingStream = false;
           streamState = StreamState();
           state = NegotiatorState.DONE;
           negotiatorStateStreamController = StreamController();
@@ -222,6 +221,16 @@ class StreamManagementModule extends Negotiator {
   }
 
   bool isResumeAvailable() => streamState.isResumeAvailable();
+
+  void resetAckTimer() {
+    streamState = StreamState();
+    streamState.lastReceivedStanza = 0;
+    streamState.lastSentStanza = 0;
+    timer!.cancel();
+
+    outStanzaSubscription!.cancel();
+    inStanzaSubscription!.cancel();
+  }
 
   void reset() {
     negotiatorStateStreamController = StreamController();

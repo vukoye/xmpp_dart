@@ -135,6 +135,7 @@ class Connection {
 
   Socket? _socket;
   StreamSubscription? _socketSubscription;
+  StreamSubscription? _secureSocketSubscription;
 
   // for testing purpose
   set socket(Socket value) {
@@ -200,7 +201,6 @@ xml:lang='en'
 
   void reconnect() {
     if (_state == XmppConnectionState.ForcefullyClosed) {
-      setState(XmppConnectionState.Reconnecting);
       // Prevent open socket run too many times
       connExecutionQueue.put(
           ConnectionExecutionQueueContent(openSocket, true, {}, 'openSocket'));
@@ -240,6 +240,9 @@ xml:lang='en'
                 .then((socket) => socket, onError: (error, stack) {
           handleConnectionError(error.toString());
         });
+        if (_socket == null) {
+          throw SocketException('Socket is not initialized');
+        }
         _socketSubscription = _socket!
             .cast<List<int>>()
             .transform(utf8.decoder)
@@ -254,6 +257,8 @@ xml:lang='en'
     } on SocketException catch (error) {
       Log.e(this.toString(), 'Socket Exception' + error.toString());
       handleConnectionError(error.toString());
+    } catch (e) {
+      Log.e(this.toString(), 'Exception' + e.toString());
     }
   }
 
@@ -264,11 +269,19 @@ xml:lang='en'
     connExecutionQueue.resume();
   }
 
-  void _close() async {
+  void _cleanSubscription() {
+    if (_secureSocketSubscription != null) {
+      _secureSocketSubscription!.cancel();
+      _secureSocketSubscription = null;
+    }
     if (_socketSubscription != null) {
       _socketSubscription!.cancel();
       _socketSubscription = null;
     }
+  }
+
+  void _close() async {
+    _cleanSubscription();
     if (state == XmppConnectionState.SocketOpening) {
       throw Exception('Closing is not possible during this state');
     } else if (state == XmppConnectionState.StreamConflict) {
@@ -286,6 +299,8 @@ xml:lang='en'
       if (state != XmppConnectionState.Closed &&
           state != XmppConnectionState.ForcefullyClosed &&
           state != XmppConnectionState.Closing) {
+        // Close socket and re-open
+        connectionNegotiationManager.cleanNegotiators();
         if (_socket != null) {
           setState(XmppConnectionState.Closing);
           _socket!.write('</stream:stream>');
@@ -404,9 +419,9 @@ xml:lang='en'
     Log.xmppSending(message);
     try {
       if (isOpened()) {
-        Log.d(this.toString(),
-            'Writing to stanza/socket[${DateTime.now().toIso8601String()}]:\n${message}');
-        _socket!.write(message);
+      Log.d(this.toString(),
+          'Writing to stanza/socket[${DateTime.now().toIso8601String()}]:\n${message}');
+      _socket!.write(message);
       } else {
         throw FailWriteSocketException();
       }
@@ -455,7 +470,7 @@ xml:lang='en'
     SecureSocket.secure(_socket!, onBadCertificate: _validateBadCertificate)
         .then((secureSocket) {
       _socket = secureSocket;
-      _socket!
+      _secureSocketSubscription = _socket!
           .cast<List<int>>()
           .transform(utf8.decoder)
           .map(prepareStreamResponse)
@@ -527,6 +542,7 @@ xml:lang='en'
   }
 
   void handleConnectionError(String error) {
+    Log.e(this.toString(), 'Handle connection error: $error');
     handleCloseState();
   }
 

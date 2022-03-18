@@ -27,26 +27,42 @@ class ReconnectionManager {
       handleReconnection();
     } else if (state == XmppConnectionState.SocketOpening) {
       //do nothing
-    } else if (state != XmppConnectionState.Reconnecting) {
-      isActive = false;
-      timeOutInMs = initialTimeout;
-      counter = 0;
-      if (timer != null) {
-        timer!.cancel();
-        timer = null;
-      }
+    } else if ([
+      XmppConnectionState.Authenticating,
+      XmppConnectionState.Authenticated,
+      XmppConnectionState.Resumed,
+      XmppConnectionState.SessionInitialized,
+      XmppConnectionState.Ready
+    ].contains(state)) {
+      _reset();
     }
   }
 
-  void handleReconnection() {
+  void _reset() {
+    isActive = false;
+    timeOutInMs = initialTimeout;
+    counter = 0;
     if (timer != null) {
       timer!.cancel();
+      timer = null;
+    }
+  }
+
+  void handleReconnection({bool reset = true}) {
+    if (reset) {
+      _reset();
+    }
+    if (timer != null) {
+      return;
     }
     if (counter < totalReconnections) {
-      timer = Timer(Duration(milliseconds: timeOutInMs), _connection.reconnect);
-      timeOutInMs += timeOutInMs;
-      Log.d(TAG, 'TimeOut is: $timeOutInMs reconnection counter $counter');
-      counter++;
+      timer = Timer(Duration(milliseconds: timeOutInMs), () {
+        _connection.reconnect();
+        timer = null;
+        timeOutInMs += timeOutInMs;
+        counter++;
+        Log.d(TAG, 'TimeOut is: $timeOutInMs reconnection counter $counter');
+      });
     } else {
       _connection.close();
     }
