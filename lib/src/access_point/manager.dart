@@ -129,7 +129,8 @@ class XMPPClientManager {
   }
 
   void reconnect() {
-    _connection!.reconnect();
+    // _connection!.reconnect();
+    _connection!.reconnectionManager!.handleReconnection(reset: true);
   }
 
   xmpp.XmppConnectionState getState() {
@@ -874,6 +875,10 @@ class ConnectionManagerStateChangedListener
     } else if (state == xmpp.XmppConnectionState.Closed) {
       Log.i(_context.LOG_TAG, 'Disconnected');
       _context._connection!.connect();
+    } else if (state == xmpp.XmppConnectionState.ForcefullyClosed) {
+      Log.i(_context.LOG_TAG, 'ForcefullyClosed');
+
+      _connection!.reconnectionManager!.handleReconnection(reset: true);
     }
     _context.onState(state);
   }

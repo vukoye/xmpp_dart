@@ -16,7 +16,7 @@ import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MultiUserChatNegotiator.dart';
 import 'package:xmpp_stone/src/response/response.dart';
-import 'package:xmpp_stone/src/utils/random.dart';
+import 'package:xmpp_stone/src/utils/Random.dart';
 
 class MultiUserChatManager {
   static Map<Connection, MultiUserChatManager> instances =

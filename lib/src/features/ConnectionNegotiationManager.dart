@@ -107,21 +107,24 @@ class ConnectionNegotiationManager {
     supportedNegotiatorList
         .add(SaslAuthenticationFeature(_connection, _accountSettings.password));
     if (streamManagement.isResumeAvailable()) {
+      supportedNegotiatorList
+          .add(BindingResourceConnectionNegotiator(_connection));
+      supportedNegotiatorList.add(SessionInitiationNegotiator(_connection));
       supportedNegotiatorList.add(streamManagement);
+    } else {
+      supportedNegotiatorList
+          .add(BindingResourceConnectionNegotiator(_connection));
+      supportedNegotiatorList.add(SessionInitiationNegotiator(_connection));
+      supportedNegotiatorList
+          .add(streamManagement); //doesn't care if success it will be done
+      // supportedNegotiatorList
+      //     .add(ServiceDiscoveryNegotiator.getInstance(_connection));
+      supportedNegotiatorList.add(CarbonsNegotiator.getInstance(_connection));
+      supportedNegotiatorList.add(MAMNegotiator.getInstance(_connection));
+      // supportedNegotiatorList.add(AmpNegotiator.getInstance(_connection));
+      supportedNegotiatorList
+          .add(MultiUserChatNegotiator.getInstance(_connection));
     }
-
-    supportedNegotiatorList
-        .add(BindingResourceConnectionNegotiator(_connection));
-    supportedNegotiatorList.add(SessionInitiationNegotiator(_connection));
-    supportedNegotiatorList
-        .add(streamManagement); //doesn't care if success it will be done
-     // supportedNegotiatorList
-    //     .add(ServiceDiscoveryNegotiator.getInstance(_connection));
-    supportedNegotiatorList.add(CarbonsNegotiator.getInstance(_connection));
-    supportedNegotiatorList.add(MAMNegotiator.getInstance(_connection));
-    // supportedNegotiatorList.add(AmpNegotiator.getInstance(_connection));
-    supportedNegotiatorList
-        .add(MultiUserChatNegotiator.getInstance(_connection));
   }
 
   bool isNegotiatorSupport(Function checkType) {
