@@ -88,7 +88,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
         XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info'));
     request.addChild(queryElement);
     fullRequestStanza = request;
-    _connection.writeStanza(request, postInitialization: false);
+    _connection.writeStanza(request);
   }
 
   void _parseFullInfoResponse(IqStanza stanza) {
@@ -148,7 +148,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
       query.addChild(featureElement);
     });
     iqStanza.addChild(query);
-    _connection.writeStanza(iqStanza, postInitialization: false);
+    _connection.writeStanza(iqStanza);
   }
 }
 

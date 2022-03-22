@@ -61,7 +61,7 @@ class CarbonsNegotiator extends Negotiator {
     element.addAttribute(XmppAttribute('xmlns', 'urn:xmpp:carbons:2'));
     iqStanza.addChild(element);
     _myUnrespondedIqStanza = iqStanza;
-    _connection!.writeStanza(iqStanza, postInitialization: false);
+    _connection!.writeStanza(iqStanza);
   }
 
   void checkStanzas(AbstractStanza? stanza) {
