@@ -10,7 +10,7 @@ import 'package:xmpp_stone/src/data/Jid.dart';
 
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/exception/fail_exception.dart';
+import 'package:xmpp_stone/src/exception/XmppException.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotiationManager.dart';
 import 'package:xmpp_stone/src/features/error/StreamConflictHandler.dart';
