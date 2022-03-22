@@ -43,7 +43,7 @@ class VCardManager {
     vCardElement.addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     iqStanza.addChild(vCardElement);
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
     return completer.future;
   }
 
@@ -54,7 +54,7 @@ class VCardManager {
     iqStanza.addChild(vCardElement);
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
     // TODO: remove
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
     return completer.future;
   }
 
@@ -68,7 +68,7 @@ class VCardManager {
     vCardElement.addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     iqStanza.addChild(vCardElement);
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
     return completer.future;
   }
 

@@ -46,7 +46,7 @@ class RosterManager {
     element.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(element);
 
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
 
     return responseHandler.set<QueryRosterResponse>(iqStanza.id!, iqStanza,
         description: 'Query user roster');
@@ -74,7 +74,7 @@ class RosterManager {
     if (rosterItem.name != null) {
       itemElement.addAttribute(XmppAttribute('name', rosterItem.name));
     }
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
     return responseHandler.set<SetRosterResponse>(iqStanza.id!, iqStanza,
         description: 'Set/Update/Add Roster');
   }
@@ -91,7 +91,7 @@ class RosterManager {
     itemElement
         .addAttribute(XmppAttribute('jid', rosterItem.jid!.userAtDomain));
     itemElement.addAttribute(XmppAttribute('subscription', 'remove'));
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
     return responseHandler.set<RemoveRosterResponse>(iqStanza.id!, iqStanza,
         description: 'Remove roster');
   }

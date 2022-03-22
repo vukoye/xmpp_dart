@@ -70,7 +70,7 @@ class PresenceManager implements PresenceApi {
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     requests.add(presenceStanza);
-    _connection.writeStanza(presenceStanza);
+    _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
@@ -79,7 +79,7 @@ class PresenceManager implements PresenceApi {
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     requests.add(presenceStanza);
-    _connection.writeStanza(presenceStanza);
+    _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
@@ -88,7 +88,7 @@ class PresenceManager implements PresenceApi {
     presenceStanza.toJid = to;
     presenceStanza.show = presence.showElement;
     presenceStanza.status = presence.status;
-    _connection.writeStanza(presenceStanza);
+    _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
@@ -96,7 +96,7 @@ class PresenceManager implements PresenceApi {
     var presenceStanza = PresenceStanza.withType(PresenceType.PROBE);
     presenceStanza.toJid = to;
     presenceStanza.fromJid = _connection.fullJid;
-    _connection.writeStanza(presenceStanza);
+    _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
@@ -109,7 +109,7 @@ class PresenceManager implements PresenceApi {
       // presenceStanza.fromJid = _connection.fullJid;
     }
     Log.d(LOG_TAG, presenceStanza.buildXmlString());
-    _connection.writeStanza(presenceStanza);
+    _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
@@ -118,7 +118,7 @@ class PresenceManager implements PresenceApi {
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     requests.add(presenceStanza);
-    _connection.writeStanza(presenceStanza);
+    _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
@@ -127,7 +127,7 @@ class PresenceManager implements PresenceApi {
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     requests.add(presenceStanza);
-    _connection.writeStanza(presenceStanza);
+    _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   void _processPresenceStanza(PresenceStanza? presenceStanza) {

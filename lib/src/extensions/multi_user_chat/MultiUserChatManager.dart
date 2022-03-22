@@ -73,7 +73,7 @@ class MultiUserChatManager {
         ..addAttribute(
             XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info')));
 
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
 
     return responseIqHandler.set<DiscoverRoomResponse>(iqStanza.id!, iqStanza,
         description: 'Discover Multi Chat Room');
@@ -92,7 +92,7 @@ class MultiUserChatManager {
           ..name = 'item'
           ..addAttribute(XmppAttribute('affiliation', affiliation))));
 
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
 
     return responseIqHandler.set<GetUsersResponse>(iqStanza.id!, iqStanza,
         description: 'Get Multi Chat Room\' users');
@@ -161,7 +161,7 @@ class MultiUserChatManager {
 
     iqStanza.addChild(queryElement);
 
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
     if (isAsync) {
       return responseIqHandler.set<AddUsersResponse>(iqStanza.id!, iqStanza,
           description: 'Add User to Multi Chat Room');
@@ -186,7 +186,7 @@ class MultiUserChatManager {
     }
 
     stanza.addChild(invitationForm);
-    _connection.writeStanza(stanza);
+    _connection.writeStanzaWithQueue(stanza);
   }
 
   // Try to request for room configuration
@@ -201,7 +201,7 @@ class MultiUserChatManager {
         ..addAttribute(
             XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#owner')));
 
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
 
     return responseIqHandler.set<GetRoomConfigResponse>(iqStanza.id!, iqStanza,
         description: 'Get Multi Chat Room Configuration');
@@ -218,7 +218,7 @@ class MultiUserChatManager {
       ..toJid = roomDotMucDomain
       ..addChild(queryElement);
 
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
 
     return responseIqHandler.set<SetRoomConfigResponse>(iqStanza.id!, iqStanza,
         description: 'Set Multi Chat Room Configuration');
@@ -245,7 +245,7 @@ class MultiUserChatManager {
     //     Tuple2(presenceStanza, completer);
     // _myUnrespondedIqStanzasActions[presenceStanza.id] =
     //     GroupChatroomAction.CREATE_ROOM;
-    _connection.writeStanza(presenceStanza);
+    _connection.writeStanzaWithQueue(presenceStanza);
 
     return responsePresenceHandler.set<CreateRoomResponse>(
         presenceStanza.id!, presenceStanza,
@@ -264,7 +264,7 @@ class MultiUserChatManager {
       ..addAttribute(XmppAttribute('to', roomDotMucDomain.fullJid))
       ..addChild(config.buildJoinRoomXElement());
 
-    _connection.writeStanza(presenceStanza);
+    _connection.writeStanzaWithQueue(presenceStanza);
 
     return responsePresenceHandler.set<JoinRoomResponse>(
         presenceStanza.id!, presenceStanza,
@@ -285,7 +285,7 @@ class MultiUserChatManager {
       ..addChild(
           AcceptGroupChatroomInvitationParams().buildAcceptRoomXElement());
 
-    _connection.writeStanza(presenceStanza);
+    _connection.writeStanzaWithQueue(presenceStanza);
 
     return responsePresenceHandler.set<AcceptRoomResponse>(
         presenceStanza.id!, presenceStanza,
