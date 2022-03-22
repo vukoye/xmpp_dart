@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:tuple/tuple.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
 class ResponseHandler<T> {
   final Map<String?, Tuple3<T, Completer, dynamic>> _queuedStanzas =
@@ -12,7 +13,7 @@ class ResponseHandler<T> {
     _queuedStanzas[id] = Tuple3(stanza, completer, P);
     return completer.future.timeout(Duration(seconds: 30),
         onTimeout: () => throw TimeoutException(
-            'Error: ${getResponseMetaData(P.runtimeType.toString(), description: description)} - Request Timeout'));
+            'Error: ${getResponseMetaData(P.runtimeType.toString(), description: description)} - Request Timeout\n\nStack Detail: ${(stanza as AbstractStanza).buildXmlString()}'));
   }
 
   void unset(String id) {

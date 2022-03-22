@@ -13,7 +13,7 @@ import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/exception/XmppException.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotiationManager.dart';
-import 'package:xmpp_stone/src/features/error/StreamConflictHandler.dart';
+import 'package:xmpp_stone/src/features/error/ConnectionStreamErrorHandler.dart';
 import 'package:xmpp_stone/src/features/queue/ConnectionExecutionQueue.dart';
 import 'package:xmpp_stone/src/features/queue/ConnectionWriteQueue.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagementModule.dart';
@@ -129,7 +129,7 @@ class Connection {
   late ConnectionNegotiationManager connectionNegotiationManager;
   late ConnectionExecutionQueue connExecutionQueue;
   late ConnectionWriteQueue connWriteQueue;
-  StreamConflictHandler? streamConflictHandler;
+  ConnectionStreamErrorHandler? connectionStreamErrorHandler;
 
   void fullJidRetrieved(Jid jid) {
     account.resource = jid.resource;
@@ -235,8 +235,7 @@ xml:lang='en'
     try {
       // if not closed in meantime
       if (_state != XmppConnectionState.Closed) {
-        streamConflictHandler = StreamConflictHandler(this);
-        streamConflictHandler!.init();
+        connectionStreamErrorHandler = ConnectionStreamErrorHandler.init(this);
         setState(XmppConnectionState.SocketOpened);
         _socket =
             await Socket.connect(account.host ?? account.domain, account.port)
@@ -528,7 +527,7 @@ xml:lang='en'
         state == XmppConnectionState.StreamConflict) {
       return;
     }
-    streamConflictHandler!.dispose();
+    connectionStreamErrorHandler!.dispose();
     setState(XmppConnectionState.StreamConflict);
     close();
   }
