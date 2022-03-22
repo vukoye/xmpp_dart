@@ -6,12 +6,13 @@ class ResponseHandler<T> {
   final Map<String?, Tuple3<T, Completer, dynamic>> _queuedStanzas =
       <String?, Tuple3<T, Completer, dynamic>>{};
 
-  Future<P> set<P>(String id, T stanza) {
+  Future<P> set<P>(String id, T stanza, {String description = ''}) {
     final completer = Completer<P>();
 
     _queuedStanzas[id] = Tuple3(stanza, completer, P);
     return completer.future.timeout(Duration(seconds: 30),
-        onTimeout: () => throw TimeoutException('Request is timeout'));
+        onTimeout: () => throw TimeoutException(
+            'Error: ${getResponseMetaData(P.runtimeType.toString(), description: description)} - Request Timeout'));
   }
 
   void unset(String id) {
@@ -28,4 +29,8 @@ class ResponseHandler<T> {
   }
 
   Iterable<String> keys() => _queuedStanzas.keys.map((e) => e ?? "");
+
+  String getResponseMetaData(String responseType, {String description = ''}) {
+    return '${responseType}' + (description.isEmpty ? '' : ' - $description');
+  }
 }

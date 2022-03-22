@@ -75,7 +75,8 @@ class MultiUserChatManager {
 
     _connection.writeStanza(iqStanza);
 
-    return responseIqHandler.set<DiscoverRoomResponse>(iqStanza.id!, iqStanza);
+    return responseIqHandler.set<DiscoverRoomResponse>(iqStanza.id!, iqStanza,
+        description: 'Discover Multi Chat Room');
   }
 
   // Get Users by affiliation
@@ -93,7 +94,8 @@ class MultiUserChatManager {
 
     _connection.writeStanza(iqStanza);
 
-    return responseIqHandler.set<GetUsersResponse>(iqStanza.id!, iqStanza);
+    return responseIqHandler.set<GetUsersResponse>(iqStanza.id!, iqStanza,
+        description: 'Get Multi Chat Room\' users');
   }
 
   Future<GetUsersResponse> getMembers(Jid groupJid) async {
@@ -161,7 +163,8 @@ class MultiUserChatManager {
 
     _connection.writeStanza(iqStanza);
     if (isAsync) {
-      return responseIqHandler.set<AddUsersResponse>(iqStanza.id!, iqStanza);
+      return responseIqHandler.set<AddUsersResponse>(iqStanza.id!, iqStanza,
+          description: 'Add User to Multi Chat Room');
     } else {
       return AddUsersResponse();
     }
@@ -200,7 +203,8 @@ class MultiUserChatManager {
 
     _connection.writeStanza(iqStanza);
 
-    return responseIqHandler.set<GetRoomConfigResponse>(iqStanza.id!, iqStanza);
+    return responseIqHandler.set<GetRoomConfigResponse>(iqStanza.id!, iqStanza,
+        description: 'Get Multi Chat Room Configuration');
   }
 
   // Try to request for room configuration
@@ -216,7 +220,8 @@ class MultiUserChatManager {
 
     _connection.writeStanza(iqStanza);
 
-    return responseIqHandler.set<SetRoomConfigResponse>(iqStanza.id!, iqStanza);
+    return responseIqHandler.set<SetRoomConfigResponse>(iqStanza.id!, iqStanza,
+        description: 'Set Multi Chat Room Configuration');
   }
 
   Future<CreateRoomResponse> createRoom(Jid _roomDotMucDomain) {
@@ -243,7 +248,8 @@ class MultiUserChatManager {
     _connection.writeStanza(presenceStanza);
 
     return responsePresenceHandler.set<CreateRoomResponse>(
-        presenceStanza.id!, presenceStanza);
+        presenceStanza.id!, presenceStanza,
+        description: 'Create Multi Group Chat Room');
   }
 
   Future<JoinRoomResponse> joinRoom(
@@ -261,7 +267,8 @@ class MultiUserChatManager {
     _connection.writeStanza(presenceStanza);
 
     return responsePresenceHandler.set<JoinRoomResponse>(
-        presenceStanza.id!, presenceStanza);
+        presenceStanza.id!, presenceStanza,
+        description: 'Join Multi User Chat Room');
   }
 
   Future<AcceptRoomResponse> acceptRoomInvitation(Jid _roomDotMucDomain,
@@ -281,7 +288,8 @@ class MultiUserChatManager {
     _connection.writeStanza(presenceStanza);
 
     return responsePresenceHandler.set<AcceptRoomResponse>(
-        presenceStanza.id!, presenceStanza);
+        presenceStanza.id!, presenceStanza,
+        description: 'Accept Multi User Chat invitation to join the Room');
   }
 
   ///

@@ -51,7 +51,8 @@ class LastActivityManager implements LastActivityApi {
 
     _connection.writeStanza(iqStanza);
 
-    return responseHandler.set<LastActivityResponse>(iqStanza.id!, iqStanza);
+    return responseHandler.set<LastActivityResponse>(iqStanza.id!, iqStanza,
+        description: 'Ask for user last activity');
   }
 
   void _processStanza(AbstractStanza? stanza) {

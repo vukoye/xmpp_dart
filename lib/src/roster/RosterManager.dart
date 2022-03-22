@@ -48,7 +48,8 @@ class RosterManager {
 
     _connection.writeStanza(iqStanza);
 
-    return responseHandler.set<QueryRosterResponse>(iqStanza.id!, iqStanza);
+    return responseHandler.set<QueryRosterResponse>(iqStanza.id!, iqStanza,
+        description: 'Query user roster');
   }
 
   List<Buddy> getRoster() {
@@ -74,7 +75,8 @@ class RosterManager {
       itemElement.addAttribute(XmppAttribute('name', rosterItem.name));
     }
     _connection.writeStanza(iqStanza);
-    return responseHandler.set<SetRosterResponse>(iqStanza.id!, iqStanza);
+    return responseHandler.set<SetRosterResponse>(iqStanza.id!, iqStanza,
+        description: 'Set/Update/Add Roster');
   }
 
   Future<RemoveRosterResponse> removeRosterItem(Buddy rosterItem) {
@@ -90,7 +92,8 @@ class RosterManager {
         .addAttribute(XmppAttribute('jid', rosterItem.jid!.userAtDomain));
     itemElement.addAttribute(XmppAttribute('subscription', 'remove'));
     _connection.writeStanza(iqStanza);
-    return responseHandler.set<RemoveRosterResponse>(iqStanza.id!, iqStanza);
+    return responseHandler.set<RemoveRosterResponse>(iqStanza.id!, iqStanza,
+        description: 'Remove roster');
   }
 
   RosterManager(Connection connection) {

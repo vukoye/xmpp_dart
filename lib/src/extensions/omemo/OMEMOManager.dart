@@ -64,7 +64,8 @@ class OMEMOManager extends OMEMOManagerApi {
     final requestStanza = params.buildRequest(from: _connection.fullJid);
     _connection.writeStanza(requestStanza);
     return responseHandler.set<OMEMOPublishBundleResponse>(
-        requestStanza.id!, requestStanza);
+        requestStanza.id!, requestStanza,
+        description: 'Publish user OMEMO bundle');
   }
 
   @override
@@ -95,7 +96,8 @@ class OMEMOManager extends OMEMOManagerApi {
     final requestStanza = params.buildRequest(from: _connection.fullJid);
     _connection.writeStanza(requestStanza);
     return responseHandler.set<OMEMOGetBundleResponse>(
-        requestStanza.id!, requestStanza);
+        requestStanza.id!, requestStanza,
+        description: 'Fetching user OMEMO bundle');
   }
 
   @override
@@ -103,7 +105,8 @@ class OMEMOManager extends OMEMOManagerApi {
     final requestStanza = params.buildRequest(from: _connection.fullJid);
     _connection.writeStanza(requestStanza);
     return responseHandler.set<OMEMOGetDevicesResponse>(
-        requestStanza.id!, requestStanza);
+        requestStanza.id!, requestStanza,
+        description: 'Fetching user devices');
   }
 
   @override
@@ -112,6 +115,7 @@ class OMEMOManager extends OMEMOManagerApi {
     final requestStanza = params.buildRequest(from: _connection.fullJid);
     _connection.writeStanza(requestStanza);
     return responseHandler.set<OMEMOPublishDeviceResponse>(
-        requestStanza.id!, requestStanza);
+        requestStanza.id!, requestStanza,
+        description: 'Publishing user devices');
   }
 }
