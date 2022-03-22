@@ -8,7 +8,7 @@ import 'package:xmpp_stone/src/features/queue/QueueApi.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 
 const tag = 'wrt-queue';
-const idealWriteIntervalMs = 300;
+const idealWriteIntervalMs = 200;
 
 class WriteContent {
   final String id;

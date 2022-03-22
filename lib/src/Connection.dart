@@ -529,6 +529,8 @@ xml:lang='en'
     }
     connectionStreamErrorHandler!.dispose();
     setState(XmppConnectionState.StreamConflict);
+
+    setState(XmppConnectionState.Closing);
     close();
   }
 

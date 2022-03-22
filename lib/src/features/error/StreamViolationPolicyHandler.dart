@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/elements/nonzas/StreamConflictNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/StreamErrorPolicyViolationNonza.dart';
 import 'package:xmpp_stone/src/features/error/StreamErrorApi.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
@@ -17,7 +16,7 @@ class StreamViolationPolicyHandler extends StreamErrorApi {
   }
 
   void init() {
-    Log.d(TAG, 'checking stream conflict');
+    Log.d(TAG, 'checking stream violation');
     subscription = _connection!.inNonzasStream.listen(checkNonzas);
   }
 
