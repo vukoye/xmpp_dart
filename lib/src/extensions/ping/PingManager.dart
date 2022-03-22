@@ -37,7 +37,7 @@ class PingManager {
           var iqStanza = IqStanza(stanza.id, IqStanzaType.RESULT);
           iqStanza.fromJid = _connection.fullJid;
           iqStanza.toJid = stanza.fromJid;
-          _connection.writeStanza(iqStanza);
+          _connection.writeStanzaWithQueue(iqStanza);
 
           if (listener != null) {
             listener!.onPing(stanza);

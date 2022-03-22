@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:xmpp_stone/src/features/error/ConnectionStreamErrorHandler.dart';
 import 'package:xmpp_stone/src/features/error/StreamConflictHandler.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 import 'package:test/test.dart';
@@ -14,8 +15,8 @@ void main() {
         final accountSetting =
             XmppAccountSettings('Alice', 'alice', 'lit', 'foo', 5222);
         final connection = Connection(accountSetting);
-        connection.streamConflictHandler = StreamConflictHandler(connection);
-        connection.streamConflictHandler!.init();
+        connection.connectionStreamErrorHandler =
+            ConnectionStreamErrorHandler.init(connection);
         final conflictResponse =
             "<xmpp_stone><stream:error><conflict xmlns='urn:ietf:params:xml:ns:xmpp-streams'/><text xml:lang='en' xmlns='urn:ietf:params:xml:ns:xmpp-streams'>Replaced by new connection</text></stream:error></xmpp_stone>";
         connection.handleResponse(conflictResponse);

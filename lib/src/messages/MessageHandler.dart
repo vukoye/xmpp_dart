@@ -122,7 +122,7 @@ class MessageHandler implements MessageApi {
       stanza.addAmpDeliverDirect();
     }
 
-    _connection!.writeStanza(stanza);
+    _connection!.writeStanzaWithQueue(stanza);
 
     return stanza;
     // Could not wait for the ack, there is no ack sent (r, c type)

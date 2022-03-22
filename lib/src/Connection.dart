@@ -13,8 +13,9 @@ import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/exception/XmppException.dart';
 import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotiationManager.dart';
-import 'package:xmpp_stone/src/features/error/StreamConflictHandler.dart';
+import 'package:xmpp_stone/src/features/error/ConnectionStreamErrorHandler.dart';
 import 'package:xmpp_stone/src/features/queue/ConnectionExecutionQueue.dart';
+import 'package:xmpp_stone/src/features/queue/ConnectionWriteQueue.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagementModule.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/src/messages/MessageHandler.dart';
@@ -127,7 +128,8 @@ class Connection {
 
   late ConnectionNegotiationManager connectionNegotiationManager;
   late ConnectionExecutionQueue connExecutionQueue;
-  StreamConflictHandler? streamConflictHandler;
+  late ConnectionWriteQueue connWriteQueue;
+  ConnectionStreamErrorHandler? connectionStreamErrorHandler;
 
   void fullJidRetrieved(Jid jid) {
     account.resource = jid.resource;
@@ -154,6 +156,7 @@ class Connection {
     connectionNegotiationManager = ConnectionNegotiationManager(this, account);
     reconnectionManager = ReconnectionManager(this);
     connExecutionQueue = ConnectionExecutionQueue(this);
+    connWriteQueue = ConnectionWriteQueue(this, _outStanzaStreamController);
 
     connectionId = generateId();
     Log.v(this.toString(), 'Create new connection instance');
@@ -232,8 +235,7 @@ xml:lang='en'
     try {
       // if not closed in meantime
       if (_state != XmppConnectionState.Closed) {
-        streamConflictHandler = StreamConflictHandler(this);
-        streamConflictHandler!.init();
+        connectionStreamErrorHandler = ConnectionStreamErrorHandler.init(this);
         setState(XmppConnectionState.SocketOpened);
         _socket =
             await Socket.connect(account.host ?? account.domain, account.port)
@@ -434,10 +436,15 @@ xml:lang='en'
   }
 
   /// - stanza: AbstractStanza => Stanza in xml structure to write
-  /// - postInitialization: bool => Is the bool defined if connection are writing to stanza after all connection and initialization done or not
-  void writeStanza(AbstractStanza stanza, {bool postInitialization = true}) {
+  void writeStanza(AbstractStanza stanza) {
     _outStanzaStreamController.add(stanza);
     write(stanza.buildXmlString());
+  }
+
+  void writeStanzaWithQueue(AbstractStanza stanza) {
+    connWriteQueue
+      ..put(WriteContent(id: stanza.id ?? "", content: stanza, sent: false))
+      ..resume();
   }
 
   void writeNonza(Nonza nonza) {
@@ -520,8 +527,10 @@ xml:lang='en'
         state == XmppConnectionState.StreamConflict) {
       return;
     }
-    streamConflictHandler!.dispose();
+    connectionStreamErrorHandler!.dispose();
     setState(XmppConnectionState.StreamConflict);
+
+    setState(XmppConnectionState.Closing);
     close();
   }
 

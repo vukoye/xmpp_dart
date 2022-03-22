@@ -70,8 +70,8 @@ class ExampleConnectionStateChangedListener
       var receiver = 'nemanja2@test';
       var receiverJid = xmpp.Jid.fromFullJid(receiver);
       rosterManager.addRosterItem(xmpp.Buddy(receiverJid)).then((result) {
-        if (result.description != null) {
-          Log.d(TAG, 'add roster' + result.description!);
+        if (result != null) {
+          Log.d(TAG, 'Add roster successfully');
         }
       });
       sleep(const Duration(seconds: 1));

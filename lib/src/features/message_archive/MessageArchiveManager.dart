@@ -54,7 +54,7 @@ class MessageArchiveManager {
     query.setXmlns('urn:xmpp:mam:2');
     query.setQueryId(AbstractStanza.getRandomId());
     iqStanza.addChild(query);
-    _connection.writeStanza(iqStanza);
+    _connection.writeStanzaWithQueue(iqStanza);
   }
 
   void queryByTime(
@@ -93,7 +93,7 @@ class MessageArchiveManager {
         x.addField(
             FieldElement.build(varAttr: 'include-groupchat', value: 'true'));
       }
-      _connection.writeStanza(iqStanza);
+      _connection.writeStanzaWithQueue(iqStanza);
     }
   }
 
@@ -149,7 +149,7 @@ class MessageArchiveManager {
         x.addField(
             FieldElement.build(varAttr: 'include-groupchat', value: 'true'));
       }
-      _connection.writeStanza(iqStanza);
+      _connection.writeStanzaWithQueue(iqStanza);
     }
   }
 

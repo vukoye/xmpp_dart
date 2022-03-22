@@ -268,8 +268,8 @@ class XMPPClientManager {
 
     var rosterManager = xmpp.RosterManager.getInstance(_connection);
     rosterManager.addRosterItem(xmpp.Buddy(receiverJid)).then((result) {
-      if (result.description != null) {
-        onLog('add roster' + result.description!);
+      if (result.success) {
+        onLog('Add roster successfully');
         // Refresh the list
         rosterList().then((rosterList) {
           completer.complete(rosterList);
@@ -287,8 +287,8 @@ class XMPPClientManager {
 
     var rosterManager = xmpp.RosterManager.getInstance(_connection);
     rosterManager.removeRosterItem(xmpp.Buddy(receiverJid)).then((result) {
-      if (result.description != null) {
-        onLog('remove roster' + result.description!);
+      if (result.success) {
+        onLog('Remove roster successfully');
         // Refresh the list
         rosterList().then((rosterList) {
           completer.complete(rosterList);

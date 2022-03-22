@@ -4,9 +4,9 @@ import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/response/base_response.dart';
 import 'package:xmpp_stone/src/response/response.dart';
 
-class ChatMarkerResposne extends BaseResponse {}
+class ChatMarkerResponse extends BaseResponse {}
 
-class ChatMarkerReadResposne extends BaseResponse {}
+class ChatMarkerReadResponse extends BaseResponse {}
 
 class ChatMarkerManager {
   final Connection _connection;
@@ -42,11 +42,11 @@ class ChatMarkerManager {
       responseHandler.test(stanza.id!, (res) {
         late BaseResponse response;
         switch (res.item3) {
-          case ChatMarkerResposne:
-            response = ChatMarkerResposne();
+          case ChatMarkerResponse:
+            response = ChatMarkerResponse();
             break;
-          case ChatMarkerReadResposne:
-            response = ChatMarkerReadResposne();
+          case ChatMarkerReadResponse:
+            response = ChatMarkerReadResponse();
 
             break;
         }
@@ -56,25 +56,25 @@ class ChatMarkerManager {
     }
   }
 
-  Future<ChatMarkerResposne> sendMarker(dynamic params) {
+  Future<ChatMarkerResponse> sendMarker(dynamic params) {
     final requestStanza = params.buildRequest(from: _connection.fullJid);
     // <message id="123" from=""><chatMarker/></message>
 
     _connection.writeStanza(requestStanza);
 
-    return responseHandler.set<ChatMarkerResposne>(
+    return responseHandler.set<ChatMarkerResponse>(
         // 123
         requestStanza.id!,
         requestStanza);
   }
 
-  Future<ChatMarkerReadResposne> sendReadMarker(dynamic params) {
+  Future<ChatMarkerReadResponse> sendReadMarker(dynamic params) {
     final requestStanza = params.buildRequest(from: _connection.fullJid);
     // <message id="123" from=""><chatMarker/></message>
 
     _connection.writeStanza(requestStanza);
 
-    return responseHandler.set<ChatMarkerReadResposne>(
+    return responseHandler.set<ChatMarkerReadResponse>(
         // 123
         requestStanza.id!,
         requestStanza);

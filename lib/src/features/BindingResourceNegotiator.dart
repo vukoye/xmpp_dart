@@ -64,6 +64,6 @@ class BindingResourceConnectionNegotiator extends Negotiator {
     bindElement.addAttribute(attribute);
     stanza.addChild(bindElement);
     Log.d('resource-binding', 'Handle resource binding sent');
-    _connection!.writeStanza(stanza, postInitialization: false);
+    _connection!.writeStanza(stanza);
   }
 }
