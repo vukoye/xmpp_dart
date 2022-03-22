@@ -154,8 +154,8 @@ class GroupChatroomFormParams {
 
     xElement.addField(
         FieldElement.build(varAttr: 'muc#roomconfig_maxusers', value: '100'));
-    xElement.addField(FieldElement.build(
-        varAttr: 'muc#roomconfig_whois', value: 'moderators'));
+    xElement.addField(
+        FieldElement.build(varAttr: 'muc#roomconfig_whois', value: 'anyone'));
     xElement.addField(FieldElement.build(
         varAttr: 'muc#roomconfig_membersonly',
         value: config.membersonly ? '1' : '0'));
