@@ -1,7 +1,7 @@
-import 'package:xmpp_stone/src/exception/fail_exception.dart';
+import 'package:xmpp_stone/src/exception/XmppException.dart';
 
-class InvalidDeviceListException extends FailException {}
+class InvalidDeviceListException extends XmppException {}
 
-class ErrorGetDevicesException extends FailException {}
+class ErrorGetDevicesException extends XmppException {}
 
-class ErrorPublishDeviceException extends FailException {}
+class ErrorPublishDeviceException extends XmppException {}
