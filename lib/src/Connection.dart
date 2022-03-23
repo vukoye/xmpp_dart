@@ -431,6 +431,7 @@ xml:lang='en'
       }
     } catch (e) {
       close();
+      Log.e(this.toString(), 'Write exception $e');
       throw FailWriteSocketException();
     }
   }

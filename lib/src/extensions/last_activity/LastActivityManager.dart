@@ -6,6 +6,7 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/exception/XmppException.dart';
 import 'package:xmpp_stone/src/extensions/last_activity/LastActivityApi.dart';
 import 'package:xmpp_stone/src/extensions/last_activity/LastActivityData.dart';
 import 'package:xmpp_stone/src/response/base_response.dart';
@@ -44,6 +45,12 @@ class LastActivityManager implements LastActivityApi {
     final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = to;
+
+    // Validation
+    if (iqStanza.toJid == null || iqStanza.fromJid == null) {
+      throw InvalidJidIqStanzaException();
+    }
+
     final queryElement = XmppElement();
     queryElement.name = 'query';
     queryElement.addAttribute(XmppAttribute('xmlns', iqLastActivityXmlns));
