@@ -9,10 +9,9 @@ final String TAG = 'example';
 final String roomName = 'test7';
 
 void main(List<String> arguments) async {
-  
   final UsersConnection users = await initRemoteUser();
   final result = await sendMassivePersonalMessageScenario(users);
-  if(result) {
+  if (result) {
     print('sendMassivePersonalMessageScenario work');
   }
   // await sendMessageScenario(users);
@@ -27,24 +26,25 @@ Future<bool> sendMassivePersonalMessageScenario(UsersConnection users) async {
   final keys = users.users.keys.toList();
   final user1 = users.users[keys[0]];
   final user2 = users.users[keys[1]];
-  user1?.xmppCallback!.onMessage = (message){
+  user1?.xmppCallback!.onMessage = (message) {
     // print('${user1.name} vin receive message from sendMessageScenario ${message.message!.body}');
   };
-  user2?.xmppCallback!.onMessage = (message){
+  user2?.xmppCallback!.onMessage = (message) {
     // print('${user2.name} receive message from sendMessageScenario ${message.message!.body}');
-    if(!completer.isCompleted && message.message!.body == 'I miss you. jub jub.'){
+    if (!completer.isCompleted &&
+        message.message!.body == 'I miss you. jub jub.') {
       completer.complete(true);
     }
   };
-  final n = 10;
+  final n = 400;
   for (var i = 0; i < n; i++) {
-    if(i == n-1){
+    if (i == n - 1) {
       user1?.sendMessage(message: 'I miss you. jub jub.', user: user2!);
-    } 
+    }
     user1?.sendMessage(message: i.toString(), user: user2!);
     user2?.sendMessage(message: i.toString(), user: user1!);
   }
-  
+
   return completer.future;
 }
 
@@ -54,32 +54,33 @@ Future<void> sendMessageScenario(UsersConnection users) async {
   final keys = users.users.keys.toList();
   final user1 = users.users[keys[0]];
   final user2 = users.users[keys[1]];
-  user1?.xmppCallback!.onMessage = (message){
+  user1?.xmppCallback!.onMessage = (message) {
     // print('${user1.name} vin receive message from sendMessageScenario ${message.message!.body}');
   };
-  user2?.xmppCallback!.onMessage = (message){
+  user2?.xmppCallback!.onMessage = (message) {
     // print('${user2.name} receive message from sendMessageScenario ${message.message!.body}');
-    if(!completer.isCompleted && message.message!.body == 'I miss you. jub jub.'){
+    if (!completer.isCompleted &&
+        message.message!.body == 'I miss you. jub jub.') {
       completer.complete();
     }
   };
- 
+
   user1?.sendMessage(message: 'I miss you. jub jub.', user: user2!);
   return completer.future;
 }
 
 // create group with 2 user
 Future<void> createGroupScenario(UsersConnection users) async {
-  List<String> usersJid = []; 
+  List<String> usersJid = [];
   final keys = users.users.keys.toList();
   final user = users.users[keys[0]]; // key 1
 
-  users.users.forEach((key, value) { 
-    if( key != user?.name){
+  users.users.forEach((key, value) {
+    if (key != user?.name) {
       usersJid.add(users.users[key]?.jid ?? '');
     }
   });
-  await user?.createGroup(roomName:roomName, usersJid: usersJid);
+  await user?.createGroup(roomName: roomName, usersJid: usersJid);
   final members = await user?.getMembers(roomName: roomName);
   final admins = await user?.getAdmins(roomName: roomName);
   final owners = await user?.getOwners(roomName: roomName);
@@ -97,8 +98,9 @@ Future<void> removeMembersInGroupScenario(UsersConnection users) async {
 
   usersJid.add(removeUser?.jid ?? '');
 
-  final result = await user?.removeMembersInGroup(roomName: roomName, usersJid: usersJid);
-  if(result!){
+  final result =
+      await user?.removeMembersInGroup(roomName: roomName, usersJid: usersJid);
+  if (result!) {
     user?.sendCustomGroupMessage(roomName: roomName);
   }
   // send notify the group when remove someone from group
@@ -113,7 +115,6 @@ Future<void> removeMembersInGroupScenario(UsersConnection users) async {
 Future<void> addAdminsInGroupScenario(UsersConnection users) async {
   List<String> usersJid = [];
 
-  
   final keys = users.users.keys.toList();
   final user = users.users[keys[0]]; // key
   final adminUser = users.users[keys[2]];
@@ -133,7 +134,6 @@ Future<void> addAdminsInGroupScenario(UsersConnection users) async {
 Future<void> removeAdminsInGroupScenario(UsersConnection users) async {
   List<String> usersJid = [];
 
-  
   final keys = users.users.keys.toList();
   final user = users.users[keys[0]]; // key
   final adminUser = users.users[keys[3]];
@@ -151,7 +151,7 @@ Future<UsersConnection> initUser() async {
   // final XMPPClientManager xmppClientManager;
   var completer = Completer<UsersConnection>();
 
-  Map<String,String> users = {
+  Map<String, String> users = {
     '1647-240077-542380-47b2339c2a355ed6': 'kuldeep',
     // '1645-172186-380626-a86b135e92b91a62': 'Pandu',
     // '1645-172185-192393-a58cddac1966a202': 'Mattiase',
@@ -165,18 +165,24 @@ Future<UsersConnection> initUser() async {
     // '1645-172177-107955-0e0bd3d1f6cc27b1': 'Mateo', //28
   };
 
-  UsersConnection usersConnection = UsersConnection(users: {}, xmppCallback: XmppCommunicationCallback());
-  int countUserConnected = 0; 
+  UsersConnection usersConnection =
+      UsersConnection(users: {}, xmppCallback: XmppCommunicationCallback());
+  int countUserConnected = 0;
   var host = 'localhost';
   var password = 'password';
 
-  users.forEach((key, value) { 
+  users.forEach((key, value) {
     var atDomain = '${key}@${host}';
     var resource = '/${value}';
     var jid = '${atDomain}$resource';
-    var user = User(name: value, jid: jid, password: password,phoneNumber: '', xmppCallback: XmppCommunicationCallback());
-    user.connect((){
-      if(++countUserConnected == users.length){
+    var user = User(
+        name: value,
+        jid: jid,
+        password: password,
+        phoneNumber: '',
+        xmppCallback: XmppCommunicationCallback());
+    user.connect(() {
+      if (++countUserConnected == users.length) {
         completer.complete(usersConnection);
       }
     });
@@ -190,15 +196,16 @@ Future<UsersConnection> initRemoteUser() async {
   // final XMPPClientManager xmppClientManager;
   var completer = Completer<UsersConnection>();
 
-  Map<String,User> users = TestUser().generateUsers(2);
+  Map<String, User> users = TestUser().generateUsers(2);
 
-  UsersConnection usersConnection = UsersConnection(users: {}, xmppCallback: XmppCommunicationCallback());
-  int countUserConnected = 0; 
+  UsersConnection usersConnection =
+      UsersConnection(users: {}, xmppCallback: XmppCommunicationCallback());
+  int countUserConnected = 0;
 
-  users.forEach((key, value) { 
+  users.forEach((key, value) {
     var user = value;
-    user.connect((){
-      if(++countUserConnected == users.length){
+    user.connect(() {
+      if (++countUserConnected == users.length) {
         completer.complete(usersConnection);
       }
     });
