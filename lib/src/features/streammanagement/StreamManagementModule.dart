@@ -152,6 +152,8 @@ class StreamManagementModule extends Negotiator {
               'Stream Management Failed'); // try to send an error down to client
           state = NegotiatorState.DONE;
         }
+        // On stream resume failed, try to tell connection to handle error, close and then open again
+        _connection.handleStreamConflictErrorThrown();
       }
     } else if (state == NegotiatorState.DONE) {
       if (ANonza.match(nonza)) {

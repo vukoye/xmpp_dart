@@ -26,7 +26,7 @@ class StreamConflictHandler extends StreamErrorApi {
 
   void checkNonzas(Nonza nonza) {
     if (match([nonza]).isNotEmpty && _connection!.isOpened()) {
-      _connection!.criticalStreamErrorThrown();
+      _connection!.handleStreamConflictErrorThrown();
     }
   }
 
