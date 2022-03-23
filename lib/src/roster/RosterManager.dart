@@ -39,14 +39,14 @@ class RosterManager {
 
   late Connection _connection;
 
-  Future<QueryRosterResponse> queryForRoster() {
+  Future<QueryRosterResponse> queryForRoster() async {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     var element = XmppElement();
     element.name = 'query';
     element.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(element);
 
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
 
     return responseHandler.set<QueryRosterResponse>(iqStanza.id!, iqStanza,
         description: 'Query user roster');
@@ -60,7 +60,7 @@ class RosterManager {
     return addRosterItem(rosterItem);
   }
 
-  Future<SetRosterResponse> addRosterItem(Buddy rosterItem) {
+  Future<SetRosterResponse> addRosterItem(Buddy rosterItem) async {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     var queryElement = XmppElement();
     queryElement.name = 'query';
@@ -74,12 +74,12 @@ class RosterManager {
     if (rosterItem.name != null) {
       itemElement.addAttribute(XmppAttribute('name', rosterItem.name));
     }
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
     return responseHandler.set<SetRosterResponse>(iqStanza.id!, iqStanza,
         description: 'Set/Update/Add Roster');
   }
 
-  Future<RemoveRosterResponse> removeRosterItem(Buddy rosterItem) {
+  Future<RemoveRosterResponse> removeRosterItem(Buddy rosterItem) async {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     var queryElement = XmppElement();
     queryElement.name = 'query';
@@ -91,7 +91,7 @@ class RosterManager {
     itemElement
         .addAttribute(XmppAttribute('jid', rosterItem.jid!.userAtDomain));
     itemElement.addAttribute(XmppAttribute('subscription', 'remove'));
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
     return responseHandler.set<RemoveRosterResponse>(iqStanza.id!, iqStanza,
         description: 'Remove roster');
   }

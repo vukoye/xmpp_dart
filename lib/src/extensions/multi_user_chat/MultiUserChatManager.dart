@@ -64,7 +64,7 @@ class MultiUserChatManager {
   }
 
   // Try to discover the services
-  Future<DiscoverRoomResponse> discoverRoom(Jid roomDotMucDomain) {
+  Future<DiscoverRoomResponse> discoverRoom(Jid roomDotMucDomain) async {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET)
       ..fromJid = _connection.fullJid
       ..toJid = roomDotMucDomain
@@ -73,7 +73,7 @@ class MultiUserChatManager {
         ..addAttribute(
             XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info')));
 
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
 
     return responseIqHandler.set<DiscoverRoomResponse>(iqStanza.id!, iqStanza,
         description: 'Discover Multi Chat Room');
@@ -92,7 +92,7 @@ class MultiUserChatManager {
           ..name = 'item'
           ..addAttribute(XmppAttribute('affiliation', affiliation))));
 
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
 
     return responseIqHandler.set<GetUsersResponse>(iqStanza.id!, iqStanza,
         description: 'Get Multi Chat Room\' users');
@@ -161,7 +161,7 @@ class MultiUserChatManager {
 
     iqStanza.addChild(queryElement);
 
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
     if (isAsync) {
       return responseIqHandler.set<AddUsersResponse>(iqStanza.id!, iqStanza,
           description: 'Add User to Multi Chat Room');
@@ -186,13 +186,13 @@ class MultiUserChatManager {
     }
 
     stanza.addChild(invitationForm);
-    _connection.writeStanzaWithQueue(stanza);
+    await _connection.writeStanzaWithQueue(stanza);
   }
 
   // Try to request for room configuration
   Future<GetRoomConfigResponse> requestReservedRoomConfig(Jid roomDotMucDomain,
       {XmppCommunicationConfig options =
-          const XmppCommunicationConfig(shallWaitStanza: false)}) {
+          const XmppCommunicationConfig(shallWaitStanza: false)}) async {
     final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET)
       ..fromJid = _connection.fullJid
       ..toJid = roomDotMucDomain
@@ -201,7 +201,7 @@ class MultiUserChatManager {
         ..addAttribute(
             XmppAttribute('xmlns', 'http://jabber.org/protocol/muc#owner')));
 
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
 
     return responseIqHandler.set<GetRoomConfigResponse>(iqStanza.id!, iqStanza,
         description: 'Get Multi Chat Room Configuration');
@@ -209,7 +209,7 @@ class MultiUserChatManager {
 
   // Try to request for room configuration
   Future<SetRoomConfigResponse> setRoomConfig(
-      Jid roomDotMucDomain, MultiUserChatCreateParams params) {
+      Jid roomDotMucDomain, MultiUserChatCreateParams params) async {
     final form = GroupChatroomFormParams(config: params.config);
     final queryElement = form.buildForm();
 
@@ -218,13 +218,13 @@ class MultiUserChatManager {
       ..toJid = roomDotMucDomain
       ..addChild(queryElement);
 
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
 
     return responseIqHandler.set<SetRoomConfigResponse>(iqStanza.id!, iqStanza,
         description: 'Set Multi Chat Room Configuration');
   }
 
-  Future<CreateRoomResponse> createRoom(Jid _roomDotMucDomain) {
+  Future<CreateRoomResponse> createRoom(Jid _roomDotMucDomain) async {
     final roomDotMucDomain = Jid(_roomDotMucDomain.local,
         _roomDotMucDomain.domain, _connection.fullJid.resource);
 
@@ -245,7 +245,7 @@ class MultiUserChatManager {
     //     Tuple2(presenceStanza, completer);
     // _myUnrespondedIqStanzasActions[presenceStanza.id] =
     //     GroupChatroomAction.CREATE_ROOM;
-    _connection.writeStanzaWithQueue(presenceStanza);
+    await _connection.writeStanzaWithQueue(presenceStanza);
 
     return responsePresenceHandler.set<CreateRoomResponse>(
         presenceStanza.id!, presenceStanza,
@@ -253,7 +253,7 @@ class MultiUserChatManager {
   }
 
   Future<JoinRoomResponse> joinRoom(
-      Jid _roomDotMucDomain, JoinGroupChatroomParams config) {
+      Jid _roomDotMucDomain, JoinGroupChatroomParams config) async {
     // Change nickname
     final roomDotMucDomain = Jid(_roomDotMucDomain.local,
         _roomDotMucDomain.domain, _connection.fullJid.local);
@@ -264,7 +264,7 @@ class MultiUserChatManager {
       ..addAttribute(XmppAttribute('to', roomDotMucDomain.fullJid))
       ..addChild(config.buildJoinRoomXElement());
 
-    _connection.writeStanzaWithQueue(presenceStanza);
+    await _connection.writeStanzaWithQueue(presenceStanza);
 
     return responsePresenceHandler.set<JoinRoomResponse>(
         presenceStanza.id!, presenceStanza,
@@ -273,7 +273,7 @@ class MultiUserChatManager {
 
   Future<AcceptRoomResponse> acceptRoomInvitation(Jid _roomDotMucDomain,
       {XmppCommunicationConfig options =
-          const XmppCommunicationConfig(shallWaitStanza: false)}) {
+          const XmppCommunicationConfig(shallWaitStanza: false)}) async {
     // Change nickname
     final roomDotMucDomain = Jid(_roomDotMucDomain.local,
         _roomDotMucDomain.domain, _connection.fullJid.local);
@@ -285,7 +285,7 @@ class MultiUserChatManager {
       ..addChild(
           AcceptGroupChatroomInvitationParams().buildAcceptRoomXElement());
 
-    _connection.writeStanzaWithQueue(presenceStanza);
+    await _connection.writeStanzaWithQueue(presenceStanza);
 
     return responsePresenceHandler.set<AcceptRoomResponse>(
         presenceStanza.id!, presenceStanza,

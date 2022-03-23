@@ -40,7 +40,7 @@ class LastActivityManager implements LastActivityApi {
   }
 
   @override
-  Future<LastActivityResponse> askLastActivity(Jid to) {
+  Future<LastActivityResponse> askLastActivity(Jid to) async {
     final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = to;
@@ -49,7 +49,7 @@ class LastActivityManager implements LastActivityApi {
     queryElement.addAttribute(XmppAttribute('xmlns', iqLastActivityXmlns));
     iqStanza.addChild(queryElement);
 
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
 
     return responseHandler.set<LastActivityResponse>(iqStanza.id!, iqStanza,
         description: 'Ask for user last activity');

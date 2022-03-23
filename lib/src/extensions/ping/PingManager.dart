@@ -29,7 +29,7 @@ class PingManager {
     // connection state processor.
   }
 
-  void _processStanza(AbstractStanza? stanza) {
+  void _processStanza(AbstractStanza? stanza) async {
     if (stanza is IqStanza) {
       if (stanza.type == IqStanzaType.GET) {
         var ping = stanza.getChild('ping');
@@ -37,7 +37,7 @@ class PingManager {
           var iqStanza = IqStanza(stanza.id, IqStanzaType.RESULT);
           iqStanza.fromJid = _connection.fullJid;
           iqStanza.toJid = stanza.fromJid;
-          _connection.writeStanzaWithQueue(iqStanza);
+          await _connection.writeStanzaWithQueue(iqStanza);
 
           if (listener != null) {
             listener!.onPing(stanza);

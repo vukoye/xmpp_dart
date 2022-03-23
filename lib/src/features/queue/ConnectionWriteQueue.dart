@@ -40,9 +40,9 @@ class ConnectionWriteQueue extends QueueApi {
     _outStanzaStreamController = outStanzaStreamController;
   }
 
-  void _connectionStateHandler(XmppConnectionState state) {
+  void _connectionStateHandler(XmppConnectionState state) async {
     if (state == XmppConnectionState.Ready) {
-      resume();
+      await resume();
     }
   }
 

@@ -60,9 +60,9 @@ class OMEMOManager extends OMEMOManagerApi {
 
   @override
   Future<OMEMOPublishBundleResponse> publishBundle(
-      OMEMOPublishBundleParams params) {
+      OMEMOPublishBundleParams params) async {
     final requestStanza = params.buildRequest(from: _connection.fullJid);
-    _connection.writeStanzaWithQueue(requestStanza);
+    await _connection.writeStanzaWithQueue(requestStanza);
     return responseHandler.set<OMEMOPublishBundleResponse>(
         requestStanza.id!, requestStanza,
         description: 'Publish user OMEMO bundle');
@@ -92,18 +92,20 @@ class OMEMOManager extends OMEMOManagerApi {
   }
 
   @override
-  Future<OMEMOGetBundleResponse> fetchBundle(OMEMOGetBundleParams params) {
+  Future<OMEMOGetBundleResponse> fetchBundle(
+      OMEMOGetBundleParams params) async {
     final requestStanza = params.buildRequest(from: _connection.fullJid);
-    _connection.writeStanzaWithQueue(requestStanza);
+    await _connection.writeStanzaWithQueue(requestStanza);
     return responseHandler.set<OMEMOGetBundleResponse>(
         requestStanza.id!, requestStanza,
         description: 'Fetching user OMEMO bundle');
   }
 
   @override
-  Future<OMEMOGetDevicesResponse> fetchDevices(OMEMOGetDevicesParams params) {
+  Future<OMEMOGetDevicesResponse> fetchDevices(
+      OMEMOGetDevicesParams params) async {
     final requestStanza = params.buildRequest(from: _connection.fullJid);
-    _connection.writeStanzaWithQueue(requestStanza);
+    await _connection.writeStanzaWithQueue(requestStanza);
     return responseHandler.set<OMEMOGetDevicesResponse>(
         requestStanza.id!, requestStanza,
         description: 'Fetching user devices');
@@ -111,9 +113,9 @@ class OMEMOManager extends OMEMOManagerApi {
 
   @override
   Future<OMEMOPublishDeviceResponse> publishDevice(
-      OMEMOPublishDeviceParams params) {
+      OMEMOPublishDeviceParams params) async {
     final requestStanza = params.buildRequest(from: _connection.fullJid);
-    _connection.writeStanzaWithQueue(requestStanza);
+    await _connection.writeStanzaWithQueue(requestStanza);
     return responseHandler.set<OMEMOPublishDeviceResponse>(
         requestStanza.id!, requestStanza,
         description: 'Publishing user devices');
