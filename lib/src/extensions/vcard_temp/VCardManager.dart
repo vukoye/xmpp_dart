@@ -34,7 +34,7 @@ class VCardManager {
 
   final Map<String?, VCard> _vCards = <String?, VCard>{};
 
-  Future<VCard> getSelfVCard() {
+  Future<VCard> getSelfVCard() async {
     var completer = Completer<VCard>();
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
@@ -43,18 +43,18 @@ class VCardManager {
     vCardElement.addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     iqStanza.addChild(vCardElement);
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
     return completer.future;
   }
 
-  Future<VCard> updateSelfVCard(VCard selfCard) {
+  Future<VCard> updateSelfVCard(VCard selfCard) async {
     var completer = Completer<VCard>();
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     var vCardElement = selfCard.buildXMLWithAttributes();
     iqStanza.addChild(vCardElement);
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
     // TODO: remove
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
     return completer.future;
   }
 

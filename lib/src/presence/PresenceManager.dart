@@ -65,42 +65,42 @@ class PresenceManager implements PresenceApi {
   }
 
   @override
-  void acceptSubscription(Jid? to) {
+  void acceptSubscription(Jid? to) async {
     var presenceStanza = PresenceStanza.withType(PresenceType.SUBSCRIBED);
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     requests.add(presenceStanza);
-    _connection.writeStanzaWithQueue(presenceStanza);
+    await _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
-  void declineSubscription(Jid to) {
+  void declineSubscription(Jid to) async {
     var presenceStanza = PresenceStanza.withType(PresenceType.UNSUBSCRIBED);
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     requests.add(presenceStanza);
-    _connection.writeStanzaWithQueue(presenceStanza);
+    await _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
-  void sendDirectPresence(PresenceData presence, Jid to) {
+  void sendDirectPresence(PresenceData presence, Jid to) async {
     var presenceStanza = PresenceStanza();
     presenceStanza.toJid = to;
     presenceStanza.show = presence.showElement;
     presenceStanza.status = presence.status;
-    _connection.writeStanzaWithQueue(presenceStanza);
+    await _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
-  void askDirectPresence(Jid to) {
+  void askDirectPresence(Jid to) async {
     var presenceStanza = PresenceStanza.withType(PresenceType.PROBE);
     presenceStanza.toJid = to;
     presenceStanza.fromJid = _connection.fullJid;
-    _connection.writeStanzaWithQueue(presenceStanza);
+    await _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
-  void sendPresence(PresenceData presence) {
+  void sendPresence(PresenceData presence) async {
     var presenceStanza = PresenceStanza();
     presenceStanza.show = presence.showElement;
     presenceStanza.status = presence.status;
@@ -109,25 +109,25 @@ class PresenceManager implements PresenceApi {
       // presenceStanza.fromJid = _connection.fullJid;
     }
     Log.d(LOG_TAG, presenceStanza.buildXmlString());
-    _connection.writeStanzaWithQueue(presenceStanza);
+    await _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
-  void subscribe(Jid to) {
+  void subscribe(Jid to) async {
     var presenceStanza = PresenceStanza.withType(PresenceType.SUBSCRIBE);
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     requests.add(presenceStanza);
-    _connection.writeStanzaWithQueue(presenceStanza);
+    await _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   @override
-  void unsubscribe(Jid to) {
+  void unsubscribe(Jid to) async {
     var presenceStanza = PresenceStanza.withType(PresenceType.UNSUBSCRIBE);
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;
     requests.add(presenceStanza);
-    _connection.writeStanzaWithQueue(presenceStanza);
+    await _connection.writeStanzaWithQueue(presenceStanza);
   }
 
   void _processPresenceStanza(PresenceStanza? presenceStanza) {

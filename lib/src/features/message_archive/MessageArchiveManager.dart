@@ -48,13 +48,13 @@ class MessageArchiveManager {
     _connection.inStanzasStream.listen(_processStanza);
   }
 
-  void queryAll() {
+  void queryAll() async {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     var query = QueryElement();
     query.setXmlns('urn:xmpp:mam:2');
     query.setQueryId(AbstractStanza.getRandomId());
     iqStanza.addChild(query);
-    _connection.writeStanzaWithQueue(iqStanza);
+    await _connection.writeStanzaWithQueue(iqStanza);
   }
 
   void queryByTime(
@@ -62,7 +62,7 @@ class MessageArchiveManager {
       DateTime? end,
       Jid? jid,
       bool includeGroup = false,
-      String? id}) {
+      String? id}) async {
     if (start == null && end == null && jid == null) {
       queryAll();
     } else {
@@ -93,7 +93,7 @@ class MessageArchiveManager {
         x.addField(
             FieldElement.build(varAttr: 'include-groupchat', value: 'true'));
       }
-      _connection.writeStanzaWithQueue(iqStanza);
+      await _connection.writeStanzaWithQueue(iqStanza);
     }
   }
 
@@ -102,7 +102,7 @@ class MessageArchiveManager {
       String? afterId,
       Jid? jid,
       String? id,
-      bool includeGroup = false}) {
+      bool includeGroup = false}) async {
     if (beforeId == null && afterId == null && jid == null) {
       queryAll();
     } else {
@@ -149,7 +149,7 @@ class MessageArchiveManager {
         x.addField(
             FieldElement.build(varAttr: 'include-groupchat', value: 'true'));
       }
-      _connection.writeStanzaWithQueue(iqStanza);
+      await _connection.writeStanzaWithQueue(iqStanza);
     }
   }
 

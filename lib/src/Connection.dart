@@ -441,10 +441,10 @@ xml:lang='en'
     write(stanza.buildXmlString());
   }
 
-  void writeStanzaWithQueue(AbstractStanza stanza) {
+  Future writeStanzaWithQueue(AbstractStanza stanza) async {
     connWriteQueue
-      ..put(WriteContent(id: stanza.id ?? "", content: stanza, sent: false))
-      ..resume();
+        .put(WriteContent(id: stanza.id ?? "", content: stanza, sent: false));
+    await connWriteQueue.resume();
   }
 
   void writeNonza(Nonza nonza) {
