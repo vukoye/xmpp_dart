@@ -523,7 +523,7 @@ xml:lang='en'
     close();
   }
 
-  void criticalStreamErrorThrown() {
+  void handleStreamConflictErrorThrown() {
     if (state == XmppConnectionState.Closing ||
         state == XmppConnectionState.StreamConflict) {
       return;
@@ -531,7 +531,6 @@ xml:lang='en'
     connectionStreamErrorHandler!.dispose();
     setState(XmppConnectionState.StreamConflict);
 
-    setState(XmppConnectionState.Closing);
     close();
   }
 
