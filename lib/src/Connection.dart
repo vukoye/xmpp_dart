@@ -288,27 +288,14 @@ xml:lang='en'
     _cleanSubscription();
     if (state == XmppConnectionState.SocketOpening) {
       throw Exception('Closing is not possible during this state');
-    } else if (state == XmppConnectionState.StreamConflict) {
-      // Close socket and re-open
-      connectionNegotiationManager.cleanNegotiators();
-      setState(XmppConnectionState.Closing);
-      if (_socket != null) {
-        writeClose(_socket);
-      }
-      _socket = null;
-      authenticated = false;
-
-      setState(XmppConnectionState.Closed);
     } else {
-      if (state != XmppConnectionState.Closed &&
-          state != XmppConnectionState.ForcefullyClosed &&
-          state != XmppConnectionState.Closing) {
+      if (state == XmppConnectionState.StreamConflict ||
+          (state != XmppConnectionState.Closed &&
+              state != XmppConnectionState.ForcefullyClosed &&
+              state != XmppConnectionState.Closing)) {
         // Close socket and re-open
         connectionNegotiationManager.cleanNegotiators();
-        if (_socket != null) {
-          setState(XmppConnectionState.Closing);
-          _socket!.write('</stream:stream>');
-        }
+        setState(XmppConnectionState.Closing);
         if (_socket != null) {
           writeClose(_socket);
         }

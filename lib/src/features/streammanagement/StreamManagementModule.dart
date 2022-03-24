@@ -110,6 +110,7 @@ class StreamManagementModule extends Negotiator {
       enablingStream = false;
       // Somehow, it listens too many times, if we don't clear or check.
       if (inNonzaSubscription == null) {
+        sendEnableStreamManagement();
         inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);
       }
     }

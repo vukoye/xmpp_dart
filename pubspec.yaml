@@ -29,3 +29,4 @@ dev_dependencies:
   mockito: ^5.0.17
   uuid: ^3.0.5
   dart_jsonwebtoken: ^2.4.1
+  jose: ^0.3.2
