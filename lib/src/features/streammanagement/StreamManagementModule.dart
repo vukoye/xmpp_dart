@@ -110,7 +110,11 @@ class StreamManagementModule extends Negotiator {
       enablingStream = false;
       // Somehow, it listens too many times, if we don't clear or check.
       // TOOD: see when to send from here and when not to....
-      // sendEnableStreamManagement();
+      // Ejabberd has version 2 support, I just check on it, but to be see if we need
+      // to this.
+      if (SMNonza.matchV2(nonzas[0])) {
+        sendEnableStreamManagement(resume: false);
+      }
       if (inNonzaSubscription == null) {
         inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);
       }
@@ -138,7 +142,7 @@ class StreamManagementModule extends Negotiator {
       } else if (StreamNonza.match(nonza)) {
         Log.d(tag, 'Handle <enable> stream started: $enablingStream');
         if (!enablingStream) {
-          sendEnableStreamManagement();
+          sendEnableStreamManagement(resume: true);
           enablingStream = true;
         }
       } else if (FailedNonza.match(nonza)) {
@@ -203,8 +207,8 @@ class StreamManagementModule extends Negotiator {
         Duration(milliseconds: 5000), (Timer t) => sendAckRequest());
   }
 
-  void sendEnableStreamManagement() =>
-      _connection.writeNonza(EnableNonza(true));
+  void sendEnableStreamManagement({bool resume = false}) =>
+      _connection.writeNonza(EnableNonza(resume));
 
   void sendAckResponse() =>
       _connection.writeNonza(ANonza(streamState.lastReceivedStanza));

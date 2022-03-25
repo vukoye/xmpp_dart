@@ -259,7 +259,9 @@ class GetRoomConfigResponse extends GroupResponse {
         final fieldElements =
             xFormElement.children.where((element) => element!.name == 'field');
 
-        _response.instructions = instructionsElement!.textValue!;
+        _response.instructions = instructionsElement != null
+            ? instructionsElement.textValue ?? ""
+            : "";
         _response.title = titleElement!.textValue!;
         _response.roomConfigFields = fieldElements
             .map<RoomConfigField>((e) => RoomConfigField.parseFromField(e!));

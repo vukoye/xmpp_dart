@@ -159,7 +159,7 @@ class User {
       mappedConfig['voice_request_min_interval']!.setValue('1800');
     }
     if (mappedConfig['muc#roomconfig_pubsub'] != null) {
-      mappedConfig['muc#roomconfig_pubsub']!.setValue('1');
+      mappedConfig['muc#roomconfig_pubsub']!.setValue('');
     }
     if (mappedConfig['voice_request_min_interval'] != null) {
       mappedConfig['voice_request_min_interval']!.setValue('1800');
