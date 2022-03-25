@@ -23,10 +23,10 @@ dependencies:
   console: ^4.1.0
   intl: ^0.17.0
   collection: ^1.15.0
+  jose: ^0.3.2
 
 dev_dependencies:
   test: ^1.20.1
   mockito: ^5.0.17
   uuid: ^3.0.5
   dart_jsonwebtoken: ^2.4.1
-  jose: ^0.3.2

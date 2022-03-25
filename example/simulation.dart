@@ -15,7 +15,7 @@ void main(List<String> arguments) async {
     print('sendMassivePersonalMessageScenario work');
   }
   // await sendMessageScenario(users);
-  // await createGroupScenario(users);
+  await createGroupScenario(users);
   // await removeMembersInGroupScenario(users);
   // await addAdminsInGroupScenario(users);
   // await removeAdminsInGroupScenario(users);
