@@ -1,6 +1,7 @@
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/src/response/base_response.dart';
 
 /// <query xmlns='http://jabber.org/protocol/disco#info'/>
@@ -132,20 +133,27 @@ class JoinRoomResponse extends GroupResponse {
     final response = BaseResponse.parseError(stanza);
     final _response = JoinRoomResponse();
     _response.response = response;
+    _response.success = false;
     if (response.runtimeType == BaseValidResponse) {
       // Parse further
       try {
-        final xChild = stanza.getChild('x')!;
-        final status = xChild.getChild('status')!;
-        final statusCode = status.getAttribute('code')!.value!; //  == '110
-        if (statusCode == '110') {
-          _response.success = true;
+        final xChild = stanza.children.where((element) =>
+            element!.name == 'x' &&
+            element.getAttribute('xmlns')!.value ==
+                'http://jabber.org/protocol/muc#user');
+        if (xChild.isNotEmpty) {
+          final statusChildren = xChild.first!.children
+              .where((element) => element!.name == 'status');
+          final statusCodes =
+              statusChildren.map((e) => e!.getAttribute('code')!.value!);
+          if (statusCodes.contains('110') || statusCodes.contains('100')) {
+            _response.success = true;
+          }
         }
       } catch (e) {
+        Log.e('JoinRoomResponse', 'Error parsing response: $e');
         _response.success = false;
       }
-    } else {
-      _response.success = false;
     }
 
     return _response;
