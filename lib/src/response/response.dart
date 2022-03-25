@@ -11,7 +11,7 @@ class ResponseHandler<T> {
     final completer = Completer<P>();
 
     _queuedStanzas[id] = Tuple3(stanza, completer, P);
-    return completer.future.timeout(Duration(seconds: 30),
+    return completer.future.timeout(Duration(seconds: 60),
         onTimeout: () => throw TimeoutException(
             'Error: ${getResponseMetaData(P.runtimeType.toString(), description: description)} - Request Timeout\n\nStack Detail: ${(stanza as AbstractStanza).buildXmlString()}'));
   }
