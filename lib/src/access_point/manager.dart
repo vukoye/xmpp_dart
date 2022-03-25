@@ -321,8 +321,8 @@ class XMPPClientManager {
   }
 
   // Create room
-  Future<SetRoomConfigResponse> setRoomConfig(
-      String roomName, GroupChatroomParams config) {
+  Future<SetRoomConfigResponse> setRoomConfig(String roomName,
+      GroupChatroomParams config, List<RoomConfigField> roomConfigFields) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -332,7 +332,8 @@ class XMPPClientManager {
         roomJid,
         MultiUserChatCreateParams(
             config: config,
-            options: XmppCommunicationConfig(shallWaitStanza: false)));
+            options: XmppCommunicationConfig(shallWaitStanza: false),
+            roomConfigFields: roomConfigFields));
   }
 
   // Create room

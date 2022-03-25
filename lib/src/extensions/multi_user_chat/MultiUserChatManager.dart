@@ -210,7 +210,8 @@ class MultiUserChatManager {
   // Try to request for room configuration
   Future<SetRoomConfigResponse> setRoomConfig(
       Jid roomDotMucDomain, MultiUserChatCreateParams params) async {
-    final form = GroupChatroomFormParams(config: params.config);
+    final form = GroupChatroomFormParams(
+        config: params.config, roomConfigFields: params.roomConfigFields);
     final queryElement = form.buildForm();
 
     final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET)

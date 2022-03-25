@@ -11,3 +11,5 @@ class IqStanzaException extends XmppException {}
 class InvalidJidMessageStanzaException extends MessageStanzaException {}
 
 class InvalidJidIqStanzaException extends IqStanzaException {}
+
+class SetFormConfigException extends XmppException {}
