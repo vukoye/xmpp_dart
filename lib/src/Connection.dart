@@ -21,6 +21,8 @@ import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/src/messages/MessageHandler.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone/src/presence/PresenceManager.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
+import 'package:xmpp_stone/src/response/Response.dart';
 import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/src/utils/Random.dart';
 
@@ -104,6 +106,9 @@ class Connection {
   final StreamController<XmppConnectionState> _connectionStateStreamController =
       StreamController.broadcast();
 
+  final StreamController<BaseResponse> _responseStreamController =
+      StreamController.broadcast();
+
   Stream<AbstractStanza?> get inStanzasStream {
     return _inStanzaStreamController.stream;
   }
@@ -122,6 +127,10 @@ class Connection {
 
   Stream<XmppConnectionState> get connectionStateStream {
     return _connectionStateStreamController.stream;
+  }
+
+  Stream<BaseResponse> get responseStream {
+    return _responseStreamController.stream;
   }
 
   Jid get fullJid => account.fullJid;
@@ -159,6 +168,10 @@ class Connection {
     connWriteQueue = ConnectionWriteQueue(this, _outStanzaStreamController);
 
     connectionId = generateId();
+    // Assign configured timeout
+    ResponseHandler.responseTimeoutMs = account.responseTimeoutMs;
+    ResponseHandler.setResponseStream(_responseStreamController);
+    ConnectionWriteQueue.idealWriteIntervalMs = account.writeQueueMs;
     Log.v(this.toString(), 'Create new connection instance');
   }
 

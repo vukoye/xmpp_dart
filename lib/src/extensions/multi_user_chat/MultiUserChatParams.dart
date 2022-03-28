@@ -560,10 +560,22 @@ class JoinGroupChatroomParams {
 }
 
 class AcceptGroupChatroomInvitationParams {
+  final DateTime historySince;
+  final bool shouldGetHistory;
+
+  const AcceptGroupChatroomInvitationParams({
+    required this.historySince,
+    required this.shouldGetHistory,
+  });
   XmppElement buildAcceptRoomXElement() {
     XElement xElement = XElement.build();
     xElement
         .addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/muc'));
+    if (shouldGetHistory) {
+      XmppElement itemHistory = XmppElement();
+      itemHistory.name = 'history';
+      itemHistory.addAttribute(XmppAttribute('since', historySince.toString()));
+    }
     return xElement;
   }
 }

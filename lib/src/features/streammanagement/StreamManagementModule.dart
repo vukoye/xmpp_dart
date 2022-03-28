@@ -95,28 +95,48 @@ class StreamManagementModule extends Negotiator {
 
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhereOrNull((request) => SMNonza.match(request));
-    return nonza != null ? [nonza] : [];
+    var nonza = requests
+        .where((request) => SMNonza.match(request) || SMNonza.matchV2(request));
+    return nonza.toList();
+  }
+
+// Assume if we need for this.
+  _matchSMV2(List<Nonza> nonzas) {
+    bool result = false;
+    nonzas.forEach((element) {
+      result = SMNonza.matchV2(element) || result;
+    });
+    return result;
+  }
+
+// Assume if we need for this.
+  _matchSMV3(List<Nonza> nonzas) {
+    bool result = false;
+    nonzas.forEach((element) {
+      result = SMNonza.match(element) || result;
+    });
+    return result;
   }
 
   //TODO: Improve
   @override
   void negotiate(List<Nonza> nonzas) {
-    if (nonzas != null &&
-        nonzas.isNotEmpty &&
-        SMNonza.match(nonzas[0]) &&
-        _connection.authenticated) {
-      state = NegotiatorState.NEGOTIATING;
-      enablingStream = false;
+    if (nonzas != null && nonzas.isNotEmpty && _connection.authenticated) {
+      bool matchSm2 = _matchSMV2(nonzas);
       // Somehow, it listens too many times, if we don't clear or check.
       // TOOD: see when to send from here and when not to....
       // Ejabberd has version 2 support, I just check on it, but to be see if we need
       // to this.
-      if (SMNonza.matchV2(nonzas[0])) {
-        sendEnableStreamManagement(resume: false);
+      if (matchSm2) {
+        sendEnableStreamManagement(resume: true);
       }
-      if (inNonzaSubscription == null) {
-        inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);
+      bool matchSm3 = _matchSMV3(nonzas);
+      if (matchSm2 || matchSm3) {
+        state = NegotiatorState.NEGOTIATING;
+        enablingStream = false;
+        if (inNonzaSubscription == null) {
+          inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);
+        }
       }
     }
   }

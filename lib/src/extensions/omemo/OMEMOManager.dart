@@ -6,8 +6,8 @@ import 'package:xmpp_stone/src/extensions/omemo/OMEMOData.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOManagerApi.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
-import 'package:xmpp_stone/src/response/base_response.dart';
-import 'package:xmpp_stone/src/response/response.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
+import 'package:xmpp_stone/src/response/Response.dart';
 
 class OMEMOManager extends OMEMOManagerApi {
   final Connection _connection;

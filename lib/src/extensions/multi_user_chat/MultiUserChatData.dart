@@ -4,7 +4,7 @@ import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/exception/XmppException.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
-import 'package:xmpp_stone/src/response/base_response.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
 
 /// <query xmlns='http://jabber.org/protocol/disco#info'/>
 ///       <error code='404' type='cancel'>
@@ -108,7 +108,7 @@ class InvalidGroupChatroom extends GroupChatroom {
             error: error);
 }
 
-abstract class GroupResponse {
+abstract class GroupResponse extends BaseResponse {
   late bool success;
   late BaseResponse response;
 }

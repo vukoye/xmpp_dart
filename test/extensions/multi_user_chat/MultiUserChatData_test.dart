@@ -2,7 +2,7 @@ import 'package:xml/xml.dart';
 import 'package:test/test.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
-import 'package:xmpp_stone/src/response/base_response.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
 
 void main() {
   // TODO: add more case, for now, one happy case, to add more

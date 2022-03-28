@@ -1,8 +1,8 @@
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp_stone/src/response/base_response.dart';
-import 'package:xmpp_stone/src/response/response.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
+import 'package:xmpp_stone/src/response/Response.dart';
 
 class ChatMarkerResponse extends BaseResponse {}
 

@@ -48,3 +48,4 @@ export 'src/elements/encryption/EncryptElement.dart';
 export 'src/extensions/last_activity/LastActivityData.dart';
 export 'src/exception/XmppException.dart';
 export 'src/utils/JwtUtil.dart';
+export 'src/response/BaseResponse.dart';

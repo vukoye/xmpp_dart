@@ -5,8 +5,8 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
-import 'package:xmpp_stone/src/response/base_response.dart';
-import 'package:xmpp_stone/src/response/response.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
+import 'package:xmpp_stone/src/response/Response.dart';
 import 'package:xmpp_stone/src/roster/Buddy.dart';
 import 'package:xmpp_stone/src/roster/RosterResponse.dart';
 
@@ -103,9 +103,7 @@ class RosterManager {
   }
 
   void _connectionStateProcessor(XmppConnectionState state) {
-    if (state == XmppConnectionState.Ready) {
-      queryForRoster();
-    } else if (state == XmppConnectionState.Closed) {
+    if (state == XmppConnectionState.Closed) {
       _rosterMap.clear();
       _rosterController.add([]);
     }
