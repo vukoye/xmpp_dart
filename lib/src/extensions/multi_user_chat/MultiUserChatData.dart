@@ -1,7 +1,10 @@
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
+import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/response/base_response.dart';
+import 'package:xmpp_stone/src/exception/XmppException.dart';
+import 'package:xmpp_stone/src/logger/Log.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
 
 /// <query xmlns='http://jabber.org/protocol/disco#info'/>
 ///       <error code='404' type='cancel'>
@@ -105,7 +108,7 @@ class InvalidGroupChatroom extends GroupChatroom {
             error: error);
 }
 
-abstract class GroupResponse {
+abstract class GroupResponse extends BaseResponse {
   late bool success;
   late BaseResponse response;
 }
@@ -132,27 +135,115 @@ class JoinRoomResponse extends GroupResponse {
     final response = BaseResponse.parseError(stanza);
     final _response = JoinRoomResponse();
     _response.response = response;
+    _response.success = false;
     if (response.runtimeType == BaseValidResponse) {
       // Parse further
       try {
-        final xChild = stanza.getChild('x')!;
-        final status = xChild.getChild('status')!;
-        final statusCode = status.getAttribute('code')!.value!; //  == '110
-        if (statusCode == '110') {
-          _response.success = true;
+        final xChild = stanza.children.where((element) =>
+            element!.name == 'x' &&
+            element.getAttribute('xmlns')!.value ==
+                'http://jabber.org/protocol/muc#user');
+        if (xChild.isNotEmpty) {
+          final statusChildren = xChild.first!.children
+              .where((element) => element!.name == 'status');
+          final statusCodes =
+              statusChildren.map((e) => e!.getAttribute('code')!.value!);
+          if (statusCodes.contains('110') || statusCodes.contains('100')) {
+            _response.success = true;
+          }
         }
       } catch (e) {
+        Log.e('JoinRoomResponse', 'Error parsing response: $e');
         _response.success = false;
       }
-    } else {
-      _response.success = false;
     }
 
     return _response;
   }
 }
 
+class RoomConfigFieldOption {
+  final String label;
+  final String value;
+  const RoomConfigFieldOption({
+    required this.label,
+    required this.value,
+  });
+}
+
+class RoomConfigField {
+  final String key;
+  final String type;
+  final String label;
+  List<String> values;
+  final Iterable<RoomConfigFieldOption> availableValues;
+
+  RoomConfigField({
+    required this.key,
+    required this.type,
+    required this.label,
+    required this.values,
+    required this.availableValues,
+  });
+
+  void setValue(dynamic value) {
+    if (['boolean', 'text-private', 'text-single', 'hidden', 'list-single']
+        .contains(type)) {
+      values = <String>[value as String];
+    } else if (type == 'list-multi') {
+      values = value as List<String>;
+    } else {
+      throw SetFormConfigException();
+    }
+  }
+
+  FieldElement getFieldElement() {
+    if (['boolean', 'text-private', 'text-single', 'hidden', 'list-single']
+        .contains(type)) {
+      return FieldElement.build(
+          varAttr: key, value: values.isNotEmpty ? values.first : '');
+    } else if (type == 'list-multi') {
+      return FieldElement.build(varAttr: key, values: values);
+    } else {
+      throw SetFormConfigException();
+    }
+  }
+
+  static RoomConfigField parseFromField(XmppElement xField) {
+    final typeAttr = xField.getAttribute('type');
+
+    final type = typeAttr != null ? typeAttr.value ?? "" : "";
+    final keyAttr = xField.getAttribute('var');
+    final key = keyAttr != null ? keyAttr.value ?? "" : "";
+    final labelAttr = xField.getAttribute('label');
+    final label = labelAttr != null ? labelAttr.value ?? "" : "";
+
+    final values = xField.children
+        .where((element) => element!.name == 'value')
+        .map<String>((e) {
+      return e!.textValue ?? "";
+    });
+    final availableValues = xField.children
+        .where((element) => element!.name == 'option')
+        .map<RoomConfigFieldOption>((e) {
+      final label = e!.getAttribute('label')!.value ?? "";
+      final value = e.getChild('value')!.textValue ?? "";
+      return RoomConfigFieldOption(label: label, value: value);
+    });
+    return RoomConfigField(
+        availableValues: availableValues,
+        values: values.toList(),
+        type: type,
+        label: label,
+        key: key);
+  }
+}
+
 class GetRoomConfigResponse extends GroupResponse {
+  late Iterable<RoomConfigField> roomConfigFields;
+  late String instructions;
+  late String title;
+
   static GetRoomConfigResponse parse(AbstractStanza stanza) {
     final response = BaseResponse.parseError(stanza);
 
@@ -160,7 +251,24 @@ class GetRoomConfigResponse extends GroupResponse {
     _response.response = response;
     if (response.runtimeType == BaseValidResponse) {
       // Parse further
-      _response.success = true;
+      try {
+        final queryElement = stanza.getChild('query');
+        final instructionsElement = queryElement!.getChild('instructions');
+        final xFormElement = queryElement.getChild('x');
+        final titleElement = xFormElement!.getChild('title');
+        final fieldElements =
+            xFormElement.children.where((element) => element!.name == 'field');
+
+        _response.instructions = instructionsElement != null
+            ? instructionsElement.textValue ?? ""
+            : "";
+        _response.title = titleElement!.textValue!;
+        _response.roomConfigFields = fieldElements
+            .map<RoomConfigField>((e) => RoomConfigField.parseFromField(e!));
+        _response.success = true;
+      } catch (e) {
+        _response.success = false;
+      }
     } else {
       _response.success = false;
     }

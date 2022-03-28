@@ -16,7 +16,13 @@ class User {
 
   late XMPPClientManager xmppClientManager;
 
-  User({required this.name, required this.jid, required this.password,required this.phoneNumber, this.countryCode = '62', this.xmppCallback = null});
+  User(
+      {required this.name,
+      required this.jid,
+      required this.password,
+      required this.phoneNumber,
+      this.countryCode = '62',
+      this.xmppCallback = null});
 
   void connect(onReady) {
     var fullJid = Jid.fromFullJid(this.jid);
@@ -82,13 +88,98 @@ class User {
       {required String roomName, required List<String> usersJid}) async {
     xmppClientManager.createInstantRoom(roomName,
         GroupChatroomParams.build(name: roomName, description: roomName));
-    xmppClientManager.getReservedRoomConfig(roomName);
+    final configResponse =
+        await xmppClientManager.getReservedRoomConfig(roomName);
+    final roomConfig = configResponse.roomConfigFields;
+    final Map<String, RoomConfigField> mappedConfig = {};
+    final roomConfigOpts = GroupChatroomParams.build(
+      name: roomName,
+      description: roomName,
+    );
+
+    roomConfig.forEach((element) {
+      mappedConfig[element.key] = element;
+    });
+    if (mappedConfig['muc#roomconfig_roomname'] != null) {
+      mappedConfig['muc#roomconfig_roomname']!.setValue(roomName);
+    }
+    if (mappedConfig['muc#roomconfig_roomdesc'] != null) {
+      mappedConfig['muc#roomconfig_roomdesc']!.setValue(roomName);
+    }
+    if (mappedConfig['muc#roomconfig_lang'] != null) {
+      mappedConfig['muc#roomconfig_lang']!.setValue('en');
+    }
+    if (mappedConfig['muc#roomconfig_persistentroom'] != null) {
+      mappedConfig['muc#roomconfig_persistentroom']!.setValue('1');
+    }
+    if (mappedConfig['muc#roomconfig_publicroom'] != null) {
+      mappedConfig['muc#roomconfig_publicroom']!.setValue('1');
+    }
+    if (mappedConfig['muc#roomconfig_presencebroadcast'] != null) {
+      mappedConfig['muc#roomconfig_presencebroadcast']!
+          .setValue(roomConfigOpts.presencebroadcast);
+    }
+    if (mappedConfig['muc#roomconfig_membersonly'] != null) {
+      mappedConfig['muc#roomconfig_membersonly']!.setValue('1');
+    }
+    if (mappedConfig['muc#roomconfig_moderatedroom'] != null) {
+      mappedConfig['muc#roomconfig_moderatedroom']!.setValue('1');
+    }
+    if (mappedConfig['muc#members_by_default'] != null) {
+      mappedConfig['muc#members_by_default']!.setValue('1');
+    }
+    if (mappedConfig['muc#roomconfig_changesubject'] != null) {
+      mappedConfig['muc#roomconfig_changesubject']!.setValue('1');
+    }
+    if (mappedConfig['allow_private_messages'] != null) {
+      mappedConfig['allow_private_messages']!.setValue('1');
+    }
+    if (mappedConfig['allow_private_messages_from_visitors'] != null) {
+      mappedConfig['allow_private_messages_from_visitors']!.setValue('anyone');
+    }
+    if (mappedConfig['allow_query_users'] != null) {
+      mappedConfig['allow_query_users']!.setValue('1');
+    }
+    if (mappedConfig['muc#roomconfig_allowinvites'] != null) {
+      mappedConfig['muc#roomconfig_allowinvites']!.setValue('1');
+    }
+    if (mappedConfig['allow_visitor_status'] != null) {
+      mappedConfig['allow_visitor_status']!.setValue('1');
+    }
+    if (mappedConfig['allow_visitor_nickchange'] != null) {
+      mappedConfig['allow_visitor_nickchange']!.setValue('1');
+    }
+    if (mappedConfig['allow_voice_requests'] != null) {
+      mappedConfig['allow_voice_requests']!.setValue('1');
+    }
+    if (mappedConfig['allow_subscription'] != null) {
+      mappedConfig['allow_subscription']!.setValue('1');
+    }
+    if (mappedConfig['voice_request_min_interval'] != null) {
+      mappedConfig['voice_request_min_interval']!.setValue('1800');
+    }
+    if (mappedConfig['muc#roomconfig_pubsub'] != null) {
+      mappedConfig['muc#roomconfig_pubsub']!.setValue('');
+    }
+    if (mappedConfig['voice_request_min_interval'] != null) {
+      mappedConfig['voice_request_min_interval']!.setValue('1800');
+    }
+    if (mappedConfig['mam'] != null) {
+      mappedConfig['mam']!.setValue('1');
+    }
+    // Mongooseim
+    if (mappedConfig['muc#roomconfig_allowmultisessions'] != null) {
+      mappedConfig['muc#roomconfig_allowmultisessions']!.setValue('1');
+    }
+    if (mappedConfig['muc#roomconfig_whois'] != null) {
+      mappedConfig['muc#roomconfig_whois']!.setValue('anyone');
+    }
+    if (mappedConfig['muc#roomconfig_getmemberlist'] != null) {
+      mappedConfig['muc#roomconfig_getmemberlist']!
+          .setValue(roomConfigOpts.getmemberlist);
+    }
     xmppClientManager.setRoomConfig(
-        roomName,
-        GroupChatroomParams.build(
-          name: roomName,
-          description: roomName,
-        ));
+        roomName, roomConfigOpts, mappedConfig.values.toList());
 
     final success =
         await xmppClientManager.addMembersInGroupAsync(roomName, usersJid);

@@ -15,7 +15,7 @@ void main(List<String> arguments) async {
     print('sendMassivePersonalMessageScenario work');
   }
   // await sendMessageScenario(users);
-  // await createGroupScenario(users);
+  await createGroupScenario(users);
   // await removeMembersInGroupScenario(users);
   // await addAdminsInGroupScenario(users);
   // await removeAdminsInGroupScenario(users);
@@ -36,7 +36,7 @@ Future<bool> sendMassivePersonalMessageScenario(UsersConnection users) async {
       completer.complete(true);
     }
   };
-  final n = 400;
+  final n = 10;
   for (var i = 0; i < n; i++) {
     if (i == n - 1) {
       user1?.sendMessage(message: 'I miss you. jub jub.', user: user2!);

@@ -1,6 +1,5 @@
 import 'dart:math';
 
-import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/encryption/EncryptElement.dart';
 import 'package:xmpp_stone/src/elements/messages/CustomElement.dart';
 import 'package:xmpp_stone/src/elements/messages/CustomSubElement.dart';
@@ -9,7 +8,7 @@ import 'package:xmpp_stone/src/elements/messages/TimeStampElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOException.dart';
 import 'package:xmpp_stone/src/extensions/omemo/OMEMOParams.dart';
-import 'package:xmpp_stone/src/response/base_response.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
 
 enum OMEMOEncodedType { utf8, base64, hex, bytes }
 

@@ -9,8 +9,8 @@ import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/exception/XmppException.dart';
 import 'package:xmpp_stone/src/extensions/last_activity/LastActivityApi.dart';
 import 'package:xmpp_stone/src/extensions/last_activity/LastActivityData.dart';
-import 'package:xmpp_stone/src/response/base_response.dart';
-import 'package:xmpp_stone/src/response/response.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
+import 'package:xmpp_stone/src/response/Response.dart';
 
 // Implementation of standard: https://xmpp.org/extensions/xep-0012.html
 const iqLastActivityXmlns = 'jabber:iq:last';

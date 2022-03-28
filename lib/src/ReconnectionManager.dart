@@ -34,6 +34,7 @@ class ReconnectionManager {
       XmppConnectionState.SessionInitialized,
       XmppConnectionState.Ready
     ].contains(state)) {
+      Log.d(TAG, 'State: $state, Resetting timeout.');
       _reset();
     }
   }

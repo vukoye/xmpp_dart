@@ -15,7 +15,7 @@ import 'package:xmpp_stone/src/elements/stanzas/PresenceStanza.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart';
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MultiUserChatNegotiator.dart';
-import 'package:xmpp_stone/src/response/response.dart';
+import 'package:xmpp_stone/src/response/Response.dart';
 import 'package:xmpp_stone/src/utils/Random.dart';
 
 class MultiUserChatManager {
@@ -162,11 +162,14 @@ class MultiUserChatManager {
     iqStanza.addChild(queryElement);
 
     await _connection.writeStanzaWithQueue(iqStanza);
-    if (isAsync) {
+    if (!isAsync) {
+      await responseIqHandler.setStream<AddUsersResponse>(
+          iqStanza.id!, iqStanza,
+          description: 'Add User to Multi Chat Room Async');
+      return AddUsersResponse();
+    } else {
       return responseIqHandler.set<AddUsersResponse>(iqStanza.id!, iqStanza,
           description: 'Add User to Multi Chat Room');
-    } else {
-      return AddUsersResponse();
     }
   }
 
@@ -210,7 +213,8 @@ class MultiUserChatManager {
   // Try to request for room configuration
   Future<SetRoomConfigResponse> setRoomConfig(
       Jid roomDotMucDomain, MultiUserChatCreateParams params) async {
-    final form = GroupChatroomFormParams(config: params.config);
+    final form = GroupChatroomFormParams(
+        config: params.config, roomConfigFields: params.roomConfigFields);
     final queryElement = form.buildForm();
 
     final iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET)
@@ -271,9 +275,8 @@ class MultiUserChatManager {
         description: 'Join Multi User Chat Room');
   }
 
-  Future<AcceptRoomResponse> acceptRoomInvitation(Jid _roomDotMucDomain,
-      {XmppCommunicationConfig options =
-          const XmppCommunicationConfig(shallWaitStanza: false)}) async {
+  Future<AcceptRoomResponse> acceptRoomInvitation(
+      Jid _roomDotMucDomain, AcceptGroupChatroomInvitationParams params) async {
     // Change nickname
     final roomDotMucDomain = Jid(_roomDotMucDomain.local,
         _roomDotMucDomain.domain, _connection.fullJid.local);
@@ -282,8 +285,7 @@ class MultiUserChatManager {
       ..id = AbstractStanza.getRandomId()
       ..fromJid = _connection.fullJid
       ..addAttribute(XmppAttribute('to', roomDotMucDomain.fullJid))
-      ..addChild(
-          AcceptGroupChatroomInvitationParams().buildAcceptRoomXElement());
+      ..addChild(params.buildAcceptRoomXElement());
 
     await _connection.writeStanzaWithQueue(presenceStanza);
 

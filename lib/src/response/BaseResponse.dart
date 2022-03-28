@@ -9,9 +9,12 @@ abstract class BaseResponse {
         final error = stanza.getChild('error');
         final errorResponse = BaseErrorResponse();
         if (error != null) {
-          errorResponse.code = error.getAttribute('code')!.value!;
+          errorResponse.code = error.getAttribute('code') != null
+              ? error.getAttribute('code')!.value!
+              : '00';
           final itemNotFound = error.getChild('item-not-found');
           final serviceUnavailable = error.getChild('service-unavailable');
+          final notAllowed = error.getChild('not-allowed');
 
           XmppElement? textItem = error.children.firstWhere(
               (element) => element!.name == 'text',
@@ -23,6 +26,9 @@ abstract class BaseResponse {
           } else if (serviceUnavailable != null) {
             errorResponse.errorType = 'service-unavailable';
             errorResponse.message = 'Service unavailable';
+          } else if (notAllowed != null) {
+            errorResponse.errorType = 'not-allowed';
+            errorResponse.message = 'Not Allowed';
           } else {
             errorResponse.errorType = 'n/a';
             errorResponse.message = 'Unidentified error';
