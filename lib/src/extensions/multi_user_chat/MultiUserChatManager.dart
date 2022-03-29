@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/access_point/communication_config.dart';
@@ -16,7 +17,6 @@ import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatData.dart
 import 'package:xmpp_stone/src/extensions/multi_user_chat/MultiUserChatParams.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MultiUserChatNegotiator.dart';
 import 'package:xmpp_stone/src/response/Response.dart';
-import 'package:xmpp_stone/src/utils/Random.dart';
 
 class MultiUserChatManager {
   static Map<Connection, MultiUserChatManager> instances =
@@ -148,13 +148,18 @@ class MultiUserChatManager {
       // TODO: throw error
     }
 
+    final reasonJson = jsonEncode({
+      "desc": "add user!",
+      "utcTimestamp": DateTime.now().toUtc().millisecondsSinceEpoch,
+    });
+
     // Create Users List
     for (final memberJid in memberJids) {
       final item = XmppElement()
         ..name = 'item'
         ..addAttribute(XmppAttribute('affiliation', affiliation))
         ..addAttribute(XmppAttribute('jid', memberJid))
-        ..addChild(ReasonElement.build("add user!"));
+        ..addChild(ReasonElement.build(reasonJson));
 
       queryElement.addChild(item);
     }
