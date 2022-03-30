@@ -11,6 +11,8 @@ class XmppAccountSettings {
   int port;
   int totalReconnections = 3;
   int reconnectionTimeout = 1000;
+  int responseTimeoutMs = 30000;
+  int writeQueueMs = 200;
   bool ackEnabled = true;
 
   XmppAccountSettings(

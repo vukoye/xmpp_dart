@@ -106,7 +106,7 @@ class PresenceManager implements PresenceApi {
     presenceStanza.status = presence.status;
     if (presence.priority != -1) {
       presenceStanza.priority = presence.priority;
-      // presenceStanza.fromJid = _connection.fullJid;
+      presenceStanza.fromJid = _connection.fullJid;
     }
     Log.d(LOG_TAG, presenceStanza.buildXmlString());
     await _connection.writeStanzaWithQueue(presenceStanza);

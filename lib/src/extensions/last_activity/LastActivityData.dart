@@ -1,5 +1,6 @@
-import 'package:xmpp_stone/src/response/base_response.dart';
-import 'package:xmpp_stone/xmpp_stone.dart';
+import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/extensions/last_activity/LastActivityManager.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
 
 class LastActivityResponse extends BaseResponse {
   late String lastActivitySeconds;

@@ -19,10 +19,6 @@ void main(List<String> arguments) async {
   await initScenarios();
   // sendMassivePersonal?.run();
   sendMassiveGroup?.run();
-  // final result = await sendMassivePersonalMessageScenario(users,10, 150);
-  // if (result) {
-  //   print('sendMassivePersonalMessageScenario work');
-  // }
   // await sendMessageScenario(users);
   // await createGroupScenario(users);
   // await removeMembersInGroupScenario(users);
@@ -34,21 +30,6 @@ Future<void> initScenarios() async {
   final UsersConnection users = await initRemoteUser(50);
   sendMassivePersonal = SendMassivePersonal(users: users, batchSize: 10, nIteration: 10);
   sendMassiveGroup = SendMassiveGroup(users: users, roomName: roomName);
-}
-
-
-void performSendMessageTwoUsers(User userA, User userB, String message){
-  if(userB.xmppCallback!.onMessage == noFunc){
-    userB.xmppCallback!.onMessage = (XMPPMessageParams message) {
-      print('${userA.name} receive message from sendMessageScenario ${message.message!.fromJid} ${message.message!.body}');
-    };
-
-    userB.xmppCallback!.onConnectionStatus = (XmppConnectionState state) {
-      print('${userB.name} onConnectionStatus ${state.toString()}');
-    };
-  }
-  
-  userA.sendMessage(message: message.padLeft(40, '0'), user: userB);
 }
 
 // user A send message to user B

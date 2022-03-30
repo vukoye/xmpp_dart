@@ -24,6 +24,9 @@ import 'package:xmpp_stone/src/features/message_archive/MessageArchiveManager.da
 import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/src/messages/MessageHandler.dart';
 import 'package:xmpp_stone/src/messages/MessageParams.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
+import 'package:xmpp_stone/src/response/ResponseListener.dart';
+import 'package:xmpp_stone/src/response/Response.dart';
 import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 import 'package:console/console.dart';
@@ -58,6 +61,8 @@ class XMPPClientManager {
   String LOG_TAG = 'XMPPClientManager';
   String? host;
   String? mucDomain = '';
+  int responseTimeoutMs = 30000;
+  int writeQueueMs = 200;
   late XMPPClientPersonel personel;
   Function(XMPPClientManager _context)? _onReady;
   Function(String timestamp, String logMessage)? _onLog;
@@ -68,6 +73,7 @@ class XMPPClientManager {
   Function()? _onPing;
   Function(xmpp.MessageArchiveResult)? _onArchiveRetrieved;
   Function(List<xmpp.Buddy>)? _onRosterList;
+  Function(xmpp.BaseResponse)? _responseListener;
   xmpp.Connection? _connection;
   late MessageHandler _messageHandler;
   late PingManager _pingHandler;
@@ -77,6 +83,7 @@ class XMPPClientManager {
   late RosterManager _rosterManager;
   late xmpp.PresenceManager _presenceManager;
   late ConnectionManagerStateChangedListener _connectionStateListener;
+  late ConnectionResponseListener _connectionResponseListener;
 
   StreamSubscription? messageListener;
   StreamSubscription? _rosterList;
@@ -92,8 +99,11 @@ class XMPPClientManager {
       void Function()? onPing,
       void Function(xmpp.MessageArchiveResult)? onArchiveRetrieved,
       void Function(List<xmpp.Buddy>)? onRosterList,
+      Function(xmpp.BaseResponse)? responseListener,
       String? host,
-      String? this.mucDomain}) {
+      String? this.mucDomain,
+      this.responseTimeoutMs = 30000,
+      this.writeQueueMs = 200}) {
     personel = XMPPClientPersonel(jid, password);
     LOG_TAG = '$LOG_TAG/$jid';
     _onReady = onReady;
@@ -105,6 +115,7 @@ class XMPPClientManager {
     _onArchiveRetrieved = onArchiveRetrieved;
     _onPresenceSubscription = onPresenceSubscription;
     _onRosterList = onRosterList;
+    _responseListener = responseListener;
     this.host = host;
   }
 
@@ -116,6 +127,9 @@ class XMPPClientManager {
     var account = xmpp.XmppAccountSettings(
         personel.jid, jid.local, jid.domain, personel.password, 5222,
         mucDomain: mucDomain, host: host, resource: jid.resource);
+
+    account.responseTimeoutMs = responseTimeoutMs;
+    account.writeQueueMs = writeQueueMs;
     _connection = xmpp.Connection(account);
     _connection!.connect();
     _listenConnection();
@@ -126,6 +140,7 @@ class XMPPClientManager {
   Future close() async {
     _connection!.close();
     _connectionStateListener.close();
+    _connectionResponseListener.close();
   }
 
   void reconnect() {
@@ -321,8 +336,8 @@ class XMPPClientManager {
   }
 
   // Create room
-  Future<SetRoomConfigResponse> setRoomConfig(
-      String roomName, GroupChatroomParams config) {
+  Future<SetRoomConfigResponse> setRoomConfig(String roomName,
+      GroupChatroomParams config, List<RoomConfigField> roomConfigFields) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
@@ -332,7 +347,8 @@ class XMPPClientManager {
         roomJid,
         MultiUserChatCreateParams(
             config: config,
-            options: XmppCommunicationConfig(shallWaitStanza: false)));
+            options: XmppCommunicationConfig(shallWaitStanza: false),
+            roomConfigFields: roomConfigFields));
   }
 
   // Create room
@@ -357,13 +373,14 @@ class XMPPClientManager {
     return mucManager.joinRoom(roomJid, config);
   }
 
-  Future<AcceptRoomResponse> acceptInvitation(String roomName) {
+  Future<AcceptRoomResponse> acceptInvitation(
+      String roomName, AcceptGroupChatroomInvitationParams params) {
     var mucManager = xmpp.MultiUserChatManager(_connection!);
     var roomJid = xmpp.Jid.fromFullJid(roomName);
     if (!roomName.contains(mucDomain ?? "")) {
       roomJid = xmpp.Jid(roomName, mucDomain, '');
     }
-    return mucManager.acceptRoomInvitation(roomJid);
+    return mucManager.acceptRoomInvitation(roomJid, params);
   }
 
   // Get group members
@@ -828,6 +845,7 @@ class XMPPClientManager {
     xmpp.MessagesListener messagesListener = ClientMessagesListener();
     _connectionStateListener = ConnectionManagerStateChangedListener(
         _connection, messagesListener, this);
+    _connectionResponseListener = ConnectionResponseListener(_connection, this);
   }
 
   void _listenPresence() {
@@ -844,6 +862,31 @@ class XMPPClientManager {
         _onPresenceSubscription!(streamEvent);
       }
     });
+  }
+}
+
+class ConnectionResponseListener implements ResponseListener {
+  xmpp.Connection? _connection;
+  late XMPPClientManager _context;
+
+  StreamSubscription<BaseResponse>? subscription;
+
+  ConnectionResponseListener(
+      xmpp.Connection? connection, XMPPClientManager context) {
+    _connection = connection;
+    subscription = _connection!.responseStream.listen(onResponse);
+    _context = context;
+  }
+
+  @override
+  void onResponse(BaseResponse response) {
+    if (_context._responseListener != null) {
+      _context._responseListener!(response);
+    }
+  }
+
+  void close() {
+    subscription!.cancel();
   }
 }
 
@@ -877,7 +920,7 @@ class ConnectionManagerStateChangedListener
     } else if (state == xmpp.XmppConnectionState.ForcefullyClosed) {
       Log.i(_context.LOG_TAG, 'ForcefullyClosed');
 
-      _connection!.reconnectionManager!.handleReconnection(reset: true);
+      _connection!.reconnectionManager!.handleReconnection(reset: false);
     }
     _context.onState(state);
   }

@@ -21,6 +21,8 @@ import 'package:xmpp_stone/src/logger/Log.dart';
 import 'package:xmpp_stone/src/messages/MessageHandler.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone/src/presence/PresenceManager.dart';
+import 'package:xmpp_stone/src/response/BaseResponse.dart';
+import 'package:xmpp_stone/src/response/Response.dart';
 import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/src/utils/Random.dart';
 
@@ -104,6 +106,9 @@ class Connection {
   final StreamController<XmppConnectionState> _connectionStateStreamController =
       StreamController.broadcast();
 
+  final StreamController<BaseResponse> _responseStreamController =
+      StreamController.broadcast();
+
   Stream<AbstractStanza?> get inStanzasStream {
     return _inStanzaStreamController.stream;
   }
@@ -122,6 +127,10 @@ class Connection {
 
   Stream<XmppConnectionState> get connectionStateStream {
     return _connectionStateStreamController.stream;
+  }
+
+  Stream<BaseResponse> get responseStream {
+    return _responseStreamController.stream;
   }
 
   Jid get fullJid => account.fullJid;
@@ -159,6 +168,10 @@ class Connection {
     connWriteQueue = ConnectionWriteQueue(this, _outStanzaStreamController);
 
     connectionId = generateId();
+    // Assign configured timeout
+    ResponseHandler.responseTimeoutMs = account.responseTimeoutMs;
+    ResponseHandler.setResponseStream(_responseStreamController);
+    ConnectionWriteQueue.idealWriteIntervalMs = account.writeQueueMs;
     Log.v(this.toString(), 'Create new connection instance');
   }
 
@@ -288,27 +301,14 @@ xml:lang='en'
     _cleanSubscription();
     if (state == XmppConnectionState.SocketOpening) {
       throw Exception('Closing is not possible during this state');
-    } else if (state == XmppConnectionState.StreamConflict) {
-      // Close socket and re-open
-      connectionNegotiationManager.cleanNegotiators();
-      setState(XmppConnectionState.Closing);
-      if (_socket != null) {
-        writeClose(_socket);
-      }
-      _socket = null;
-      authenticated = false;
-
-      setState(XmppConnectionState.Closed);
     } else {
-      if (state != XmppConnectionState.Closed &&
-          state != XmppConnectionState.ForcefullyClosed &&
-          state != XmppConnectionState.Closing) {
+      if (state == XmppConnectionState.StreamConflict ||
+          (state != XmppConnectionState.Closed &&
+              state != XmppConnectionState.ForcefullyClosed &&
+              state != XmppConnectionState.Closing)) {
         // Close socket and re-open
         connectionNegotiationManager.cleanNegotiators();
-        if (_socket != null) {
-          setState(XmppConnectionState.Closing);
-          _socket!.write('</stream:stream>');
-        }
+        setState(XmppConnectionState.Closing);
         if (_socket != null) {
           writeClose(_socket);
         }

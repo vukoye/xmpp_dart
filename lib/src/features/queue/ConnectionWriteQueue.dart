@@ -8,7 +8,6 @@ import 'package:xmpp_stone/src/features/queue/QueueApi.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 
 const tag = 'wrt-queue';
-const idealWriteIntervalMs = 200;
 
 class WriteContent {
   final String id;
@@ -27,6 +26,7 @@ class WriteContent {
 }
 
 class ConnectionWriteQueue extends QueueApi {
+  static int idealWriteIntervalMs = 200;
   Queue<WriteContent> writingQueueContent = Queue<WriteContent>();
   late Connection _connection;
   late StreamController<AbstractStanza> _outStanzaStreamController;
@@ -55,7 +55,7 @@ class ConnectionWriteQueue extends QueueApi {
   Future<bool> execute(content) {
     final wrtContent = content as WriteContent;
     final Completer<bool> completer = Completer<bool>();
-    Timer(const Duration(milliseconds: idealWriteIntervalMs), () {
+    Timer(Duration(milliseconds: idealWriteIntervalMs), () {
       bool success = true;
       try {
         _connection.writeStanza(wrtContent.content);
@@ -118,6 +118,7 @@ class ConnectionWriteQueue extends QueueApi {
       await _resume();
     } else {
       isRunning = false;
+      throw FailWriteSocketException();
     }
   }
 }
