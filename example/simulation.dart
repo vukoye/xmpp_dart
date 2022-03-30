@@ -1,19 +1,28 @@
 import 'dart:async';
 
+import 'package:xmpp_stone/src/Connection.dart';
+import 'package:xmpp_stone/src/access_point/manager_message_params.dart';
+
 import 'models/TestUser.dart';
 import 'models/xmpp_communication_callback.dart';
+import 'scenarios/send_masive_personal.dart';
+import 'scenarios/send_massive_group.dart';
 import 'user.dart';
 import 'users_connection.dart';
 
 final String TAG = 'example';
-final String roomName = 'test7';
+final String roomName = 'SendMassiveGroup';
+SendMassivePersonal? sendMassivePersonal;
+SendMassiveGroup? sendMassiveGroup;
 
 void main(List<String> arguments) async {
-  final UsersConnection users = await initRemoteUser();
-  final result = await sendMassivePersonalMessageScenario(users);
-  if (result) {
-    print('sendMassivePersonalMessageScenario work');
-  }
+  await initScenarios();
+  // sendMassivePersonal?.run();
+  sendMassiveGroup?.run();
+  // final result = await sendMassivePersonalMessageScenario(users,10, 150);
+  // if (result) {
+  //   print('sendMassivePersonalMessageScenario work');
+  // }
   // await sendMessageScenario(users);
   // await createGroupScenario(users);
   // await removeMembersInGroupScenario(users);
@@ -21,31 +30,25 @@ void main(List<String> arguments) async {
   // await removeAdminsInGroupScenario(users);
 }
 
-Future<bool> sendMassivePersonalMessageScenario(UsersConnection users) async {
-  var completer = Completer<bool>();
-  final keys = users.users.keys.toList();
-  final user1 = users.users[keys[0]];
-  final user2 = users.users[keys[1]];
-  user1?.xmppCallback!.onMessage = (message) {
-    // print('${user1.name} vin receive message from sendMessageScenario ${message.message!.body}');
-  };
-  user2?.xmppCallback!.onMessage = (message) {
-    // print('${user2.name} receive message from sendMessageScenario ${message.message!.body}');
-    if (!completer.isCompleted &&
-        message.message!.body == 'I miss you. jub jub.') {
-      completer.complete(true);
-    }
-  };
-  final n = 400;
-  for (var i = 0; i < n; i++) {
-    if (i == n - 1) {
-      user1?.sendMessage(message: 'I miss you. jub jub.', user: user2!);
-    }
-    user1?.sendMessage(message: i.toString(), user: user2!);
-    user2?.sendMessage(message: i.toString(), user: user1!);
-  }
+Future<void> initScenarios() async {
+  final UsersConnection users = await initRemoteUser(50);
+  sendMassivePersonal = SendMassivePersonal(users: users, batchSize: 10, nIteration: 10);
+  sendMassiveGroup = SendMassiveGroup(users: users, roomName: roomName);
+}
 
-  return completer.future;
+
+void performSendMessageTwoUsers(User userA, User userB, String message){
+  if(userB.xmppCallback!.onMessage == noFunc){
+    userB.xmppCallback!.onMessage = (XMPPMessageParams message) {
+      print('${userA.name} receive message from sendMessageScenario ${message.message!.fromJid} ${message.message!.body}');
+    };
+
+    userB.xmppCallback!.onConnectionStatus = (XmppConnectionState state) {
+      print('${userB.name} onConnectionStatus ${state.toString()}');
+    };
+  }
+  
+  userA.sendMessage(message: message.padLeft(40, '0'), user: userB);
 }
 
 // user A send message to user B
@@ -147,7 +150,7 @@ Future<void> removeAdminsInGroupScenario(UsersConnection users) async {
   return Future.value();
 }
 
-Future<UsersConnection> initUser() async {
+Future<UsersConnection> initUserBasicAuth() async {
   // final XMPPClientManager xmppClientManager;
   var completer = Completer<UsersConnection>();
 
@@ -192,11 +195,11 @@ Future<UsersConnection> initUser() async {
   return completer.future;
 }
 
-Future<UsersConnection> initRemoteUser() async {
+Future<UsersConnection> initRemoteUser(int n) async {
   // final XMPPClientManager xmppClientManager;
   var completer = Completer<UsersConnection>();
 
-  Map<String, User> users = TestUser().generateUsers(2);
+  Map<String, User> users = TestUser().generateUsers(n);
 
   UsersConnection usersConnection =
       UsersConnection(users: {}, xmppCallback: XmppCommunicationCallback());

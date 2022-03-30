@@ -27,7 +27,7 @@ class TestUser {
   }
   
   User generateUser(int i){
-    final host = 'staging.xmpp.hiapp-chat.com';
+    final host = 'localhost';
     final randomUserPhoneNumber = 10000000 + i ;
     final jwt = JWT({
       'id': 123,
@@ -51,7 +51,7 @@ class TestUser {
     
     Map<String,User> users = Map();
 
-    for (var i = 0; i < nUser; i++) {
+    for (var i = 1; i <= nUser; i++) {
       final user = generateUser(i);
       users[user.phoneNumber] = user;
     }

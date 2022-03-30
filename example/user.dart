@@ -50,6 +50,9 @@ class User {
       //     log('Flutter dart finishing retrieval of archive : ${stanza.buildXmlString()})');
       // },
       onState: (XmppConnectionState state) {
+        if (xmppCallback!.onConnectionStatus != noFunc) {
+          xmppCallback!.onConnectionStatus(state);
+        }
         // print('status of ${this.name} ' + state.toString());
       },
     );
@@ -80,10 +83,10 @@ class User {
 
   Future<void> createGroup(
       {required String roomName, required List<String> usersJid}) async {
-    xmppClientManager.createInstantRoom(roomName,
+    await xmppClientManager.createInstantRoom(roomName,
         GroupChatroomParams.build(name: roomName, description: roomName));
-    xmppClientManager.getReservedRoomConfig(roomName);
-    xmppClientManager.setRoomConfig(
+    await xmppClientManager.getReservedRoomConfig(roomName);
+    await xmppClientManager.setRoomConfig(
         roomName,
         GroupChatroomParams.build(
           name: roomName,
@@ -135,6 +138,27 @@ class User {
   }
 
   // Group
+  void sendGroupMessage({required String roomName, required String message}) {
+    const _uuid = Uuid();
+    final messageId = _uuid.v1();
+    final time = DateTime.now().toUtc().millisecondsSinceEpoch.toString();
+    xmppClientManager.sendMessage(
+      message,
+      '${roomName}@conference.localhost',
+      additional: MessageParams(
+        receipt: ReceiptRequestType.NONE,
+        messageId: messageId,
+        millisecondTs:
+            int.tryParse(time) ?? DateTime.now().toUtc().millisecondsSinceEpoch,
+        customString: '',
+        chatStateType: ChatStateType.None,
+        messageType: MessageStanzaType.GROUPCHAT,
+        options: const XmppCommunicationConfig(shallWaitStanza: false),
+        ampMessageType: AmpMessageType.None,
+        hasEncryptedBody: false,
+      ),
+    );
+  }
 
   Future<void> sendCustomGroupMessage({required String roomName}) async {
     final messageId = const Uuid().v1();
