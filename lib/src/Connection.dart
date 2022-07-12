@@ -80,7 +80,7 @@ class Connection {
   }
 
   static void removeInstance(XmppAccountSettings account) {
-    instances.remove(account);
+    instances.removeWhere((key, value) => key == account.fullJid.userAtDomain);
   }
 
   String? errorMessage;
