@@ -15,6 +15,7 @@ bool isTlsRequired() {
 }
 
 class XmppWebSocketIo extends XmppWebSocket {
+  static String TAG = 'XmppWebSocketIo';
   Socket? _socket;
   late String Function(String event) _map;
 
@@ -22,7 +23,7 @@ class XmppWebSocketIo extends XmppWebSocket {
 
   @override
   Future<XmppWebSocket> connect<S>(String host, int port,
-      {String Function(String event)? map}) async {
+      {String Function(String event)? map, List<String>? wsProtocols, String? wsPath}) async {
     await Socket.connect(host, port).then((Socket socket) {
       _socket = socket;
 

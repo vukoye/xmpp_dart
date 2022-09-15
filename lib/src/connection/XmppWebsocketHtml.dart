@@ -17,6 +17,8 @@ bool isTlsRequired() {
 }
 
 class XmppWebSocketHtml extends XmppWebSocket {
+  static String TAG = 'XmppWebSocketIo';
+
   WebSocketChannel? _socket;
   late String Function(String event) _map;
 
@@ -24,15 +26,15 @@ class XmppWebSocketHtml extends XmppWebSocket {
 
   @override
   Future<XmppWebSocket> connect<S>(String host, int port,
-      {String Function(String event)? map}) {
-    print('[XmppWebSocketHtml][connect] host: $host, port: $port');
+      {String Function(String event)? map, List<String>? wsProtocols, String? wsPath}) {
     _socket = WebSocketChannel.connect(
       Uri(
         scheme: 'wss',
         host: host,
         port: port,
+        path: wsPath,
       ),
-      protocols: ['xmpp'],
+      protocols: wsProtocols,
     );
 
     if (map != null) {

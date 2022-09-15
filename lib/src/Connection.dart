@@ -5,25 +5,19 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
 import 'package:xmpp_stone/src/ReconnectionManager.dart';
-import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 
-import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
-import 'package:xmpp_stone/src/presence/PresenceManager.dart';
-import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
 import 'connection/XmppWebsocketApi.dart'
-  if (dart.library.io) 'connection/XmppWebsocketIo.dart'
-  if (dart.library.html) 'connection/XmppWebsocketHtml.dart' as xmppSocket;
+    if (dart.library.io) 'connection/XmppWebsocketIo.dart'
+    if (dart.library.html) 'connection/XmppWebsocketHtml.dart' as xmppSocket;
 
 import 'logger/Log.dart';
 
@@ -208,16 +202,22 @@ xml:lang='en'
     connectionNegotatiorManager.init();
     setState(XmppConnectionState.SocketOpening);
     try {
-
       var socket = xmppSocket.createSocket();
 
-      return await socket.connect(account.host ?? account.domain, account.port, map: prepareStreamResponse).then((socket) {
+      return await socket
+          .connect(
+        account.host ?? account.domain,
+        account.port,
+        wsProtocols: account.wsProtocols,
+        wsPath: account.wsPath,
+        map: prepareStreamResponse,
+      )
+          .then((socket) {
         // if not closed in meantime
         if (_state != XmppConnectionState.Closed) {
           setState(XmppConnectionState.SocketOpened);
           _socket = socket;
-          socket
-              .listen(handleResponse, onDone: handleConnectionDone);
+          socket.listen(handleResponse, onDone: handleConnectionDone);
           _openStream();
         } else {
           Log.d(TAG, 'Closed in meantime');
@@ -251,10 +251,10 @@ xml:lang='en'
 
   /// Dispose of the connection so stops all activities and cannot be re-used.
   /// For the connection to be garbage collected.
-  /// 
+  ///
   /// If the Connection instance was created with [getInstance],
   /// you must also call [Connection.removeInstance] after calling [dispose].
-  /// 
+  ///
   /// If you intend to re-use the connection later, consider just calling [close] instead.
   void dispose() {
     close();
@@ -405,9 +405,10 @@ xml:lang='en'
   void startSecureSocket() {
     Log.d(TAG, 'startSecureSocket');
 
-    _socket!.secure(onBadCertificate: _validateBadCertificate).
-        then((secureSocket) {
-          if(secureSocket == null) return;
+    _socket!
+        .secure(onBadCertificate: _validateBadCertificate)
+        .then((secureSocket) {
+      if (secureSocket == null) return;
 
       secureSocket
           .cast<List<int>>()
