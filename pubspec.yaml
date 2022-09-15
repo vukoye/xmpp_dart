@@ -12,20 +12,20 @@ environment:
 #dependencies:
 #  path: ^1.4.1
 dependencies:
-  xml: ^5.1.0
+  xml: ^6.1.0
   cryptoutils: ^0.5.0
-  crypto: ^3.0.1
-  synchronized: ^3.0.0
+  crypto: ^3.0.2
+  synchronized: ^3.0.0+3
   tuple: ^2.0.0
   unorm_dart: ^0.2.0
-  image: ^3.0.8
-  quiver: ^3.0.1 #hash code generator
-  console: ^4.0.0 #for example
+  image: ^3.2.0
+  quiver: ^3.1.0 #hash code generator
+  console: ^4.1.0 #for example
   intl: ^0.17.0
-  collection: ^1.15.0
+  collection: ^1.16.0
   universal_io: ^2.0.4
-  web_socket_channel: 2.1.0
+  web_socket_channel: ^2.2.0
 
 dev_dependencies:
-  test: ^1.16.8
-  mockito: ^5.0.3
+  test: ^1.21.4
+  mockito: ^5.3.1
