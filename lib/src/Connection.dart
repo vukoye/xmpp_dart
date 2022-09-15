@@ -309,11 +309,9 @@ class Connection {
             0, fullResponse.length - 13); //remove  xmpp_stone end tag
         xmlResponse = xml.XmlElement(xml.XmlName('error'));
       }
-//      xmlResponse.descendants.whereType<xml.XmlElement>().forEach((element) {
-//        Log.d("element: " + element.name.local);
-//      });
+
       //TODO: Improve parser for children only
-      xmlResponse!.descendants
+      xmlResponse!.children
           .whereType<xml.XmlElement>()
           .where((element) => startMatcher(element))
           .forEach((element) => processInitialStream(element));
@@ -324,7 +322,7 @@ class Connection {
           .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
           .forEach((stanza) => _inStanzaStreamController.add(stanza));
 
-      xmlResponse.descendants
+      xmlResponse.children
           .whereType<xml.XmlElement>()
           .where((element) => featureMatcher(element))
           .forEach((feature) =>
