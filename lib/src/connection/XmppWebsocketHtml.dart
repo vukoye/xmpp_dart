@@ -75,4 +75,9 @@ class XmppWebSocketHtml extends XmppWebSocket {
     // return the `null`, cause for the 'html' socket initially creates as secured
     return Future.value(null);
   }
+
+  @override
+  String getStreamOpeningElement(String domain) {
+    return """<open xmlns='urn:ietf:params:xml:ns:xmpp-framing' to='$domain' version='1.0'/>""";
+  }
 }

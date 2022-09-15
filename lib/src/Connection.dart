@@ -145,13 +145,7 @@ class Connection {
   }
 
   void _openStream() {
-    var streamOpeningString = """
-<?xml version='1.0'?>
-<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams'
-to='${fullJid.domain}'
-xml:lang='en'
->
-""";
+    var streamOpeningString = _socket?.getStreamOpeningElement(fullJid.domain);
     write(streamOpeningString);
   }
 

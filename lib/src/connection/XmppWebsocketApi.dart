@@ -22,4 +22,6 @@ abstract class XmppWebSocket extends Stream<String> {
       SecurityContext? context,
       bool Function(X509Certificate certificate)? onBadCertificate,
       List<String>? supportedProtocols});
+
+  String getStreamOpeningElement(String domain);
 }

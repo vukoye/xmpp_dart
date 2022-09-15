@@ -65,4 +65,9 @@ class XmppWebSocketIo extends XmppWebSocket {
       List<String>? supportedProtocols}) {
     return SecureSocket.secure(_socket!, onBadCertificate: onBadCertificate);
   }
+
+  @override
+  String getStreamOpeningElement(String domain) {
+    return """<?xml version='1.0'?><stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams' to='$domain' xml:lang='en'>""";
+  }
 }
