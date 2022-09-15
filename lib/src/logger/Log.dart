@@ -7,45 +7,45 @@ class Log {
 
   static void v(String tag, String message) {
     if (logLevel.index <= LogLevel.VERBOSE.index) {
-      log('V/[$tag]: $message');
+      print('V/[$tag]: $message');
     }
   }
 
   static void d(String tag, String message) {
     if (logLevel.index <= LogLevel.DEBUG.index) {
-      log('D/[$tag]: $message');
+      print('D/[$tag]: $message');
     }
   }
 
   static void i(String tag, String message) {
     if (logLevel.index <= LogLevel.INFO.index) {
-      log('I/[$tag]: $message');
+      print('I/[$tag]: $message');
     }
   }
 
   static void w(String tag, String message) {
     if (logLevel.index <= LogLevel.WARNING.index) {
-      log('W/[$tag]: $message');
+      print('W/[$tag]: $message');
     }
   }
 
   static void e(String tag, String message) {
     if (logLevel.index <= LogLevel.ERROR.index) {
-      log('E/[$tag]: $message');
+      print('E/[$tag]: $message');
     }
   }
 
   static void xmppp_receiving(String message) {
     if (logXmpp) {
-      log('---Xmpp Receiving:---');
-      log('$message');
+      print('---Xmpp Receiving:---');
+      print('$message');
     }
   }
 
   static void xmppp_sending(String message) {
     if (logXmpp) {
-      log('---Xmpp Sending:---');
-      log('$message');
+      print('---Xmpp Sending:---');
+      print('$message');
     }
   }
 
