@@ -303,7 +303,7 @@ class Connection {
     if (fullResponse.isNotEmpty) {
       xml.XmlNode? xmlResponse;
       try {
-        xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
+        xmlResponse = xml.XmlDocument.parse(fullResponse.replaceAll('<?xml version=\'1.0\'?>', '')).firstChild;
       } catch (e) {
         _unparsedXmlResponse += fullResponse.substring(
             0, fullResponse.length - 13); //remove  xmpp_stone end tag
@@ -311,26 +311,22 @@ class Connection {
       }
 
       //TODO: Improve parser for children only
-      xmlResponse!.children
-          .whereType<xml.XmlElement>()
+      xmlResponse!.childElements
           .where((element) => startMatcher(element))
           .forEach((element) => processInitialStream(element));
 
-      xmlResponse.children
-          .whereType<xml.XmlElement>()
+      xmlResponse.childElements
           .where((element) => stanzaMatcher(element))
           .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
           .forEach((stanza) => _inStanzaStreamController.add(stanza));
 
-      xmlResponse.children
-          .whereType<xml.XmlElement>()
+      xmlResponse.childElements
           .where((element) => featureMatcher(element))
           .forEach((feature) =>
               connectionNegotatiorManager.negotiateFeatureList(feature));
 
       //TODO: Probably will introduce bugs!!!
-      xmlResponse.children
-          .whereType<xml.XmlElement>()
+      xmlResponse.childElements
           .where((element) => nonzaMatcher(element))
           .map((xmlElement) => Nonza.parse(xmlElement))
           .forEach((nonza) => _inNonzaStreamController.add(nonza));
