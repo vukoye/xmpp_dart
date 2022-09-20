@@ -5,25 +5,19 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
 import 'package:xmpp_stone/src/ReconnectionManager.dart';
-import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 
-import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
-import 'package:xmpp_stone/src/presence/PresenceManager.dart';
-import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
 import 'connection/XmppWebsocketApi.dart'
-  if (dart.library.io) 'connection/XmppWebsocketIo.dart'
-  if (dart.library.html) 'connection/XmppWebsocketHtml.dart' as xmppSocket;
+    if (dart.library.io) 'connection/XmppWebsocketIo.dart'
+    if (dart.library.html) 'connection/XmppWebsocketHtml.dart' as xmppSocket;
 
 import 'logger/Log.dart';
 
@@ -151,13 +145,7 @@ class Connection {
   }
 
   void _openStream() {
-    var streamOpeningString = """
-<?xml version='1.0'?>
-<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams'
-to='${fullJid.domain}'
-xml:lang='en'
->
-""";
+    var streamOpeningString = _socket?.getStreamOpeningElement(fullJid.domain);
     write(streamOpeningString);
   }
 
@@ -208,16 +196,22 @@ xml:lang='en'
     connectionNegotatiorManager.init();
     setState(XmppConnectionState.SocketOpening);
     try {
-
       var socket = xmppSocket.createSocket();
 
-      return await socket.connect(account.host ?? account.domain, account.port, map: prepareStreamResponse).then((socket) {
+      return await socket
+          .connect(
+        account.host ?? account.domain,
+        account.port,
+        wsProtocols: account.wsProtocols,
+        wsPath: account.wsPath,
+        map: prepareStreamResponse,
+      )
+          .then((socket) {
         // if not closed in meantime
         if (_state != XmppConnectionState.Closed) {
           setState(XmppConnectionState.SocketOpened);
           _socket = socket;
-          socket
-              .listen(handleResponse, onDone: handleConnectionDone);
+          socket.listen(handleResponse, onDone: handleConnectionDone);
           _openStream();
         } else {
           Log.d(TAG, 'Closed in meantime');
@@ -251,10 +245,10 @@ xml:lang='en'
 
   /// Dispose of the connection so stops all activities and cannot be re-used.
   /// For the connection to be garbage collected.
-  /// 
+  ///
   /// If the Connection instance was created with [getInstance],
   /// you must also call [Connection.removeInstance] after calling [dispose].
-  /// 
+  ///
   /// If you intend to re-use the connection later, consider just calling [close] instead.
   void dispose() {
     close();
@@ -309,36 +303,30 @@ xml:lang='en'
     if (fullResponse.isNotEmpty) {
       xml.XmlNode? xmlResponse;
       try {
-        xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild;
+        xmlResponse = xml.XmlDocument.parse(fullResponse.replaceAll('<?xml version=\'1.0\'?>', '')).firstChild;
       } catch (e) {
         _unparsedXmlResponse += fullResponse.substring(
             0, fullResponse.length - 13); //remove  xmpp_stone end tag
         xmlResponse = xml.XmlElement(xml.XmlName('error'));
       }
-//      xmlResponse.descendants.whereType<xml.XmlElement>().forEach((element) {
-//        Log.d("element: " + element.name.local);
-//      });
+
       //TODO: Improve parser for children only
-      xmlResponse!.descendants
-          .whereType<xml.XmlElement>()
+      xmlResponse!.childElements
           .where((element) => startMatcher(element))
           .forEach((element) => processInitialStream(element));
 
-      xmlResponse.children
-          .whereType<xml.XmlElement>()
+      xmlResponse.childElements
           .where((element) => stanzaMatcher(element))
           .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
           .forEach((stanza) => _inStanzaStreamController.add(stanza));
 
-      xmlResponse.descendants
-          .whereType<xml.XmlElement>()
+      xmlResponse.childElements
           .where((element) => featureMatcher(element))
           .forEach((feature) =>
               connectionNegotatiorManager.negotiateFeatureList(feature));
 
       //TODO: Probably will introduce bugs!!!
-      xmlResponse.children
-          .whereType<xml.XmlElement>()
+      xmlResponse.childElements
           .where((element) => nonzaMatcher(element))
           .map((xmlElement) => Nonza.parse(xmlElement))
           .forEach((nonza) => _inNonzaStreamController.add(nonza));
@@ -405,9 +393,10 @@ xml:lang='en'
   void startSecureSocket() {
     Log.d(TAG, 'startSecureSocket');
 
-    _socket!.secure(onBadCertificate: _validateBadCertificate).
-        then((secureSocket) {
-          if(secureSocket == null) return;
+    _socket!
+        .secure(onBadCertificate: _validateBadCertificate)
+        .then((secureSocket) {
+      if (secureSocket == null) return;
 
       secureSocket
           .cast<List<int>>()

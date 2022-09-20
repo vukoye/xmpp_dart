@@ -37,7 +37,12 @@ __Actively working on:__
 import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 
 main() {
-  xmpp.Connection connection = new xmpp.Connection("user@domain", "password", 5222);
+  xmpp.XmppAccountSettings accountSettings = xmpp.XmppAccountSettings.fromJid('nick@damain.com/resource', 'password');
+  accountSettings.port = kIsWeb ? 5291 : 5222;
+  accountSettings.wsPath = 'xmpp-websocket'; // null or your custom xmpp path
+  accountSettings.wsProtocols = ['xmpp']; // or your custom protocols
+
+  xmpp.Connection connection = xmpp.Connection.getInstance(accountSettings);
   connection.open();
 }
 ```
