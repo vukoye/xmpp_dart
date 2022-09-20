@@ -58,3 +58,10 @@ Introducing optional parameter for domain name in account settings
 ## 0.1.3
 
 - Initial published version
+
+
+## 0.4.4-dev.1
+
+- Improvements for establishing a connection;
+- Make WebSocket parameters configurable (see `XmppAccountSettings` for new parameters `wsPath` and `wsProtocols`).
+- Update dependencies to the latest possible versions;
