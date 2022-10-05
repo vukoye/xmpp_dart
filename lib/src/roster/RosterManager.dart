@@ -1,4 +1,6 @@
 import 'dart:async';
+
+import 'package:tuple/tuple.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
@@ -6,7 +8,6 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/roster/Buddy.dart';
-import 'package:tuple/tuple.dart';
 
 //todo check for rfc6121 2.6.2
 //todo add support for jid groups
@@ -100,10 +101,8 @@ class RosterManager {
 
   RosterManager(Connection connection) {
     _connection = connection;
-    _xmppConnectionStateSubscription =
-        connection.connectionStateStream.listen(_connectionStateProcessor);
-    _abstractStanzaSubscription =
-        connection.inStanzasStream.listen(_processStanza);
+    _xmppConnectionStateSubscription = connection.connectionStateStream.listen(_connectionStateProcessor);
+    _abstractStanzaSubscription = connection.inStanzasStream.listen(_processStanza);
   }
 
   void _connectionStateProcessor(XmppConnectionState state) {
@@ -122,7 +121,7 @@ class RosterManager {
         if (stanza.type == IqStanzaType.RESULT) {
           if (_isFullJidRequest(unrespondedStanza!.item1)) {
             _handleFullRosterResponse(stanza);
-          } else if (_isRosterSet(stanza)) {
+          } else if (_isRosterSet(unrespondedStanza.item1)) {
             _handleRosterSetSuccessResponse(unrespondedStanza);
           }
         } else if (stanza.type == IqStanzaType.SET) {
@@ -177,7 +176,7 @@ class RosterManager {
   }
 
   void _handleRosterSetSuccessResponse(Tuple2<IqStanza, Completer?> request) {
-    request.item2!.complete(true);
+    request.item2!.complete(IqStanzaResult()..type = IqStanzaType.SET);
     _myUnrespondedIqStanzas.remove(request.item1.id);
   }
 
