@@ -60,6 +60,12 @@ Introducing optional parameter for domain name in account settings
 - Initial published version
 
 
+## 0.4.4-dev.2
+
+- Fix establishing a connection with some XMPP servers;
+- Fixed bug in roster result processing, thanks to [annarekonvald](https://github.com/annarekonvald) ([#77](https://github.com/vukoye/xmpp_dart/pull/77));
+- Fix removing Connection by key, thanks to [seoyong-lim](https://github.com/seoyong-lim) ([#78](https://github.com/vukoye/xmpp_dart/pull/78));
+
 ## 0.4.4-dev.1
 
 - Improvements for establishing a connection;
