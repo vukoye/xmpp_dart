@@ -303,7 +303,7 @@ class Connection {
     if (fullResponse.isNotEmpty) {
       xml.XmlNode? xmlResponse;
       try {
-        xmlResponse = xml.XmlDocument.parse(fullResponse.replaceAll('<?xml version=\'1.0\'?>', '')).firstChild;
+        xmlResponse = xml.XmlDocument.parse(fullResponse.replaceAll(RegExp(r'<\?(xml.+?)\>'), '')).firstChild;
       } catch (e) {
         _unparsedXmlResponse += fullResponse.substring(
             0, fullResponse.length - 13); //remove  xmpp_stone end tag
