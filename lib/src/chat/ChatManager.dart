@@ -24,7 +24,7 @@ class ChatManager {
   ChatManager(this._connection) {
     _connection.inStanzasStream
         .where((abstractStanza) => abstractStanza is MessageStanza)
-        .map((stanza) => stanza as MessageStanza)
+        .map((stanza) => stanza as MessageStanza/*!*/)
         .listen((stanza) {
           var message = Message.fromStanza(stanza);
           // find jid different from mine
@@ -52,7 +52,7 @@ class ChatManager {
   }
 
   ChatImpl _getChat(Jid jid) {
-    Chat chat = _chats[jid.userAtDomain];
+    Chat/*?*/ chat = _chats[jid.userAtDomain];
     if (chat == null) {
       chat = ChatImpl(jid, _connection);
       _chats[jid.userAtDomain] = chat;

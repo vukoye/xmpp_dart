@@ -11,14 +11,14 @@ abstract class AbstractStanza extends XmppElement {
 
   Jid get fromJid => _fromJid;
 
-  set fromJid(Jid value) {
+  set fromJid(Jid/*!*/ value) {
     _fromJid = value;
     addAttribute(XmppAttribute('from', _fromJid.fullJid));
   }
 
   Jid get toJid => _toJid;
 
-  set toJid(Jid value) {
+  set toJid(Jid/*!*/ value) {
     _toJid = value;
     addAttribute(XmppAttribute('to', _toJid.userAtDomain));
   }

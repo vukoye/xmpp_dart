@@ -19,7 +19,7 @@ class XmppElement {
   List<XmppElement> get children => _children;
 
   final List<XmppAttribute> _attributes = <XmppAttribute>[];
-  XmppAttribute getAttribute(String name) {
+  XmppAttribute/*!*/ getAttribute(String name) {
     return _attributes.firstWhere((attr) => attr.name == name, orElse: () => null);
   }
 

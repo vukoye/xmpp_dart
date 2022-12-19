@@ -10,7 +10,6 @@ import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'Message.dart';
 
 class ChatImpl implements Chat {
-
   static String TAG = 'Chat';
 
   final Connection _connection;
@@ -18,16 +17,16 @@ class ChatImpl implements Chat {
 
   @override
   Jid get jid => _jid;
-  ChatState _myState;
+  ChatState /*?*/ _myState;
   @override
-  ChatState get myState => _myState;
+  ChatState /*?*/ get myState => _myState;
 
-  ChatState _remoteState;
+  ChatState /*?*/ _remoteState;
   @override
-  ChatState get remoteState => _remoteState;
+  ChatState /*?*/ get remoteState => _remoteState;
 
   @override
-  List<Message> messages = [];
+  List<Message> /*!*/ messages = [];
 
   final StreamController<Message> _newMessageController =
       StreamController.broadcast();
@@ -37,7 +36,8 @@ class ChatImpl implements Chat {
   @override
   Stream<Message> get newMessageStream => _newMessageController.stream;
   @override
-  Stream<ChatState> get remoteStateStream => _remoteStateController.stream;
+  Stream<ChatState /*!*/ > get remoteStateStream =>
+      _remoteStateController.stream;
 
   ChatImpl(this._jid, this._connection);
 
@@ -69,7 +69,7 @@ class ChatImpl implements Chat {
   }
 
   @override
-  set myState(ChatState state) {
+  set myState(ChatState /*!*/ state) {
     var stanza =
         MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
@@ -86,13 +86,13 @@ class ChatImpl implements Chat {
 
 abstract class Chat {
   Jid get jid;
-  ChatState get myState;
+  ChatState /*?*/ get myState;
   ChatState get remoteState;
   Stream<Message> get newMessageStream;
   Stream<ChatState> get remoteStateStream;
   List<Message> messages;
   void sendMessage(String text);
-  set myState(ChatState state);
+  set myState(ChatState /*!*/ state);
 }
 
 enum ChatState { INACTIVE, ACTIVE, GONE, COMPOSING, PAUSED }

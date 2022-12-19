@@ -1,9 +1,9 @@
 import 'package:quiver/core.dart';
 
 class Jid {
-  String _local = '';
-  String _domain = '';
-  String _resource = '';
+  String /*!*/ _local = '';
+  String /*!*/ _domain = '';
+  String /*!*/ _resource = '';
 
   Jid(String local, String domain, String resource) {
     _local = local;
@@ -13,7 +13,10 @@ class Jid {
 
   @override
   bool operator ==(other) {
-    return other is Jid && local == other.local && domain == other.domain && resource == other.resource;
+    return other is Jid &&
+        local == other.local &&
+        domain == other.domain &&
+        resource == other.resource;
   }
 
   String get local => _local;
@@ -46,10 +49,13 @@ class Jid {
   }
 
   bool isValid() {
-    return local != null && local.isNotEmpty && domain != null && domain.isNotEmpty;
+    return local != null &&
+        local.isNotEmpty &&
+        domain != null &&
+        domain.isNotEmpty;
   }
 
-  static Jid fromFullJid(String fullJid) {
+  static Jid fromFullJid(String /*!*/ fullJid) {
     var exp = RegExp(r'^((.*?)@)?([^/@]+)(/(.*))?$');
     Iterable<Match> matches = exp.allMatches(fullJid);
     var match = matches.first;
