@@ -12,13 +12,13 @@ environment:
 #dependencies:
 #  path: ^1.4.1
 dependencies:
-  xml: ^4.0.0
+  xml: ^6.0.1
   cryptoutils: ^0.4.0
-  crypto: ^2.0.6
+  crypto: ^3.0.2
   synchronized: ^2.1.0
   tuple: ^1.0.2
   unorm_dart: ^0.1.1
-  image: ^2.0.7
+  image: ^3.2.2
   quiver: '>=2.0.0 <3.0.0' #hash code generator
   console: ^3.1.0 #for example
   intl: ^0.16.1
