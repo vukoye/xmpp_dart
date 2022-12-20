@@ -65,16 +65,16 @@ class VCardManager {
     return _vCards;
   }
 
-  void _processStanza(AbstractStanza stanza) {
+  void _processStanza(AbstractStanza/*?*/ stanza) {
     if (stanza is IqStanza) {
-      var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
-      if (_myUnrespondedIqStanzas[stanza.id] != null) {
+      final unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
+      if (unrespondedStanza != null) {
         if (stanza.type == IqStanzaType.RESULT) {
           var vCardChild = stanza.getChild('vCard');
           if (vCardChild != null) {
             var vCard = VCard(vCardChild);
             if (stanza.fromJid != null) {
-              _vCards[stanza.fromJid.userAtDomain] = vCard;
+              _vCards[stanza.fromJid/*!*/.userAtDomain] = vCard;
             } else {
               _vCards[_connection.fullJid.userAtDomain] = vCard;
             }

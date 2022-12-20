@@ -25,12 +25,15 @@ class StanzaParser {
       Log.d(TAG, 'No id found for stanza');
     }
 
-    if (element.name.local == 'iq') {
-      stanza = IqParser.parseIqStanza(id, element);
-    } else if (element.name.local == 'message') {
+    final elementName = element.name.local;
+    if (elementName == 'iq') {
+      stanza = IqParser.parseIqStanza(id/*!*/, element);
+    } else if (elementName == 'message') {
       stanza = _parseMessageStanza(id, element);
-    } else if (element.name.local == 'presence') {
+    } else if (elementName == 'presence') {
       stanza = _parsePresenceStanza(id, element);
+    } else {
+      throw Exception('Not a stanza element: $elementName');
     }
     var fromString = element.getAttribute('from');
     if (fromString != null) {
@@ -52,9 +55,9 @@ class StanzaParser {
     return stanza;
   }
 
-  static MessageStanza _parseMessageStanza(String id, xml.XmlElement element) {
+  static MessageStanza _parseMessageStanza(String/*?*/ id, xml.XmlElement element) {
     var typeString = element.getAttribute('type');
-    MessageStanzaType type;
+    MessageStanzaType/*?*/ type;
     if (typeString == null) {
       Log.w(TAG, 'No type found for message stanza');
     } else {
@@ -82,7 +85,7 @@ class StanzaParser {
   }
 
   static PresenceStanza _parsePresenceStanza(
-      String id, xml.XmlElement element) {
+      String/*?*/ id, xml.XmlElement element) {
     var presenceStanza = PresenceStanza();
     presenceStanza.id = id;
     return presenceStanza;
@@ -90,7 +93,7 @@ class StanzaParser {
 
   static XmppElement parseElement(xml.XmlElement xmlElement) {
     XmppElement xmppElement;
-    var parentName = (xmlElement.parent as xml.XmlElement)?.name?.local ?? '';
+    var parentName = (xmlElement.parent as xml.XmlElement/*?*/)?.name?.local ?? '';
     var name = xmlElement?.name?.local;
     if (parentName == 'query' && name == 'identity') {
       xmppElement = Identity();

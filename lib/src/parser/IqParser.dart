@@ -10,7 +10,7 @@ class IqParser {
     return IqStanza(id, _parseIqType(typeString));
   }
 
-  static IqStanzaType _parseIqType(String typeString) {
+  static IqStanzaType _parseIqType(String/*?*/ typeString) {
     if (typeString == null) {
       Log.w(TAG, 'No type found for iq stanza');
       return IqStanzaType.INVALID;

@@ -7,9 +7,9 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 class VCard extends XmppElement {
   var _imageData;
 
-  img.Image _image;
+  img.Image/*?*/ _image;
 
-  VCard(XmppElement element) : super('vCard') {
+  VCard(XmppElement/*?*/ element) : super('vCard') {
     if (element != null) {
       element.children.forEach((child) => addChild(child));
     }
@@ -17,39 +17,39 @@ class VCard extends XmppElement {
     _parseImage();
   }
 
-  String get fullName => getChild('FN')?.textValue;
+  String/*?*/ get fullName => getChild('FN')?.textValue;
 
-  String get familyName => getChild('N')?.getChild('FAMILY')?.textValue;
+  String/*?*/ get familyName => getChild('N')?.getChild('FAMILY')?.textValue;
 
-  String get givenName => getChild('N')?.getChild('GIVEN')?.textValue;
+  String/*?*/ get givenName => getChild('N')?.getChild('GIVEN')?.textValue;
 
-  String get prefixName => getChild('N')?.getChild('PREFIX')?.textValue;
+  String/*?*/ get prefixName => getChild('N')?.getChild('PREFIX')?.textValue;
 
-  String get nickName => getChild('NICKNAME')?.textValue;
+  String/*?*/ get nickName => getChild('NICKNAME')?.textValue;
 
-  String get url => getChild('URL')?.textValue;
+  String/*?*/ get url => getChild('URL')?.textValue;
 
-  String get bDay => getChild('BDAY')?.textValue;
+  String/*?*/ get bDay => getChild('BDAY')?.textValue;
 
-  String get organisationName =>
+  String/*?*/ get organisationName =>
       getChild('ORG')?.getChild('ORGNAME')?.textValue;
 
-  String get organizationUnit =>
+  String/*?*/ get organizationUnit =>
       getChild('ORG')?.getChild('ORGUNIT')?.textValue;
 
-  String get title => getChild('TITLE')?.textValue;
+  String/*?*/ get title => getChild('TITLE')?.textValue;
 
-  String get role => getChild('ROLE')?.textValue;
+  String/*?*/ get role => getChild('ROLE')?.textValue;
 
-  String get jabberId => getChild('JABBERID')?.textValue;
+  String/*?*/ get jabberId => getChild('JABBERID')?.textValue;
 
-  String getItem(String itemName) => getChild(itemName)?.textValue;
+  String/*?*/ getItem(String itemName) => getChild(itemName)?.textValue;
 
-  dynamic get imageData => _imageData;
+  dynamic/*?*/ get imageData => _imageData;
 
-  img.Image get image => _image;
+  img.Image/*?*/ get image => _image;
 
-  String get imageType => getChild('PHOTO')?.getChild('TYPE')?.textValue;
+  String/*?*/ get imageType => getChild('PHOTO')?.getChild('TYPE')?.textValue;
 
   List<PhoneItem> get phones {
     var homePhones = <PhoneItem>[];
@@ -71,7 +71,7 @@ class VCard extends XmppElement {
     return homePhones;
   }
 
-  String get emailHome {
+  String/*?*/ get emailHome {
     var element = children.firstWhere(
         (element) =>
             (element.name == 'EMAIL' && element.getChild('HOME') != null),
@@ -79,7 +79,7 @@ class VCard extends XmppElement {
     return element?.getChild('USERID')?.textValue;
   }
 
-  String get emailWork {
+  String/*?*/ get emailWork {
     var element = children.firstWhere(
         (element) =>
             (element.name == 'EMAIL' && element.getChild('WORK') != null),
@@ -136,7 +136,7 @@ class VCard extends XmppElement {
 }
 
 class InvalidVCard extends VCard {
-  InvalidVCard(XmppElement element) : super(element);
+  InvalidVCard(XmppElement/*?*/ element) : super(element);
 }
 
 class PhoneItem {

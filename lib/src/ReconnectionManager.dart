@@ -11,14 +11,12 @@ class ReconnectionManager {
   int totalReconnections = 3;
   int timeOutInMs;
   int counter = 0;
-  Timer timer;
+  Timer/*?*/ timer;
 
-  ReconnectionManager(Connection connection) {
-    _connection = connection;
+  ReconnectionManager(Connection connection) : this._connection = connection, timeOutInMs = connection.account.reconnectionTimeout {
     _connection.connectionStateStream.listen(connectionStateHandler);
     initialTimeout = _connection.account.reconnectionTimeout;
     totalReconnections = _connection.account.totalReconnections;
-    timeOutInMs = initialTimeout;
   }
 
   void connectionStateHandler(XmppConnectionState state) {

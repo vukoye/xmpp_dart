@@ -7,13 +7,16 @@ class IqStanza extends AbstractStanza {
 
   IqStanzaType get type => _type;
 
+  String /*!*/ _id;
+
+  @override
+  String /*!*/ get id => _id;
+
   set type(IqStanzaType value) {
     _type = value;
   }
 
-  IqStanza(String /*?*/ id, IqStanzaType type) : super('iq') {
-    this.id = id;
-    _type = type;
+  IqStanza(String /*!*/ id, IqStanzaType type) : _id = id, _type = type, super('iq') {
     addAttribute(
         XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
   }

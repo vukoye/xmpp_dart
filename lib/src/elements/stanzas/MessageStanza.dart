@@ -3,20 +3,22 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
 class MessageStanza extends AbstractStanza {
-  MessageStanzaType /*!*/ _type;
+  MessageStanzaType /*?*/ _type;
 
-  MessageStanzaType /*!*/ get type => _type;
+  MessageStanzaType /*?*/ get type => _type;
 
   set type(MessageStanzaType value) {
     _type = value;
   }
 
-  MessageStanza(id, type)
+  MessageStanza(String /*?*/ id, MessageStanzaType /*?*/ type)
       : _type = type,
         super('message') {
     this.id = id;
-    addAttribute(
-        XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
+    if (type != null) {
+      addAttribute(
+          XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
+    }
   }
 
   String get body => children

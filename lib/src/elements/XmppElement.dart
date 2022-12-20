@@ -42,11 +42,11 @@ class XmppElement {
     _children.add(element);
   }
 
-  bool removeChild(XmppElement element) {
+  bool removeChild(XmppElement/*!*/ element) {
     return _children.remove(element);
   }
 
-  XmppElement getChild(String name) {
+  XmppElement/*?*/ getChild(String name) {
     return _children.firstWhere((element) => element.name == name,
         orElse: () => null);
   }
