@@ -74,16 +74,14 @@ class ServiceDiscoveryNegotiator extends Negotiator {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inStanzasStream.listen(_parseStanza);
       _sendServiceDiscoveryRequest();
-    } else if (state == NegotiatorState.DONE) {
-    }
+    } else if (state == NegotiatorState.DONE) {}
   }
 
   void _sendServiceDiscoveryRequest() {
     var request = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     request.fromJid = _connection.fullJid;
     request.toJid = _connection.serverName;
-    var queryElement = XmppElement();
-    queryElement.name = 'query';
+    var queryElement = XmppElement('query');
     queryElement.addAttribute(
         XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info'));
     request.addChild(queryElement);
@@ -141,11 +139,11 @@ class ServiceDiscoveryNegotiator extends Negotiator {
     var iqStanza = IqStanza(request.id, IqStanzaType.RESULT);
     //iqStanza.fromJid = _connection.fullJid; //do not send for now
     iqStanza.toJid = request.fromJid;
-    var query = XmppElement();
+    var query = XmppElement('query');
     query.addAttribute(XmppAttribute('xmlns', NAMESPACE_DISCO_INFO));
     SERVICE_DISCOVERY_SUPPORT_LIST.forEach((featureName) {
-      var featureElement = XmppElement();
-      featureElement.addAttribute(XmppAttribute('feature', featureName));
+      var featureElement = XmppElement('feature');
+      featureElement.addAttribute(XmppAttribute('var', featureName));
       query.addChild(featureElement);
     });
     iqStanza.addChild(query);

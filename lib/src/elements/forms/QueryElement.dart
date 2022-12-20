@@ -2,10 +2,8 @@ import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import '../XmppAttribute.dart';
 import '../XmppElement.dart';
 
-class QueryElement extends XmppElement{
-  QueryElement() {
-    name = 'query';
-  }
+class QueryElement extends XmppElement {
+  QueryElement() : super('query');
 
   void addX(XElement xElement) {
     addChild(xElement);
@@ -19,5 +17,5 @@ class QueryElement extends XmppElement{
     XmppAttribute('queryid', queryId);
   }
 
-  String/*?*/ get queryId => getAttribute('queryid')?.value;
+  String /*?*/ get queryId => getAttribute('queryid')?.value;
 }

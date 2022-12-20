@@ -11,7 +11,8 @@ import 'package:tuple/tuple.dart';
 //todo check for rfc6121 2.6.2
 //todo add support for jid groups
 class RosterManager {
-  static Map<Connection, RosterManager> instances = <Connection, RosterManager>{};
+  static Map<Connection, RosterManager> instances =
+      <Connection, RosterManager>{};
 
   static RosterManager getInstance(Connection connection) {
     var manager = instances[connection];
@@ -22,9 +23,11 @@ class RosterManager {
     return manager;
   }
 
-  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas = <String, Tuple2<IqStanza, Completer>>{};
+  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas =
+      <String, Tuple2<IqStanza, Completer>>{};
 
-  final StreamController<List<Buddy>> _rosterController = StreamController<List<Buddy>>.broadcast();
+  final StreamController<List<Buddy>> _rosterController =
+      StreamController<List<Buddy>>.broadcast();
 
   Stream<List<Buddy>> get rosterStream {
     return _rosterController.stream;
@@ -36,8 +39,7 @@ class RosterManager {
 
   void queryForRoster() {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
-    var element = XmppElement();
-    element.name = 'query';
+    var element = XmppElement('query');
     element.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(element);
     _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, null);
@@ -55,12 +57,10 @@ class RosterManager {
   Future<IqStanzaResult> addRosterItem(Buddy rosterItem) {
     var completer = Completer<IqStanzaResult>();
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    var queryElement = XmppElement();
-    queryElement.name = 'query';
+    var queryElement = XmppElement('query');
     queryElement.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(queryElement);
-    var itemElement = XmppElement();
-    itemElement.name = 'item';
+    var itemElement = XmppElement('item');
     queryElement.addChild(itemElement);
     itemElement.addAttribute(XmppAttribute('jid', rosterItem.jid.userAtDomain));
     if (rosterItem.name != null) {
@@ -74,12 +74,10 @@ class RosterManager {
   Future<IqStanzaResult> removeRosterItem(Buddy rosterItem) {
     var completer = Completer<IqStanzaResult>();
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    var queryElement = XmppElement();
-    queryElement.name = 'query';
+    var queryElement = XmppElement('query');
     queryElement.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(queryElement);
-    var itemElement = XmppElement();
-    itemElement.name = 'item';
+    var itemElement = XmppElement('item');
     queryElement.addChild(itemElement);
     itemElement.addAttribute(XmppAttribute('jid', rosterItem.jid.userAtDomain));
     itemElement.addAttribute(XmppAttribute('subscription', 'remove'));
@@ -127,7 +125,8 @@ class RosterManager {
   }
 
   bool _isFullJidRequest(IqStanza iqStanza) {
-    return (iqStanza.type == IqStanzaType.GET && (iqStanza.getChild('query')?.children?.isEmpty ?? false));
+    return (iqStanza.type == IqStanzaType.GET &&
+        (iqStanza.getChild('query')?.children?.isEmpty ?? false));
   }
 
   bool _isRosterSet(IqStanza iqStanza) {
@@ -141,7 +140,8 @@ class RosterManager {
 
   void _handleFullRosterResponse(IqStanza stanza) {
     var xmppElement = stanza.getChild('query');
-    if (xmppElement != null && xmppElement.getNameSpace() == 'jabber:iq:roster') {
+    if (xmppElement != null &&
+        xmppElement.getNameSpace() == 'jabber:iq:roster') {
       _rosterMap.clear();
       xmppElement.children.forEach((child) {
         if (child.name == 'item') {

@@ -23,7 +23,8 @@ class BindingResourceConnectionNegotiator extends Negotiator {
   }
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere((request) => request.name == BIND_NAME, orElse: () => null);
+    var nonza = requests.firstWhere((request) => request.name == BIND_NAME,
+        orElse: () => null);
     return nonza != null ? [nonza] : [];
   }
 
@@ -51,10 +52,8 @@ class BindingResourceConnectionNegotiator extends Negotiator {
 
   void sendBindRequestStanza(String resource) {
     var stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    var bindElement = XmppElement();
-    bindElement.name = BIND_NAME;
-    var resourceElement = XmppElement();
-    resourceElement.name = 'resource';
+    var bindElement = XmppElement(BIND_NAME);
+    var resourceElement = XmppElement('resource');
     resourceElement.textValue = resource;
     bindElement.addChild(resourceElement);
     var attribute = XmppAttribute('xmlns', BIND_ATTRIBUTE);

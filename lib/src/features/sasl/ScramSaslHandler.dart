@@ -72,8 +72,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
     _initialMessage = 'n=${saslEscape(normalize(_username))},r=${_clientNonce}';
     var bytes = utf8.encode('n,,$_initialMessage');
     var message = CryptoUtils.bytesToBase64(bytes, false, false);
-    var nonza = Nonza();
-    nonza.name = 'auth';
+    var nonza = Nonza('auth');
     nonza.addAttribute(
         XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
     nonza.addAttribute(XmppAttribute('mechanism', _mechanismString));
@@ -182,8 +181,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
     }
     var clientFinalMessage =
         '$clientFinalMessageBare,p=${base64.encode(clientProof)}';
-    var response = Nonza();
-    response.name = 'response';
+    var response = Nonza('response');
     response.addAttribute(
         XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
     response.textValue = base64.encode(utf8.encode(clientFinalMessage));

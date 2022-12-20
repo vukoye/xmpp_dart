@@ -22,7 +22,8 @@ class SessionInitiationNegotiator extends Negotiator {
   }
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere((request) => request.name == 'session', orElse: () => null);
+    var nonza = requests.firstWhere((request) => request.name == 'session',
+        orElse: () => null);
     return nonza != null ? [nonza] : [];
   }
 
@@ -48,8 +49,7 @@ class SessionInitiationNegotiator extends Negotiator {
 
   void sendSessionInitiationStanza() {
     var stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    var sessionElement = XmppElement();
-    sessionElement.name = 'session';
+    var sessionElement = XmppElement('session');
     var attribute =
         XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-session');
     sessionElement.addAttribute(attribute);

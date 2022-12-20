@@ -101,9 +101,8 @@ class StanzaParser {
     } else if (name == 'field') {
       xmppElement = FieldElement();
     } else {
-      xmppElement = XmppElement();
+      xmppElement = XmppElement(name);
     }
-    xmppElement.name = xmlElement?.name?.local;
     xmlElement.attributes.forEach((xmlAttribute) {
       xmppElement.addAttribute(
           XmppAttribute(xmlAttribute?.name?.local, xmlAttribute?.value));

@@ -74,8 +74,8 @@ class ChatImpl implements Chat {
         MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
-    var stateElement = XmppElement();
-    stateElement.name = state.toString().split('.').last.toLowerCase();
+    var stateElement =
+        XmppElement(state.toString().split('.').last.toLowerCase());
     stateElement.addAttribute(
         XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates'));
     stanza.addChild(stateElement);
@@ -90,7 +90,7 @@ abstract class Chat {
   ChatState get remoteState;
   Stream<Message> get newMessageStream;
   Stream<ChatState> get remoteStateStream;
-  List<Message> messages;
+  List<Message> messages = [];
   void sendMessage(String text);
   set myState(ChatState /*!*/ state);
 }

@@ -7,7 +7,5 @@ class SMNonza extends Nonza {
   static bool match(Nonza nonza) =>
       (nonza.name == NAME && nonza.getAttribute('xmlns').value == XMLNS);
 
-  SMNonza() {
-    name = NAME;
-  }
+  SMNonza() : super(NAME);
 }

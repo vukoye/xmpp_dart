@@ -9,11 +9,10 @@ class VCard extends XmppElement {
 
   img.Image _image;
 
-  VCard(XmppElement element) {
+  VCard(XmppElement element) : super('vCard') {
     if (element != null) {
       element.children.forEach((child) => addChild(child));
     }
-    name = 'vCard';
     addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     _parseImage();
   }

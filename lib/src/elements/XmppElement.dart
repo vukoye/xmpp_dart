@@ -2,16 +2,18 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xml/xml.dart' as xml;
 
 class XmppElement {
-  String _name;
-  String get name => _name;
-  set name(String value) {
+  String /*!*/ _name;
+  String /*!*/ get name => _name;
+  set name(String /*!*/ value) {
     _name = value;
   }
 
-  String _textValue;
-  String get textValue => _textValue;
+  XmppElement(this._name);
 
-  set textValue(String value) {
+  String /*?*/ _textValue;
+  String /*?*/ get textValue => _textValue;
+
+  set textValue(String /*?*/ value) {
     _textValue = value;
   }
 
@@ -19,24 +21,34 @@ class XmppElement {
   List<XmppElement> get children => _children;
 
   final List<XmppAttribute> _attributes = <XmppAttribute>[];
-  XmppAttribute/*!*/ getAttribute(String name) {
-    return _attributes.firstWhere((attr) => attr.name == name, orElse: () => null);
+  XmppAttribute /*?*/ getAttribute(String name) {
+    return _attributes.firstWhere((attr) => attr.name == name,
+        orElse: () => null);
   }
 
   void addAttribute(XmppAttribute attribute) {
-    var existing = getAttribute(attribute.name);
+    removeAttribute(attribute.name);
+    _attributes.add(attribute);
+  }
+
+  void removeAttribute(String name) {
+    var existing = getAttribute(name);
     if (existing != null) {
       _attributes.remove(existing);
     }
-    _attributes.add(attribute);
   }
 
   void addChild(XmppElement element) {
     _children.add(element);
   }
 
+  bool removeChild(XmppElement element) {
+    return _children.remove(element);
+  }
+
   XmppElement getChild(String name) {
-    return _children.firstWhere((element) => element.name == name, orElse: () => null);
+    return _children.firstWhere((element) => element.name == name,
+        orElse: () => null);
   }
 
   String buildXmlString() {
@@ -48,7 +60,8 @@ class XmppElement {
     var xmlNodes = <xml.XmlNode>[];
     _attributes.forEach((xmppAttribute) {
       if (xmppAttribute.value != null) {
-        xmlAttributes.add(xml.XmlAttribute(xml.XmlName(xmppAttribute.name), xmppAttribute.value));
+        xmlAttributes.add(xml.XmlAttribute(
+            xml.XmlName(xmppAttribute.name), xmppAttribute.value));
       }
     });
     _children.forEach((xmppChild) {

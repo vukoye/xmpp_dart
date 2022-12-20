@@ -3,64 +3,84 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
 class PresenceStanza extends AbstractStanza {
-  PresenceStanza() {
-    name = 'presence';
+  PresenceStanza() : super('presence');
+
+  PresenceStanza.withType(PresenceType type) : super('presence') {
+    addAttribute(
+        XmppAttribute('type', type.toString().split('.').last.toLowerCase()));
   }
 
-  PresenceStanza.withType(PresenceType type) {
-    name = 'presence';
-    addAttribute(XmppAttribute('type', type.toString().split('.').last.toLowerCase()));
+  set type(PresenceType /*?*/ value) {
+    if (value == null) {
+      removeAttribute('type');
+    } else {
+      var typeValue = value.toString().split('.').last.toLowerCase();
+      _setAttributeValue('type', typeValue);
+    }
   }
 
-  set type(PresenceType value) {
-    var typeValue = value.toString().split('.').last.toLowerCase();
-    _setAttributeValue('type', typeValue);
-  }
-
-  PresenceType get type {
+  PresenceType /*?*/ get type {
     var typeValue = getAttribute('type')?.value;
     return typeFromString(typeValue);
   }
 
-  set show(PresenceShowElement value) {
-    var showValue = value.toString().split('.').last.toLowerCase();
-    _setChildValue('show', showValue);
+  set show(PresenceShowElement /*?*/ value) {
+    if (value == null) {
+      _removeChildWithName('show');
+    } else {
+      var showValue = value.toString().split('.').last.toLowerCase();
+      _setChildValue('show', showValue);
+    }
   }
 
-  PresenceShowElement get show {
+  PresenceShowElement /*?*/ get show {
     var showValue = getChild('show')?.textValue;
     return showFromString(showValue);
   }
 
   //status with no language prefs
-  String get status {
-    var statusElement =
-        children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty, orElse: () => null);
+  String /*?*/ get status {
+    var statusElement = children.firstWhere(
+        (element) => element.name == 'status' && element.attributes.isEmpty,
+        orElse: () => null);
     return statusElement?.textValue;
   }
 
-  set status(String value) {
-    var childElement =
-        children.firstWhere((element) => element.name == 'status' && element.attributes.isEmpty, orElse: () => null);
-    if (childElement == null) {
-      var element = XmppElement();
-      element.name = 'status';
-      element.textValue = value;
-      addChild(element);
+  set status(String /*?*/ value) {
+    if (value == null) {
+      _removeChildWithName('status');
     } else {
-      childElement.textValue = value;
+      var childElement = children.firstWhere(
+          (element) => element.name == 'status' && element.attributes.isEmpty,
+          orElse: () => null);
+      if (childElement == null) {
+        var element = XmppElement('status');
+        element.textValue = value;
+        addChild(element);
+      } else {
+        childElement.textValue = value;
+      }
     }
   }
 
-  int get priority {
-    return int.tryParse(getChild('priority')?.textValue);
+  int /*?*/ get priority {
+    final priorityElement = getChild('priority');
+    if (priorityElement == null) {
+      return null;
+    } else {
+      return int.tryParse(priorityElement.textValue /*!*/);
+    }
   }
 
-  set priority(int value) {
-    _setChildValue('priority', value.toString());
+  set priority(int /*?*/ value) {
+    if (value == null) {
+      _removeChildWithName('priority');
+    } else {
+      _setChildValue('priority', value.toString());
+    }
   }
 
-  PresenceShowElement showFromString(String showString) {
+  PresenceShowElement /*?*/ showFromString(String /*?*/ showString) {
     //AWAY, CHAT, DND, XA
     switch (showString) {
       case 'away':
@@ -76,7 +96,7 @@ class PresenceStanza extends AbstractStanza {
     return null;
   }
 
-  PresenceType typeFromString(String typeString) {
+  PresenceType /*?*/ typeFromString(String typeString) {
     switch (typeString) {
       case 'error':
         return PresenceType.ERROR;
@@ -97,12 +117,17 @@ class PresenceStanza extends AbstractStanza {
     return null;
   }
 
+  bool _removeChildWithName(String childName) {
+    final child = getChild(childName);
+    return removeChild(child);
+  }
+
   void _setChildValue(String childName, String value) {
-    var childElement =
-        children.firstWhere((element) => element.name == childName && element.attributes.isEmpty, orElse: () => null);
+    var childElement = children.firstWhere(
+        (element) => element.name == childName && element.attributes.isEmpty,
+        orElse: () => null);
     if (childElement == null) {
-      var element = XmppElement();
-      element.name = childName;
+      var element = XmppElement(childName);
       element.textValue = value;
       addChild(element);
     } else {
@@ -111,10 +136,10 @@ class PresenceStanza extends AbstractStanza {
   }
 
   void _setAttributeValue(String attrName, String value) {
-    var attr = attributes.firstWhere((attribute) => attribute.name == name, orElse: () => null);
+    var attr = attributes.firstWhere((attribute) => attribute.name == name,
+        orElse: () => null);
     if (attr == null) {
-      var element = XmppElement();
-      element.name = attrName;
+      var element = XmppElement(attrName);
       element.textValue = value;
       addChild(element);
     } else {

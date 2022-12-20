@@ -14,12 +14,10 @@ import '../Negotiator.dart';
 import 'Feature.dart';
 
 class CarbonsNegotiator extends Negotiator {
-
   static const TAG = 'CarbonsNegotiator';
 
   static final Map<Connection, CarbonsNegotiator> _instances =
       <Connection, CarbonsNegotiator>{};
-
 
   static CarbonsNegotiator getInstance(Connection connection) {
     var instance = _instances[connection];
@@ -44,7 +42,8 @@ class CarbonsNegotiator extends Negotiator {
   @override
   List<Nonza> match(List<Nonza> requests) {
     return (requests.where((element) =>
-        element != null && element is Feature &&
+        element != null &&
+        element is Feature &&
         ((element).xmppVar == 'urn:xmpp:carbons:2' ||
             (element).xmppVar == 'urn:xmpp:carbons:rules:0'))).toList();
   }
@@ -54,15 +53,14 @@ class CarbonsNegotiator extends Negotiator {
     if (match(nonzas).isNotEmpty) {
       state = NegotiatorState.NEGOTIATING;
       sendRequest();
-      _subscription= _connection.inStanzasStream.listen(checkStanzas);
+      _subscription = _connection.inStanzasStream.listen(checkStanzas);
     }
   }
 
   void sendRequest() {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     iqStanza.addAttribute(XmppAttribute('xmlns', 'jabber:client'));
-    var element = XmppElement();
-    element.name = 'enable';
+    var element = XmppElement('enable');
     element.addAttribute(XmppAttribute('xmlns', 'urn:xmpp:carbons:2'));
     iqStanza.addChild(element);
     _myUnrespondedIqStanza = iqStanza;

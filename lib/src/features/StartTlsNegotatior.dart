@@ -52,8 +52,7 @@ class StartTlsNegotiator extends Negotiator {
 }
 
 class StartTlsResponse extends Nonza {
-  StartTlsResponse() {
-    name = 'starttls';
+  StartTlsResponse() : super('starttls') {
     addAttribute(XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-tls'));
   }
 }

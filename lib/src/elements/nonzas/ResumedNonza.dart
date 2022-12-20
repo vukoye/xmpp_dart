@@ -8,8 +8,7 @@ class ResumedNonza extends Nonza {
   static bool match(Nonza nonza) =>
       (nonza.name == NAME && nonza.getAttribute('xmlns').value == XMLNS);
 
-  ResumedNonza() {
-    name = NAME;
+  ResumedNonza() : super(NAME) {
     addAttribute(XmppAttribute('xmlns', XMLNS));
   }
 }
