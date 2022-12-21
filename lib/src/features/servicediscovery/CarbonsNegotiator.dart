@@ -32,8 +32,8 @@ class CarbonsNegotiator extends Negotiator {
 
   bool enabled = false;
 
-  StreamSubscription<AbstractStanza> _subscription;
-  IqStanza _myUnrespondedIqStanza;
+  late StreamSubscription<AbstractStanza> _subscription;
+  late IqStanza _myUnrespondedIqStanza;
 
   CarbonsNegotiator(this._connection) {
     expectedName = 'urn:xmpp:carbons';

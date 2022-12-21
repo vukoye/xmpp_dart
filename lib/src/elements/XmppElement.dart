@@ -1,19 +1,20 @@
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xml/xml.dart' as xml;
 
 class XmppElement {
-  String /*!*/ _name;
-  String /*!*/ get name => _name;
-  set name(String /*!*/ value) {
+  String _name;
+  String get name => _name;
+  set name(String value) {
     _name = value;
   }
 
   XmppElement(this._name);
 
-  String /*?*/ _textValue;
-  String /*?*/ get textValue => _textValue;
+  String? _textValue;
+  String? get textValue => _textValue;
 
-  set textValue(String /*?*/ value) {
+  set textValue(String? value) {
     _textValue = value;
   }
 
@@ -21,9 +22,8 @@ class XmppElement {
   List<XmppElement> get children => _children;
 
   final List<XmppAttribute> _attributes = <XmppAttribute>[];
-  XmppAttribute /*?*/ getAttribute(String name) {
-    return _attributes.firstWhere((attr) => attr.name == name,
-        orElse: () => null);
+  XmppAttribute? getAttribute(String name) {
+    return _attributes.firstWhereOrNull((attr) => attr.name == name);
   }
 
   void addAttribute(XmppAttribute attribute) {
@@ -42,13 +42,12 @@ class XmppElement {
     _children.add(element);
   }
 
-  bool removeChild(XmppElement/*!*/ element) {
+  bool removeChild(XmppElement element) {
     return _children.remove(element);
   }
 
-  XmppElement/*?*/ getChild(String name) {
-    return _children.firstWhere((element) => element.name == name,
-        orElse: () => null);
+  XmppElement? getChild(String name) {
+    return _children.firstWhereOrNull((element) => element.name == name);
   }
 
   String buildXmlString() {
@@ -66,13 +65,13 @@ class XmppElement {
       xmlNodes.add(xmppChild.buildXml());
     });
     if (textValue != null) {
-      xmlNodes.add(xml.XmlText(textValue));
+      xmlNodes.add(xml.XmlText(textValue!));
     }
     var xmlElement = xml.XmlElement(xml.XmlName(name), xmlAttributes, xmlNodes);
     return xmlElement;
   }
 
-  String getNameSpace() {
+  String? getNameSpace() {
     return getAttribute('xmlns')?.value;
   }
 

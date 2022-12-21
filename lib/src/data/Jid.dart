@@ -1,9 +1,9 @@
 import 'package:quiver/core.dart';
 
 class Jid {
-  String /*!*/ _local = '';
-  String /*!*/ _domain = '';
-  String /*!*/ _resource = '';
+  String _local = '';
+  String _domain = '';
+  String _resource = '';
 
   Jid(String local, String domain, String resource) {
     _local = local;
@@ -55,12 +55,12 @@ class Jid {
         domain.isNotEmpty;
   }
 
-  static Jid fromFullJid(String /*!*/ fullJid) {
+  static Jid fromFullJid(String fullJid) {
     var exp = RegExp(r'^((.*?)@)?([^/@]+)(/(.*))?$');
     Iterable<Match> matches = exp.allMatches(fullJid);
     var match = matches.first;
     if (match != null) {
-      return Jid(match[2], match[3], match[5]);
+      return Jid(match[2]!, match[3]!, match[5]!);
     } else {
       return InvalidJid();
     }

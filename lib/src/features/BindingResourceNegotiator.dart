@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
@@ -11,8 +12,8 @@ import 'package:xmpp_stone/src/features/Negotiator.dart';
 import '../elements/nonzas/Nonza.dart';
 
 class BindingResourceConnectionNegotiator extends Negotiator {
-  Connection/*!*/ _connection;
-  StreamSubscription<AbstractStanza>/*?*/ subscription;
+  Connection _connection;
+  StreamSubscription<AbstractStanza>? subscription;
   static const String BIND_NAME = 'bind';
   static const String BIND_ATTRIBUTE = 'urn:ietf:params:xml:ns:xmpp-bind';
 
@@ -22,8 +23,7 @@ class BindingResourceConnectionNegotiator extends Negotiator {
   }
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhere((request) => request.name == BIND_NAME,
-        orElse: () => null);
+    var nonza = requests.firstWhereOrNull((request) => request.name == BIND_NAME);
     return nonza != null ? [nonza] : [];
   }
 

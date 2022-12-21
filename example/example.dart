@@ -25,7 +25,7 @@ void main(List<String> arguments) {
   presenceManager.subscriptionStream.listen((streamEvent) {
     if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
       Log.d(TAG, 'Accepting presence request');
-      presenceManager.acceptSubscription(streamEvent.jid);
+      presenceManager.acceptSubscription(streamEvent.jid!);
     }
   });
   var receiver = 'nemanja2@test';
@@ -37,10 +37,10 @@ void main(List<String> arguments) {
 }
 
 class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChangedListener {
-  xmpp.Connection _connection;
-  xmpp.MessagesListener _messagesListener;
+  late xmpp.Connection _connection;
+  late xmpp.MessagesListener _messagesListener;
 
-  StreamSubscription<String> subscription;
+  StreamSubscription<String>? subscription;
 
   ExampleConnectionStateChangedListener(xmpp.Connection connection, xmpp.MessagesListener messagesListener) {
     _connection = connection;
@@ -74,7 +74,7 @@ class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChang
         if (vCard != null) {
           Log.d(TAG, 'Receiver info' + vCard.buildXmlString());
           if (vCard != null && vCard.image != null) {
-            var file = File('test456789.jpg')..writeAsBytesSync(image.encodeJpg(vCard.image));
+            var file = File('test456789.jpg')..writeAsBytesSync(image.encodeJpg(vCard.image!));
             Log.d(TAG, 'IMAGE SAVED TO: ${file.path}');
           }
         }
@@ -85,7 +85,7 @@ class ExampleConnectionStateChangedListener implements xmpp.ConnectionStateChang
   }
 
   void onPresence(xmpp.PresenceData event) {
-    Log.d(TAG, 'presence Event from ' + event.jid.fullJid + ' PRESENCE: ' + event.showElement.toString());
+    Log.d(TAG, 'presence Event from ' + event.jid!.fullJid + ' PRESENCE: ' + event.showElement.toString());
   }
 }
 
@@ -102,7 +102,7 @@ class ExampleMessagesListener implements xmpp.MessagesListener {
   void onNewMessage(xmpp.MessageStanza message) {
     if (message.body != null) {
       Log.d(TAG, format(
-          'New Message from {color.blue}${message.fromJid.userAtDomain}{color.end} message: {color.red}${message.body}{color.end}'));
+          'New Message from {color.blue}${message.fromJid!.userAtDomain}{color.end} message: {color.red}${message.body}{color.end}'));
     }
   }
 }

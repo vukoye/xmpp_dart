@@ -17,33 +17,33 @@ class ChatImpl implements Chat {
 
   @override
   Jid get jid => _jid;
-  ChatState /*?*/ _myState;
+  ChatState? _myState;
   @override
-  ChatState /*?*/ get myState => _myState;
+  ChatState? get myState => _myState;
 
-  ChatState /*?*/ _remoteState;
+  ChatState? _remoteState;
   @override
-  ChatState /*?*/ get remoteState => _remoteState;
+  ChatState? get remoteState => _remoteState;
 
   @override
-  List<Message> /*!*/ messages = [];
+  List<Message> messages = [];
 
   final StreamController<Message> _newMessageController =
       StreamController.broadcast();
-  final StreamController<ChatState> _remoteStateController =
+  final StreamController<ChatState?> _remoteStateController =
       StreamController.broadcast();
 
   @override
   Stream<Message> get newMessageStream => _newMessageController.stream;
   @override
-  Stream<ChatState /*!*/ > get remoteStateStream =>
-      _remoteStateController.stream;
+  Stream<ChatState > get remoteStateStream =>
+      _remoteStateController.stream as Stream<ChatState>;
 
   ChatImpl(this._jid, this._connection);
 
   void parseMessage(Message message) {
     if (message.type == MessageStanzaType.CHAT) {
-      if (message.text != null && message.text.isNotEmpty) {
+      if (message.text != null && message.text!.isNotEmpty) {
         messages.add(message);
         _newMessageController.add(message);
       }
@@ -69,7 +69,7 @@ class ChatImpl implements Chat {
   }
 
   @override
-  set myState(ChatState /*!*/ state) {
+  set myState(ChatState state) {
     var stanza =
         MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
@@ -86,13 +86,13 @@ class ChatImpl implements Chat {
 
 abstract class Chat {
   Jid get jid;
-  ChatState /*?*/ get myState;
-  ChatState get remoteState;
+  ChatState? get myState;
+  ChatState? get remoteState;
   Stream<Message> get newMessageStream;
   Stream<ChatState> get remoteStateStream;
   List<Message> messages = [];
   void sendMessage(String text);
-  set myState(ChatState /*!*/ state);
+  set myState(ChatState state);
 }
 
 enum ChatState { INACTIVE, ACTIVE, GONE, COMPOSING, PAUSED }

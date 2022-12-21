@@ -40,9 +40,9 @@ class PresenceManager implements PresenceApi {
     return _errorStreamController.stream;
   }
 
-  static Map<Connection/*!*/, PresenceManager> instances = <Connection/*!*/, PresenceManager>{};
+  static Map<Connection, PresenceManager> instances = <Connection, PresenceManager>{};
 
-  static PresenceManager getInstance(Connection/*!*/ connection) {
+  static PresenceManager getInstance(Connection connection) {
     var manager = instances[connection];
     if (manager == null) {
       manager = PresenceManager(connection);
@@ -60,7 +60,7 @@ class PresenceManager implements PresenceApi {
   }
 
   @override
-  void acceptSubscription(Jid/*!*/ to) {
+  void acceptSubscription(Jid to) {
     var presenceStanza = PresenceStanza.withType(PresenceType.SUBSCRIBED);
     presenceStanza.id = _getPresenceId();
     presenceStanza.toJid = to;

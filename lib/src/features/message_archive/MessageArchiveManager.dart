@@ -26,7 +26,7 @@ class MessageArchiveManager {
 
   bool get enabled => MAMNegotiator.getInstance(_connection).enabled;
 
-  bool/*?*/ get hasExtended => MAMNegotiator.getInstance(_connection).hasExtended;
+  bool? get hasExtended => MAMNegotiator.getInstance(_connection).hasExtended;
 
   bool get isQueryByDateSupported => MAMNegotiator.getInstance(_connection).isQueryByDateSupported;
 
@@ -45,7 +45,7 @@ class MessageArchiveManager {
     _connection.writeStanza(iqStanza);
   }
 
-  void queryByTime({DateTime/*?*/ start, DateTime/*?*/ end, Jid/*?*/ jid}) {
+  void queryByTime({DateTime? start, DateTime? end, Jid? jid}) {
     if (start == null && end == null && jid == null) {
       queryAll();
     } else {
@@ -73,7 +73,7 @@ class MessageArchiveManager {
     }
   }
 
-  void queryById({String/*?*/ beforeId, String/*?*/ afterId, Jid/*?*/ jid}) {
+  void queryById({String? beforeId, String? afterId, Jid? jid}) {
     if (beforeId == null && afterId == null && jid == null) {
       queryAll();
     } else {

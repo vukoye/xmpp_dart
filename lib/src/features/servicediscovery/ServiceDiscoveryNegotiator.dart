@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
@@ -28,9 +29,9 @@ class ServiceDiscoveryNegotiator extends Negotiator {
     return instance;
   }
 
-  IqStanza fullRequestStanza;
+  IqStanza? fullRequestStanza;
 
-  StreamSubscription<AbstractStanza> subscription;
+  late StreamSubscription<AbstractStanza> subscription;
 
   final Connection _connection;
 
@@ -115,9 +116,8 @@ class ServiceDiscoveryNegotiator extends Negotiator {
   }
 
   bool isFeatureSupported(String feature) {
-    return _supportedFeatures.firstWhere(
-            (element) => element.textValue == feature,
-            orElse: () => null) !=
+    return _supportedFeatures.firstWhereOrNull(
+            (element) => element.textValue == feature) !=
         null;
   }
 
@@ -127,7 +127,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
 
   bool isDiscoInfoQuery(IqStanza stanza) {
     return stanza.type == IqStanzaType.GET &&
-        stanza.toJid.fullJid == _connection.fullJid.fullJid &&
+        stanza.toJid!.fullJid == _connection.fullJid.fullJid &&
         stanza.children
             .where((element) =>
                 element.name == 'query' &&

@@ -5,7 +5,7 @@ class FieldElement extends XmppElement {
   FieldElement() : super('field');
 
   FieldElement.build(
-      {String /*?*/ varAttr, String /*?*/ typeAttr, String /*?*/ value})
+      {String? varAttr, String? typeAttr, String? value})
       : super('field') {
     if (varAttr != null) {
       addAttribute(XmppAttribute('var', varAttr));
@@ -20,9 +20,9 @@ class FieldElement extends XmppElement {
     }
   }
 
-  String /*?*/ get varAttr => getAttribute('var')?.value;
+  String? get varAttr => getAttribute('var')?.value;
 
-  String /*?*/ get typeAttr => getAttribute('type')?.value;
+  String? get typeAttr => getAttribute('type')?.value;
 
-  String /*?*/ get value => getChild('value')?.textValue;
+  String? get value => getChild('value')?.textValue;
 }

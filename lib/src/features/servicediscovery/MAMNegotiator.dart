@@ -26,9 +26,9 @@ class MAMNegotiator extends Negotiator {
     return instance;
   }
 
-  IqStanza _myUnrespondedIqStanza;
+  late IqStanza _myUnrespondedIqStanza;
 
-  StreamSubscription<AbstractStanza> _subscription;
+  late StreamSubscription<AbstractStanza> _subscription;
 
   final Connection _connection;
 
@@ -36,7 +36,7 @@ class MAMNegotiator extends Negotiator {
 
   bool enabled = false;
 
-  bool hasExtended;
+  bool? hasExtended;
 
   MAMNegotiator(this._connection) {
     expectedName = 'urn:xmpp:mam';

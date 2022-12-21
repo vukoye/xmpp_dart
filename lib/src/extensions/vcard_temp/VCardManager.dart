@@ -65,7 +65,7 @@ class VCardManager {
     return _vCards;
   }
 
-  void _processStanza(AbstractStanza/*?*/ stanza) {
+  void _processStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       final unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
       if (unrespondedStanza != null) {
@@ -74,7 +74,7 @@ class VCardManager {
           if (vCardChild != null) {
             var vCard = VCard(vCardChild);
             if (stanza.fromJid != null) {
-              _vCards[stanza.fromJid/*!*/.userAtDomain] = vCard;
+              _vCards[stanza.fromJid!.userAtDomain] = vCard;
             } else {
               _vCards[_connection.fullJid.userAtDomain] = vCard;
             }

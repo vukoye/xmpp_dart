@@ -11,7 +11,7 @@ class ReconnectionManager {
   int totalReconnections = 3;
   int timeOutInMs;
   int counter = 0;
-  Timer/*?*/ timer;
+  Timer? timer;
 
   ReconnectionManager(Connection connection) : this._connection = connection, timeOutInMs = connection.account.reconnectionTimeout {
     _connection.connectionStateStream.listen(connectionStateHandler);
@@ -30,7 +30,7 @@ class ReconnectionManager {
       timeOutInMs = initialTimeout;
       counter = 0;
       if (timer != null) {
-        timer.cancel();
+        timer!.cancel();
         timer = null;
       }
     }
@@ -38,7 +38,7 @@ class ReconnectionManager {
 
   void handleReconnection() {
     if (timer != null) {
-      timer.cancel();
+      timer!.cancel();
     }
     if (counter < totalReconnections) {
       timer = Timer(Duration(milliseconds: timeOutInMs), _connection.reconnect);
