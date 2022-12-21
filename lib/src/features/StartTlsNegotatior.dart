@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
@@ -10,11 +11,10 @@ import '../logger/Log.dart';
 
 class StartTlsNegotiator extends Negotiator {
   static const TAG = 'StartTlsNegotiator';
-  Connection _connection;
+  Connection/*!*/ _connection;
   StreamSubscription<Nonza> subscription;
 
-  StartTlsNegotiator(Connection connection) {
-    _connection = connection;
+  StartTlsNegotiator(Connection connection) : _connection = connection {
     expectedName = 'StartTlsNegotiator';
     expectedNameSpace = 'urn:ietf:params:xml:ns:xmpp-tls';
     priorityLevel = 1;
@@ -23,7 +23,7 @@ class StartTlsNegotiator extends Negotiator {
   @override
   void negotiate(List<Nonza> nonzas) {
     Log.d(TAG, 'negotiating starttls');
-    if (match(nonzas) != null) {
+    if (match(nonzas).firstOrNull != null) {
       state = NegotiatorState.NEGOTIATING;
       subscription = _connection.inNonzasStream.listen(checkNonzas);
       _connection.writeNonza(StartTlsResponse());

@@ -11,13 +11,12 @@ import 'package:xmpp_stone/src/features/Negotiator.dart';
 import '../elements/nonzas/Nonza.dart';
 
 class SessionInitiationNegotiator extends Negotiator {
-  Connection _connection;
-  StreamSubscription<AbstractStanza> subscription;
+  Connection/*!*/ _connection;
+  StreamSubscription<AbstractStanza>/*?*/ subscription;
 
-  IqStanza sentRequest;
+  IqStanza/*?*/ sentRequest;
 
-  SessionInitiationNegotiator(Connection connection) {
-    _connection = connection;
+  SessionInitiationNegotiator(Connection connection) : _connection = connection {
     expectedName = 'SessionInitiationNegotiator';
   }
   @override

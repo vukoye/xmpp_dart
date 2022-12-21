@@ -11,13 +11,12 @@ import 'package:xmpp_stone/src/features/Negotiator.dart';
 import '../elements/nonzas/Nonza.dart';
 
 class BindingResourceConnectionNegotiator extends Negotiator {
-  Connection _connection;
-  StreamSubscription<AbstractStanza> subscription;
+  Connection/*!*/ _connection;
+  StreamSubscription<AbstractStanza>/*?*/ subscription;
   static const String BIND_NAME = 'bind';
   static const String BIND_ATTRIBUTE = 'urn:ietf:params:xml:ns:xmpp-bind';
 
-  BindingResourceConnectionNegotiator(Connection connection) {
-    _connection = connection;
+  BindingResourceConnectionNegotiator(Connection connection) : _connection = connection {
     priorityLevel = 100;
     expectedName = 'BindingResourceConnectionNegotiator';
   }
@@ -45,7 +44,7 @@ class BindingResourceConnectionNegotiator extends Negotiator {
         var jid = Jid.fromFullJid(jidValue);
         _connection.fullJidRetrieved(jid);
         state = NegotiatorState.DONE;
-        subscription.cancel();
+        subscription?.cancel();
       }
     }
   }
