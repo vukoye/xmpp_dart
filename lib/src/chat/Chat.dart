@@ -18,6 +18,7 @@ class ChatImpl implements Chat {
   @override
   Jid get jid => _jid;
   ChatState? _myState;
+
   @override
   ChatState? get myState => _myState;
 
@@ -69,18 +70,20 @@ class ChatImpl implements Chat {
   }
 
   @override
-  set myState(ChatState state) {
-    var stanza =
-        MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
-    stanza.toJid = _jid;
-    stanza.fromJid = _connection.fullJid;
-    var stateElement =
-        XmppElement(state.toString().split('.').last.toLowerCase());
-    stateElement.addAttribute(
-        XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates'));
-    stanza.addChild(stateElement);
-    _connection.writeStanza(stanza);
-    _myState = state;
+  set myState(ChatState? state) {
+    if (state != null) {
+      var stanza =
+          MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+      stanza.toJid = _jid;
+      stanza.fromJid = _connection.fullJid;
+      var stateElement =
+          XmppElement(state.toString().split('.').last.toLowerCase());
+      stateElement.addAttribute(
+          XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates'));
+      stanza.addChild(stateElement);
+      _connection.writeStanza(stanza);
+      _myState = state;
+    }
   }
 }
 
@@ -92,7 +95,7 @@ abstract class Chat {
   Stream<ChatState> get remoteStateStream;
   List<Message> messages = [];
   void sendMessage(String text);
-  set myState(ChatState state);
+  set myState(ChatState? state);
 }
 
 enum ChatState { INACTIVE, ACTIVE, GONE, COMPOSING, PAUSED }

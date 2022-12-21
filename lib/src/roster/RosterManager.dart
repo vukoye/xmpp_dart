@@ -24,7 +24,7 @@ class RosterManager {
   }
 
   final Map<String, Tuple2<IqStanza, Completer?>> _myUnrespondedIqStanzas =
-      <String, Tuple2<IqStanza, Completer>>{};
+      <String, Tuple2<IqStanza, Completer?>>{};
 
   final StreamController<List<Buddy>> _rosterController =
       StreamController<List<Buddy>>.broadcast();
@@ -125,7 +125,7 @@ class RosterManager {
 
   bool _isFullJidRequest(IqStanza iqStanza) {
     return (iqStanza.type == IqStanzaType.GET &&
-        (iqStanza.getChild('query')?.children?.isEmpty ?? false));
+        (iqStanza.getChild('query')?.children.isEmpty ?? false));
   }
 
   bool _isRosterSet(IqStanza iqStanza) {

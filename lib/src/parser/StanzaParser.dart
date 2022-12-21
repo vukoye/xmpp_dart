@@ -93,8 +93,8 @@ class StanzaParser {
 
   static XmppElement parseElement(xml.XmlElement xmlElement) {
     XmppElement xmppElement;
-    var parentName = (xmlElement.parent as xml.XmlElement?)?.name?.local ?? '';
-    var name = xmlElement?.name?.local;
+    var parentName = (xmlElement.parent as xml.XmlElement?)?.name.local ?? '';
+    var name = xmlElement.name.local;
     if (parentName == 'query' && name == 'identity') {
       xmppElement = Identity();
     } else if (parentName == 'query' && name == 'feature') {
@@ -108,7 +108,7 @@ class StanzaParser {
     }
     xmlElement.attributes.forEach((xmlAttribute) {
       xmppElement.addAttribute(
-          XmppAttribute(xmlAttribute?.name?.local, xmlAttribute?.value));
+          XmppAttribute(xmlAttribute.name.local, xmlAttribute.value));
     });
     xmlElement.children.forEach((xmlChild) {
       if (xmlChild is xml.XmlElement) {

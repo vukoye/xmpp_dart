@@ -5,20 +5,13 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xml/xml.dart' as xml;
 import 'package:synchronized/synchronized.dart';
 import 'package:xmpp_stone/src/ReconnectionManager.dart';
-import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 
-import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/extensions/ping/PingManager.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
-import 'package:xmpp_stone/src/presence/PresenceManager.dart';
-import 'package:xmpp_stone/src/roster/RosterManager.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
-import 'logger/Log.dart';
 
 enum XmppConnectionState {
   Idle,
@@ -177,6 +170,12 @@ xml:lang='en'
 
     //fix for multiple roots issue
     response1 = '<xmpp_stone>$response1</xmpp_stone>';
+
+    // Ignore declarations to avoid parsing problem
+    final xmlDeclarationMatcher = RegExp(r'<\?xml [^?]*\?>');
+    // final xmlDeclarations = xmlDeclarationMatcher.allMatches(response1);
+    // response1 = xmlDeclarations.map((e) => e[0]).join('') + '\n' + response1.replaceAll(xmlDeclarationMatcher, '');
+    response1 = response1.replaceAll(xmlDeclarationMatcher, '');
     return response1;
   }
 
@@ -281,7 +280,7 @@ xml:lang='en'
       fullResponse = response;
     }
 
-    if (fullResponse != null && fullResponse.isNotEmpty) {
+    if (fullResponse.isNotEmpty) {
       xml.XmlNode xmlResponse;
       try {
         xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild!;

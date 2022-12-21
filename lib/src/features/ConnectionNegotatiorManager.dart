@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:collection/collection.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
@@ -52,7 +53,7 @@ class ConnectionNegotiatorManager {
         .toList();
     supportedNegotiatorList.forEach((negotiator) {
       var matchingNonzas = negotiator.match(nonzas);
-      if (matchingNonzas != null && matchingNonzas.isNotEmpty) {
+      if (matchingNonzas.isNotEmpty) {
         waitingNegotiators
             .add(NegotiatorWithSupportedNonzas(negotiator, matchingNonzas));
       }
@@ -132,14 +133,14 @@ class ConnectionNegotiatorManager {
 
   NegotiatorWithSupportedNonzas? pickNextNegotiator() {
     if (waitingNegotiators.isEmpty) return null;
-    var negotiatorWithData = waitingNegotiators.firstWhere((element) {
+    var negotiatorWithData = waitingNegotiators.firstWhereOrNull((element) {
       Log.d(TAG,
           'Found matching negotiator ${element.negotiator.isReady().toString()}');
       return element.negotiator.isReady();
-    }, orElse: () {
+    });
+    if (negotiatorWithData == null) {
       Log.d(TAG, 'No matching negotiator');
-      return null;
-    } as NegotiatorWithSupportedNonzas Function()?);
+    }
     waitingNegotiators.remove(negotiatorWithData);
     return negotiatorWithData;
   }
@@ -149,7 +150,7 @@ class ConnectionNegotiatorManager {
         'ADDING FEATURES count: ${supportedFeatures.length} ${supportedFeatures} ');
     supportedNegotiatorList.forEach((negotiator) {
       var matchingNonzas = negotiator.match(supportedFeatures);
-      if (matchingNonzas != null && matchingNonzas.isNotEmpty) {
+      if (matchingNonzas.isNotEmpty) {
         Log.d(TAG, 'Adding negotiator: ${negotiator} ${matchingNonzas}');
         waitingNegotiators
             .add(NegotiatorWithSupportedNonzas(negotiator, matchingNonzas));

@@ -17,6 +17,7 @@ class IqStanza extends AbstractStanza {
   }
 
   IqStanza(String id, IqStanzaType type) : _id = id, _type = type, super('iq') {
+    this.id = id;
     addAttribute(
         XmppAttribute('type', _type.toString().split('.').last.toLowerCase()));
   }
@@ -26,6 +27,6 @@ enum IqStanzaType { ERROR, SET, RESULT, GET, INVALID, TIMEOUT }
 
 class IqStanzaResult {
   late IqStanzaType type;
-  String description;
+  String description = '';
   String? iqStanzaId;
 }

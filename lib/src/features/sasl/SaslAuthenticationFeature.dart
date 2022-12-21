@@ -34,7 +34,7 @@ class SaslAuthenticationFeature extends Negotiator {
 
   @override
   void negotiate(List<Nonza> nonzas) {
-    if (nonzas != null || nonzas.isNotEmpty) {
+    if (nonzas.isNotEmpty) {
       _populateOfferedMechanism(nonzas[0]);
       _process();
     }

@@ -40,16 +40,12 @@ class Buddy {
     switch (typeString) {
       case 'none':
         return SubscriptionType.NONE;
-        break;
       case 'to':
         return SubscriptionType.TO;
-        break;
       case 'from':
         return SubscriptionType.FROM;
-        break;
       case 'both':
         return SubscriptionType.BOTH;
-        break;
     }
     return null;
   }

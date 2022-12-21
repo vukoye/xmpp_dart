@@ -20,13 +20,13 @@ class Message {
   Jid _from;
   String? _text;
   DateTime _time;
+  DateTime? _delayTime;
 
   //TODO: check purpose vs stanza_id
   String? _messageId;
   String? _stanzaId;
   String? _threadId;
   String? _queryId; //To be determined if needed
-  bool _isDelayed;
   bool _isForwarded;
   MessageStanzaType? _type;
 
@@ -38,19 +38,19 @@ class Message {
       {String? stanzaId = '',
       String? threadId = '',
       bool isForwarded = false,
-      bool isDelayed = false,
+      DateTime? delayTime,
       String? queryId,
       String? messageId,
       MessageStanzaType? type,
-      ChatState? chatState}) {
+      ChatState? chatState}) :
+      this._isForwarded = isForwarded {
     _stanzaId = stanzaId;
     _threadId = threadId;
-    _isForwarded = isForwarded;
-    _isDelayed = isDelayed;
     _queryId = queryId;
     _messageId = messageId;
     _type = type;
     _chatState = chatState;
+    this._delayTime = delayTime;
   }
 
   ChatState? get chatState => _chatState;
@@ -83,19 +83,20 @@ class Message {
       if (forwarded != null) {
         var message = forwarded.getChild('message');
         if (message != null) {
-          var to = Jid.fromFullJid(message.getAttribute('to')?.value);
-          var from = Jid.fromFullJid(message.getAttribute('from')?.value);
+          var to = Jid.fromFullJid(message.getAttribute('to')!.value);
+          var from = Jid.fromFullJid(message.getAttribute('from')!.value);
           var body = message.getChild('body')?.textValue;
           var type = (_parseType(message));
           var chatState = _parseState(message);
           var threadId = message.getChild('thread')?.textValue;
-          var dateTime = _parseDelayed(forwarded);
-          var delayed = dateTime != null;
-          dateTime ??= DateTime.now();
-          return Message(stanza, to, from, body, dateTime,
+          var delayTime = _parseDelayed(forwarded);
+          if (delayTime == null) {
+            Log.e(TAG, 'No delay found in forwarded message ${stanza.buildXml().toXmlString()}');
+          }
+          return Message(stanza, to, from, body, DateTime.now(),
               threadId: threadId,
               isForwarded: true,
-              isDelayed: delayed,
+              delayTime: delayTime,
               chatState: chatState,
               type: type);
         }
@@ -114,27 +115,24 @@ class Message {
       return null;
     }
     try {
-      var queryId = result?.getAttribute('queryId')?.value;
+      var queryId = result.getAttribute('queryId')?.value;
       var forwarded = result.getChild('forwarded');
       if (forwarded != null) {
         var message = forwarded.getChild('message');
         if (message != null) {
-          var to = Jid.fromFullJid(message.getAttribute('to')?.value);
-          var from = Jid.fromFullJid(message.getAttribute('from')?.value);
+          var to = Jid.fromFullJid(message.getAttribute('to')!.value);
+          var from = Jid.fromFullJid(message.getAttribute('from')!.value);
           var body = message.getChild('body')?.textValue;
           var threadId = message.getChild('thread')?.textValue;
           var stanzaId =
               message.getChild('stanza-id')?.getAttribute('id')?.value;
           var type = (_parseType(message));
-          var dateTime = _parseDelayed(forwarded);
-          dateTime ??= DateTime.now();
-          var delayed = dateTime != null;
+          var dateTime = _parseDelayed(forwarded) ?? DateTime.now();
           var chatState = _parseState(message);
           return Message(stanza, to, from, body, dateTime,
               threadId: threadId,
               isForwarded: true,
               queryId: queryId,
-              isDelayed: delayed,
               stanzaId: stanzaId,
               chatState: chatState,
               type: type);
@@ -212,7 +210,7 @@ class Message {
   static DateTime? _parseDelayed(XmppElement element) {
     var delayed = element.getChild('delay');
     if (delayed != null) {
-      var stamped = delayed.getAttribute('stamp')!.value!;
+      var stamped = delayed.getAttribute('stamp')!.value;
       try {
         var dateTime = DateTime.parse(stamped);
         return dateTime;
@@ -247,13 +245,19 @@ class Message {
     _time = value;
   }
 
+  DateTime? get delayTime => _delayTime;
+
+  set delayTime(DateTime? value) {
+    _delayTime = value;
+  }
+
   String? get stanzaId => _stanzaId;
 
   String? get threadId => _threadId;
 
   String? get queryId => _queryId;
 
-  bool get isDelayed => _isDelayed;
+  bool get isDelayed => _isForwarded || _delayTime != null;
 
   bool get isForwarded => _isForwarded;
 

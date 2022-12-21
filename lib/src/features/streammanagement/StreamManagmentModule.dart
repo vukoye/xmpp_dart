@@ -10,7 +10,6 @@ import 'package:xmpp_stone/src/elements/nonzas/RNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/ResumeNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/ResumedNonza.dart';
 import 'package:xmpp_stone/src/elements/nonzas/SMNonza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamState.dart';
 
 import '../../../xmpp_stone.dart';
@@ -98,7 +97,7 @@ class StreamManagementModule extends Negotiator {
   //TODO: Improve
   @override
   void negotiate(List<Nonza> nonzas) {
-    if (nonzas != null && nonzas.isNotEmpty && SMNonza.match(nonzas[0]) && _connection.authenticated) {
+    if (nonzas.isNotEmpty && SMNonza.match(nonzas[0]) && _connection.authenticated) {
       state = NegotiatorState.NEGOTIATING;
       inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);
       if (streamState.isResumeAvailable()) {
@@ -111,7 +110,7 @@ class StreamManagementModule extends Negotiator {
 
   @override
   bool isReady() {
-    return super.isReady() && (isResumeAvailable() || (_connection.fullJid.resource != null && _connection.fullJid.resource.isNotEmpty));
+    return super.isReady() && (isResumeAvailable() || _connection.fullJid.resource.isNotEmpty);
   }
 
   void parseNonza(Nonza nonza) {

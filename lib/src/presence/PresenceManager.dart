@@ -121,41 +121,36 @@ class PresenceManager implements PresenceApi {
   }
 
   void _processPresenceStanza(PresenceStanza presenceStanza) {
-    if (presenceStanza.type == null) {
-      //presence event
-      _presenceStreamController.add(PresenceData(presenceStanza.show, presenceStanza.status, presenceStanza.fromJid));
-    } else {
-      switch (presenceStanza.type) {
-        case PresenceType.SUBSCRIBE:
-          var subscriptionEvent = SubscriptionEvent();
-          subscriptionEvent.type = SubscriptionEventType.REQUEST;
-          subscriptionEvent.jid = presenceStanza.fromJid;
-          _subscribeStreamController.add(subscriptionEvent);
-          break;
-        case PresenceType.ERROR:
-          _handleErrorEvent(presenceStanza);
-          break;
-        case PresenceType.UNSUBSCRIBE:
-          break;
-        case PresenceType.PROBE:
-          break;
-        case PresenceType.SUBSCRIBED:
-          var subscriptionEvent = SubscriptionEvent();
-          subscriptionEvent.type = SubscriptionEventType.ACCEPTED;
-          subscriptionEvent.jid = presenceStanza.fromJid;
-          _subscribeStreamController.add(subscriptionEvent);
-          break;
-        case PresenceType.UNSUBSCRIBED:
-          var subscriptionEvent = SubscriptionEvent();
-          subscriptionEvent.type = SubscriptionEventType.DECLINED;
-          subscriptionEvent.jid = presenceStanza.fromJid;
-          _subscribeStreamController.add(subscriptionEvent);
-          break;
-        case PresenceType.UNAVAILABLE:
-          //presence event
-          _presenceStreamController.add(PresenceData(PresenceShowElement.XA, 'Unavailable', presenceStanza.fromJid));
-          break;
-      }
+    switch (presenceStanza.type) {
+      case PresenceType.SUBSCRIBE:
+        var subscriptionEvent = SubscriptionEvent(SubscriptionEventType.REQUEST)
+          ..jid = presenceStanza.fromJid;
+        _subscribeStreamController.add(subscriptionEvent);
+        break;
+      case PresenceType.ERROR:
+        _handleErrorEvent(presenceStanza);
+        break;
+      case PresenceType.UNSUBSCRIBE:
+        break;
+      case PresenceType.PROBE:
+        break;
+      case PresenceType.SUBSCRIBED:
+        var subscriptionEvent = SubscriptionEvent(SubscriptionEventType.ACCEPTED)
+          ..jid = presenceStanza.fromJid;
+        _subscribeStreamController.add(subscriptionEvent);
+        break;
+      case PresenceType.UNSUBSCRIBED:
+        var subscriptionEvent = SubscriptionEvent(SubscriptionEventType.DECLINED)
+          ..jid = presenceStanza.fromJid;
+        _subscribeStreamController.add(subscriptionEvent);
+        break;
+      case PresenceType.UNAVAILABLE:
+        //presence event
+        _presenceStreamController.add(PresenceData(PresenceShowElement.XA, 'Unavailable', presenceStanza.fromJid));
+        break;
+      case null:
+        //presence event
+        _presenceStreamController.add(PresenceData(presenceStanza.show, presenceStanza.status, presenceStanza.fromJid));
     }
   }
 

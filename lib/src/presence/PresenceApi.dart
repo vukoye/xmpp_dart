@@ -29,6 +29,8 @@ enum SubscriptionEventType { REQUEST, ACCEPTED, DECLINED }
 class SubscriptionEvent {
   SubscriptionEventType type;
   Jid? jid;
+
+  SubscriptionEvent(this.type);
 }
 
 class PresenceErrorEvent {
