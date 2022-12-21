@@ -15,9 +15,9 @@ class SaslAuthenticationFeature extends Negotiator {
 
   String _password;
 
-  SaslAuthenticationFeature(Connection connection, String password) {
-    _password = password;
-    _connection = connection;
+  SaslAuthenticationFeature(Connection connection, String password) :
+    _connection = connection,
+    _password = password {
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_1);
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_256);
     _supportedMechanisms.add(SaslMechanism.PLAIN);
@@ -43,7 +43,7 @@ class SaslAuthenticationFeature extends Negotiator {
     var mechanism = _supportedMechanisms.firstWhere(
         (mch) => _offeredMechanisms.contains(mch),
         orElse: _handleAuthNotSupported);
-    AbstractSaslHandler saslHandler;
+    AbstractSaslHandler/*?*/ saslHandler;
     switch (mechanism) {
       case SaslMechanism.PLAIN:
         saslHandler = PlainSaslHandler(_connection, _password);

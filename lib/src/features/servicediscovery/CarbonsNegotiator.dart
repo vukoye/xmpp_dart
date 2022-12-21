@@ -52,12 +52,12 @@ class CarbonsNegotiator extends Negotiator {
   void negotiate(List<Nonza> nonzas) {
     if (match(nonzas).isNotEmpty) {
       state = NegotiatorState.NEGOTIATING;
-      sendRequest();
-      _subscription = _connection.inStanzasStream.listen(checkStanzas);
+      _sendRequest();
+      _subscription = _connection.inStanzasStream.listen(_checkStanzas);
     }
   }
 
-  void sendRequest() {
+  void _sendRequest() {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     iqStanza.addAttribute(XmppAttribute('xmlns', 'jabber:client'));
     var element = XmppElement('enable');
@@ -67,7 +67,7 @@ class CarbonsNegotiator extends Negotiator {
     _connection.writeStanza(iqStanza);
   }
 
-  void checkStanzas(AbstractStanza stanza) {
+  void _checkStanzas(AbstractStanza stanza) {
     if (stanza is IqStanza && stanza.id == _myUnrespondedIqStanza.id) {
       enabled = stanza.type == IqStanzaType.RESULT;
       state = NegotiatorState.DONE;

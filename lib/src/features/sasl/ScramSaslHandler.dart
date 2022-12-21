@@ -26,7 +26,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
   String _password;
   String _username;
   String _clientNonce;
-  String _initialMessage;
+  String/*?*/ _initialMessage;
 
   final SaslMechanism _mechanism;
   Hash _hash;
@@ -35,18 +35,18 @@ class ScramSaslHandler implements AbstractSaslHandler {
 
   var serverSignature;
 
-  ScramSaslHandler(Connection connection, String password, this._mechanism) {
+  ScramSaslHandler(Connection connection, String password, this._mechanism) :
+    _connection = connection,
+    _password = password {
     _username = connection.fullJid.local;
-    _password = password;
-    _connection = connection;
     initMechanism();
-    generateRandomClientNonce();
+    _generateRandomClientNonce();
   }
 
   @override
   Future<AuthenticationResult> start() {
     subscription = _connection.inNonzasStream.listen(_parseAnswer);
-    sendInitialMessage();
+    _sendInitialMessage();
     return _completer.future;
   }
 
@@ -60,7 +60,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
     }
   }
 
-  void generateRandomClientNonce() {
+  void _generateRandomClientNonce() {
     var bytes = List<int>(CLIENT_NONCE_LENGTH);
     for (var i = 0; i < CLIENT_NONCE_LENGTH; i++) {
       bytes[i] = Random.secure().nextInt(256);
@@ -68,7 +68,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
     _clientNonce = base64.encode(bytes);
   }
 
-  void sendInitialMessage() {
+  void _sendInitialMessage() {
     _initialMessage = 'n=${saslEscape(normalize(_username))},r=${_clientNonce}';
     var bytes = utf8.encode('n,,$_initialMessage');
     var message = CryptoUtils.bytesToBase64(bytes, false, false);
@@ -87,13 +87,13 @@ class ScramSaslHandler implements AbstractSaslHandler {
         _fireAuthFailed('Auth Error in sent username');
       } else if (nonza.name == 'challenge') {
         //challenge
-        challengeFirst(nonza.textValue);
+        _challengeFirst(nonza.textValue/*!*/);
       }
     } else if (_scramState == ScramStates.RESPONSE_SENT) {
       if (nonza.name == 'failure') {
         _fireAuthFailed('Auth Error in challenge');
       } else if (nonza.name == 'success') {
-        verifyServerHasKey(nonza.textValue);
+        verifyServerHasKey(nonza.textValue/*!*/);
       }
     }
   }
@@ -117,7 +117,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
     return utf8.decode(list).split(',').map((i) => i.trim()).toList();
   }
 
-  void challengeFirst(String content) {
+  void _challengeFirst(String content) {
     var serverFirstMessage = base64.decode(content);
     var tokens = tokenizeGS2header(serverFirstMessage);
 

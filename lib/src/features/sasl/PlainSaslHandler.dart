@@ -8,16 +8,15 @@ import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
 
 class PlainSaslHandler implements AbstractSaslHandler {
-  Connection _connection;
+  Connection/*!*/ _connection;
   StreamSubscription<Nonza> subscription;
   final _completer = Completer<AuthenticationResult>();
 
-  String _password;
+  String/*!*/ _password;
 
-  PlainSaslHandler(Connection connection, String password) {
+  PlainSaslHandler(Connection connection, String password) : 
+    _connection = connection,
     _password = password;
-    _connection = connection;
-  }
 
   @override
   Future<AuthenticationResult> start() {
