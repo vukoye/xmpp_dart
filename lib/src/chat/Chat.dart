@@ -31,14 +31,14 @@ class ChatImpl implements Chat {
 
   final StreamController<Message> _newMessageController =
       StreamController.broadcast();
-  final StreamController<ChatState?> _remoteStateController =
+  final StreamController<ChatState> _remoteStateController =
       StreamController.broadcast();
 
   @override
   Stream<Message> get newMessageStream => _newMessageController.stream;
   @override
   Stream<ChatState > get remoteStateStream =>
-      _remoteStateController.stream as Stream<ChatState>;
+      _remoteStateController.stream;
 
   ChatImpl(this._jid, this._connection);
 
@@ -51,7 +51,7 @@ class ChatImpl implements Chat {
 
       if (message.chatState != null && !message.isDelayed) {
         _remoteState = message.chatState;
-        _remoteStateController.add(message.chatState);
+        _remoteStateController.add(message.chatState!);
       }
     }
   }
