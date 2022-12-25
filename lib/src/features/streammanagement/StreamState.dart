@@ -3,7 +3,7 @@ import 'dart:collection';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
 class StreamState {
-  String id;
+  String? id;
   bool streamManagementEnabled = false;
   bool streamResumeEnabled = false;
   int lastSentStanza = 0;

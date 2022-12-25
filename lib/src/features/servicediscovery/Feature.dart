@@ -5,7 +5,7 @@ class Feature extends Nonza {
   Feature() {
     name = 'feature';
   }
-  String get xmppVar {
+  String? get xmppVar {
     return getAttribute('var')?.value;
   }
 }

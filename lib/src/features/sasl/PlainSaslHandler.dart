@@ -8,20 +8,20 @@ import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
 
 class PlainSaslHandler implements AbstractSaslHandler {
-  Connection _connection;
-  StreamSubscription<Nonza> subscription;
+  Connection? _connection;
+  late StreamSubscription<Nonza> subscription;
   final _completer = Completer<AuthenticationResult>();
 
-  String _password;
+  String? _password;
 
-  PlainSaslHandler(Connection connection, String password) {
+  PlainSaslHandler(Connection? connection, String? password) {
     _password = password;
     _connection = connection;
   }
 
   @override
   Future<AuthenticationResult> start() {
-    subscription = _connection.inNonzasStream.listen(_parseAnswer);
+    subscription = _connection!.inNonzasStream.listen(_parseAnswer);
     sendPlainAuthMessage();
     return _completer.future;
   }
@@ -39,7 +39,7 @@ class PlainSaslHandler implements AbstractSaslHandler {
 
   void sendPlainAuthMessage() {
     var authString =
-        '\u0000' + _connection.fullJid.local + '\u0000' + _password;
+        '\u0000' + _connection!.fullJid.local! + '\u0000' + _password!;
     var bytes = utf8.encode(authString);
     var base64 = CryptoUtils.bytesToBase64(bytes);
     var nonza = Nonza();
@@ -48,6 +48,6 @@ class PlainSaslHandler implements AbstractSaslHandler {
         XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
     nonza.addAttribute(XmppAttribute('mechanism', 'PLAIN'));
     nonza.textValue = base64;
-    _connection.writeNonza(nonza);
+    _connection!.writeNonza(nonza);
   }
 }

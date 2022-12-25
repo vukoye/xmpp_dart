@@ -5,16 +5,16 @@ import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/messages/MessageApi.dart';
 
 class MessageHandler implements MessageApi {
-  static Map<Connection, MessageHandler> instances =
-      <Connection, MessageHandler>{};
+  static Map<Connection?, MessageHandler> instances =
+      <Connection?, MessageHandler>{};
 
-  Stream<MessageStanza> get messagesStream {
-    return _connection.inStanzasStream
+  Stream<MessageStanza?> get messagesStream {
+    return _connection!.inStanzasStream
         .where((abstractStanza) => abstractStanza is MessageStanza)
-        .map((stanza) => stanza as MessageStanza);
+        .map((stanza) => stanza as MessageStanza?);
   }
 
-  static MessageHandler getInstance(Connection connection) {
+  static MessageHandler getInstance(Connection? connection) {
     var manager = instances[connection];
     if (manager == null) {
       manager = MessageHandler(connection);
@@ -24,9 +24,9 @@ class MessageHandler implements MessageApi {
     return manager;
   }
 
-  Connection _connection;
+  Connection? _connection;
 
-  MessageHandler(Connection connection) {
+  MessageHandler(Connection? connection) {
     _connection = connection;
   }
 
@@ -39,8 +39,8 @@ class MessageHandler implements MessageApi {
     var stanza =
         MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = jid;
-    stanza.fromJid = _connection.fullJid;
+    stanza.fromJid = _connection!.fullJid;
     stanza.body = text;
-    _connection.writeStanza(stanza);
+    _connection!.writeStanza(stanza);
   }
 }

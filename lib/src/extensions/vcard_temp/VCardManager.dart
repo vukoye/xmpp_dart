@@ -30,10 +30,10 @@ class VCardManager {
     _connection.inStanzasStream.listen(_processStanza);
   }
 
-  final Map<String, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas =
-      <String, Tuple2<IqStanza, Completer>>{};
+  final Map<String?, Tuple2<IqStanza, Completer>> _myUnrespondedIqStanzas =
+      <String?, Tuple2<IqStanza, Completer>>{};
 
-  final Map<String, VCard> _vCards = <String, VCard>{};
+  final Map<String?, VCard> _vCards = <String?, VCard>{};
 
   Future<VCard> getSelfVCard() {
     var completer = Completer<VCard>();
@@ -66,11 +66,11 @@ class VCardManager {
 
   void _connectionStateProcessor(XmppConnectionState event) {}
 
-  Map<String, VCard> getAllReceivedVCards() {
+  Map<String?, VCard> getAllReceivedVCards() {
     return _vCards;
   }
 
-  void _processStanza(AbstractStanza stanza) {
+  void _processStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
       if (_myUnrespondedIqStanzas[stanza.id] != null) {
@@ -79,14 +79,14 @@ class VCardManager {
           if (vCardChild != null) {
             var vCard = VCard(vCardChild);
             if (stanza.fromJid != null) {
-              _vCards[stanza.fromJid.userAtDomain] = vCard;
+              _vCards[stanza.fromJid!.userAtDomain] = vCard;
             } else {
               _vCards[_connection.fullJid.userAtDomain] = vCard;
             }
-            unrespondedStanza.item2.complete(vCard);
+            unrespondedStanza!.item2.complete(vCard);
           }
         } else if (stanza.type == IqStanzaType.ERROR) {
-          unrespondedStanza.item2
+          unrespondedStanza!.item2
               .complete(InvalidVCard(stanza.getChild('vCard')));
         }
       }

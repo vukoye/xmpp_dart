@@ -6,7 +6,7 @@ class ANonza extends Nonza {
   static String XMLNS = 'urn:xmpp:sm:3';
 
   static bool match(Nonza nonza) =>
-      (nonza.name == NAME && nonza.getAttribute('xmlns').value == XMLNS);
+      (nonza.name == NAME && nonza.getAttribute('xmlns')!.value == XMLNS);
 
   ANonza(int hValue) {
     name = NAME;

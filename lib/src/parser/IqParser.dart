@@ -5,12 +5,12 @@ import '../logger/Log.dart';
 class IqParser {
   static const TAG = 'IqParser';
 
-  static IqStanza parseIqStanza(String id, xml.XmlElement element) {
+  static IqStanza parseIqStanza(String? id, xml.XmlElement element) {
     var typeString = element.getAttribute('type');
     return IqStanza(id, _parseIqType(typeString));
   }
 
-  static IqStanzaType _parseIqType(String typeString) {
+  static IqStanzaType _parseIqType(String? typeString) {
     if (typeString == null) {
       Log.w(TAG, 'No type found for iq stanza');
       return IqStanzaType.INVALID;
