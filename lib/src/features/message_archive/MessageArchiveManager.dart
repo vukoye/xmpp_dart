@@ -1,3 +1,5 @@
+import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
@@ -45,7 +47,7 @@ class MessageArchiveManager {
     _connection.writeStanza(iqStanza);
   }
 
-  void queryByTime({DateTime? start, DateTime? end, Jid? jid}) {
+  void queryByTime({DateTime? start, DateTime? end, Jid? jid, int? max}) {
     if (start == null && end == null && jid == null) {
       queryAll();
     } else {
@@ -71,6 +73,16 @@ class MessageArchiveManager {
       }
       if (jid != null) {
         x.addField(FieldElement.build(varAttr: 'with', value: jid.userAtDomain));
+      }
+      if (max != null) {
+        query.addChild(
+          XmppElement('set')
+          ..addAttribute(
+            XmppAttribute('xmlns', 'http://jabber.org/protocol/rsm'))
+              ..addChild(XmppElement('max')
+              ..textValue = max.toString()
+            )
+        );
       }
       _connection.writeStanza(iqStanza);
     }
