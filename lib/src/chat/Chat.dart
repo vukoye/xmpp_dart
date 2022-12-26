@@ -6,6 +6,7 @@ import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
+import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'Message.dart';
 
@@ -42,6 +43,8 @@ class ChatImpl implements Chat {
 
   ChatImpl(this._jid, this._connection);
 
+  bool _requestedChatState = false;
+
   void parseMessage(Message message) {
     if (message.type == MessageStanzaType.CHAT) {
       if (message.text != null && message.text!.isNotEmpty) {
@@ -63,6 +66,9 @@ class ChatImpl implements Chat {
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
+    if (_requestedChatState) {
+      stanza.addChild(XmppElement('active')..addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates')));
+    }
     var message = Message.fromStanza(stanza);
     messages.add(message);
     _newMessageController.add(message);
@@ -85,6 +91,18 @@ class ChatImpl implements Chat {
       _myState = state;
     }
   }
+
+  void requestChatState() {
+    var request = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    request.fromJid = _connection.fullJid;
+    request.toJid = _jid;
+    var queryElement = XmppElement('query');
+    queryElement.addAttribute(
+        XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info'));
+    request.addChild(queryElement);
+    _connection.writeStanza(request);
+    _requestedChatState = true;
+  }
 }
 
 abstract class Chat {
@@ -95,6 +113,7 @@ abstract class Chat {
   Stream<ChatState> get remoteStateStream;
   List<Message> messages = [];
   void sendMessage(String text);
+  void requestChatState();
   set myState(ChatState? state);
 }
 
