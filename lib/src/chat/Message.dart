@@ -1,9 +1,9 @@
 import 'package:collection/collection.dart' show IterableExtension;
+import 'package:tuple/tuple.dart';
 import 'package:xmpp_stone/src/chat/Chat.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import '../elements/XmppElement.dart';
-import '../elements/stanzas/MessageStanza.dart';
 import '../logger/Log.dart';
 
 class Message {
@@ -34,6 +34,9 @@ class Message {
 
   String? get messageId => _messageId;
 
+  ChatMarkerType? chatMarkerType;
+  String? chatMarkerId;
+
   Message(this._messageStanza, this._to, this._from, this._text, this._time,
       {String? stanzaId = '',
       String? threadId = '',
@@ -42,7 +45,10 @@ class Message {
       String? queryId,
       String? messageId,
       MessageStanzaType? type,
-      ChatState? chatState}) :
+      ChatState? chatState,
+      this.chatMarkerType,
+      this.chatMarkerId,
+      }) :
       this._isForwarded = isForwarded {
     _stanzaId = stanzaId;
     _threadId = threadId;
@@ -93,12 +99,17 @@ class Message {
           if (delayTime == null) {
             Log.e(TAG, 'No delay found in forwarded message ${stanza.buildXml().toXmlString()}');
           }
+          final chatMarker = _parserChatMarker(message);
           return Message(stanza, to, from, body, DateTime.now(),
+              messageId: message.getAttribute('id')?.value,
               threadId: threadId,
               isForwarded: true,
               delayTime: delayTime,
               chatState: chatState,
-              type: type);
+              type: type,
+              chatMarkerType: chatMarker.item1,
+              chatMarkerId: chatMarker.item2,
+          );
         }
       }
     } catch (e) {
@@ -115,7 +126,7 @@ class Message {
       return null;
     }
     try {
-      var queryId = result.getAttribute('queryId')?.value;
+      var queryId = result.getAttribute('queryid')?.value;
       var forwarded = result.getChild('forwarded');
       if (forwarded != null) {
         var message = forwarded.getChild('message');
@@ -129,13 +140,18 @@ class Message {
           var type = (_parseType(message));
           var dateTime = _parseDelayed(forwarded) ?? DateTime.now();
           var chatState = _parseState(message);
+          final chatMarker = _parserChatMarker(message);
           return Message(stanza, to, from, body, dateTime,
+              messageId: message.getAttribute('id')?.value,
               threadId: threadId,
               isForwarded: true,
               queryId: queryId,
               stanzaId: stanzaId,
               chatState: chatState,
-              type: type);
+              type: type,
+              chatMarkerType: chatMarker.item1,
+              chatMarkerId: chatMarker.item2,
+            );
         }
       }
     } catch (e) {
@@ -183,6 +199,45 @@ class Message {
     }
   }
 
+  static Tuple2<ChatMarkerType?, String?> _parserChatMarker(XmppElement element) {
+    var marker = element.children.firstWhereOrNull(
+        (element) =>
+          element.getAttribute('xmlns')?.value == 'urn:xmpp:chat-markers:0'
+    );
+    if (marker == null) {
+      return Tuple2(null, null);
+    }
+    late final ChatMarkerType markerType;
+    late final String? markerId;
+    switch(marker.name) {
+      case 'markable':
+        markerType = ChatMarkerType.MARKABLE;
+        break;
+      case 'received':
+        markerType = ChatMarkerType.RECEIVED;
+        break;
+      case 'displayed':
+        markerType = ChatMarkerType.DISPLAYED;
+        break;
+      case 'acknowledged':
+        markerType = ChatMarkerType.ACKNOWLEDGED;
+        break;
+      default:
+        Log.e(TAG, 'Unexpected chat marker: ${marker.name}');
+        return Tuple2(null, null);
+    }
+    if (markerType == ChatMarkerType.MARKABLE) {
+      markerId = null;
+    } else {
+      markerId = marker.getAttribute('id')?.value;
+      if (markerId == null) {
+        Log.e(TAG, 'Expected marker id but got null');
+        return Tuple2(null, null);
+      }
+    }
+    return Tuple2(markerType, markerId);
+  }
+
   static ChatState _stateFromString(String? chatStateString) {
     switch (chatStateString) {
       case 'inactive':
@@ -200,11 +255,16 @@ class Message {
   }
 
   static Message _parseRegularMessage(MessageStanza stanza) {
+    final chatMarker = _parserChatMarker(stanza);
     return Message(
         stanza, stanza.toJid!, stanza.fromJid!, stanza.body, DateTime.now(),
+        messageId: stanza.id,
         chatState: _parseState(stanza),
         threadId: stanza.thread,
-        type: _parseType(stanza));
+        type: _parseType(stanza),
+        chatMarkerType: chatMarker.item1,
+        chatMarkerId: chatMarker.item2,
+      );
   }
 
   static DateTime? _parseDelayed(XmppElement element) {

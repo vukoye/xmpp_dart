@@ -8,7 +8,7 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
-import 'Message.dart';
+import 'package:xmpp_stone/src/logger/Log.dart';
 
 class ChatImpl implements Chat {
   static String TAG = 'Chat';
@@ -69,6 +69,10 @@ class ChatImpl implements Chat {
     if (_requestedChatState) {
       stanza.addChild(XmppElement('active')..addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates')));
     }
+    stanza.addChild(
+      XmppElement('markable')
+        ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:chat-markers:0'))
+    );
     var message = Message.fromStanza(stanza);
     messages.add(message);
     _newMessageController.add(message);
@@ -92,16 +96,47 @@ class ChatImpl implements Chat {
     }
   }
 
-  void requestChatState() {
-    var request = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
-    request.fromJid = _connection.fullJid;
-    request.toJid = _jid;
-    var queryElement = XmppElement('query');
-    queryElement.addAttribute(
-        XmppAttribute('xmlns', 'http://jabber.org/protocol/disco#info'));
-    request.addChild(queryElement);
-    _connection.writeStanza(request);
-    _requestedChatState = true;
+  @override
+  void sendChatMarker(Message receivedMessage, ChatMarkerType markerType) {
+    if (receivedMessage.messageId == null) {
+      Log.e('Chat', 'Received urn:xmpp:chat-markers:0 message without message id ${receivedMessage.messageStanza.buildXml()}');
+      return;
+    }
+    var stanza =
+        MessageStanza(AbstractStanza.getRandomId(), null);
+    stanza.toJid = receivedMessage.from;
+    stanza.fromJid = _connection.fullJid;
+    if (receivedMessage.threadId != null) {
+      stanza.addChild(
+        XmppElement('thread')
+          ..textValue = receivedMessage.threadId
+      );
+    }
+
+    late final String elementName;
+
+    switch (markerType) {
+      case ChatMarkerType.MARKABLE:
+        Log.e('Chat', 'Cannot send standalone markable chat marker');
+        return;
+      case ChatMarkerType.RECEIVED:
+        elementName = 'received';
+        break;
+      case ChatMarkerType.DISPLAYED:
+        elementName = 'displayed';
+        break;
+      case ChatMarkerType.ACKNOWLEDGED:
+        elementName = 'acknowledged';
+        break;
+    }
+    
+    stanza.addChild(
+      XmppElement(elementName)
+        ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:chat-markers:0'))
+        ..addAttribute(XmppAttribute('id', receivedMessage.messageId!))
+    );
+
+    _connection.writeStanza(stanza);
   }
 }
 
@@ -113,8 +148,10 @@ abstract class Chat {
   Stream<ChatState> get remoteStateStream;
   List<Message> messages = [];
   void sendMessage(String text);
-  void requestChatState();
+  void sendChatMarker(Message receivedMessage, ChatMarkerType markerType);
   set myState(ChatState? state);
 }
 
 enum ChatState { INACTIVE, ACTIVE, GONE, COMPOSING, PAUSED }
+
+enum ChatMarkerType { MARKABLE, RECEIVED, DISPLAYED, ACKNOWLEDGED  }
