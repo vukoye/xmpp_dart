@@ -6,7 +6,6 @@ import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
-import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 
@@ -32,20 +31,27 @@ class ChatImpl implements Chat {
 
   final StreamController<Message> _newMessageController =
       StreamController.broadcast();
+  final StreamController<Message> _newChatMarkerController =
+      StreamController.broadcast();
   final StreamController<ChatState> _remoteStateController =
       StreamController.broadcast();
 
   @override
   Stream<Message> get newMessageStream => _newMessageController.stream;
   @override
-  Stream<ChatState > get remoteStateStream =>
-      _remoteStateController.stream;
+  Stream<Message> get newChatMarkerStream => _newChatMarkerController.stream;
+  @override
+  Stream<ChatState> get remoteStateStream => _remoteStateController.stream;
 
   ChatImpl(this._jid, this._connection);
 
   bool _requestedChatState = false;
 
   void parseMessage(Message message) {
+    if (message.chatMarkerType != null &&
+        message.chatMarkerType != ChatMarkerType.MARKABLE) {
+      _newChatMarkerController.add(message);
+    }
     if (message.type == MessageStanzaType.CHAT) {
       if (message.text != null && message.text!.isNotEmpty) {
         messages.add(message);
@@ -67,12 +73,12 @@ class ChatImpl implements Chat {
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
     if (_requestedChatState) {
-      stanza.addChild(XmppElement('active')..addAttribute(XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates')));
+      stanza.addChild(XmppElement('active')
+        ..addAttribute(
+            XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates')));
     }
-    stanza.addChild(
-      XmppElement('markable')
-        ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:chat-markers:0'))
-    );
+    stanza.addChild(XmppElement('markable')
+      ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:chat-markers:0')));
     var message = Message.fromStanza(stanza);
     messages.add(message);
     _newMessageController.add(message);
@@ -97,20 +103,13 @@ class ChatImpl implements Chat {
   }
 
   @override
-  void sendChatMarker(Message receivedMessage, ChatMarkerType markerType) {
-    if (receivedMessage.messageId == null) {
-      Log.e('Chat', 'Received urn:xmpp:chat-markers:0 message without message id ${receivedMessage.messageStanza.buildXml()}');
-      return;
-    }
-    var stanza =
-        MessageStanza(AbstractStanza.getRandomId(), null);
-    stanza.toJid = receivedMessage.from;
+  void sendChatMarker(Jid toJid, String messageId, ChatMarkerType markerType,
+      {String? threadId}) {
+    var stanza = MessageStanza(AbstractStanza.getRandomId(), null);
+    stanza.toJid = toJid;
     stanza.fromJid = _connection.fullJid;
-    if (receivedMessage.threadId != null) {
-      stanza.addChild(
-        XmppElement('thread')
-          ..textValue = receivedMessage.threadId
-      );
+    if (threadId != null) {
+      stanza.addChild(XmppElement('thread')..textValue = threadId);
     }
 
     late final String elementName;
@@ -129,13 +128,12 @@ class ChatImpl implements Chat {
         elementName = 'acknowledged';
         break;
     }
-    
-    stanza.addChild(
-      XmppElement(elementName)
-        ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:chat-markers:0'))
-        ..addAttribute(XmppAttribute('id', receivedMessage.messageId!))
-    );
 
+    stanza.addChild(XmppElement(elementName)
+      ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:chat-markers:0'))
+      ..addAttribute(XmppAttribute('id', messageId!)));
+
+    _newChatMarkerController.add(Message.fromStanza(stanza));
     _connection.writeStanza(stanza);
   }
 }
@@ -145,13 +143,15 @@ abstract class Chat {
   ChatState? get myState;
   ChatState? get remoteState;
   Stream<Message> get newMessageStream;
+  Stream<Message> get newChatMarkerStream;
   Stream<ChatState> get remoteStateStream;
   List<Message> messages = [];
   void sendMessage(String text);
-  void sendChatMarker(Message receivedMessage, ChatMarkerType markerType);
+  void sendChatMarker(Jid toJid, String messageId, ChatMarkerType markerType,
+      {String? threadId});
   set myState(ChatState? state);
 }
 
 enum ChatState { INACTIVE, ACTIVE, GONE, COMPOSING, PAUSED }
 
-enum ChatMarkerType { MARKABLE, RECEIVED, DISPLAYED, ACKNOWLEDGED  }
+enum ChatMarkerType { MARKABLE, RECEIVED, DISPLAYED, ACKNOWLEDGED }
