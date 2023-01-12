@@ -36,7 +36,7 @@ class PushNotificationsManager {
   }
 
   void disablePush(String jid, String? node) {
-    final disableElement = XmppElement('enable')
+    final disableElement = XmppElement('disable')
       ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:push:0'))
       ..addAttribute(XmppAttribute('jid', jid));
     if (node != null && node.isNotEmpty) {
