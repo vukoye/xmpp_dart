@@ -13,6 +13,7 @@ export 'src/presence/PresenceApi.dart';
 export 'src/account/XmppAccountSettings.dart';
 export 'src/extensions/vcard_temp/VCard.dart';
 export 'src/extensions/vcard_temp/VCardManager.dart';
+export 'src/extensions/push_notifications//push_notifications_manager.dart';
 export 'src/roster/Buddy.dart';
 export 'src/roster/RosterManager.dart';
 export 'src/chat/Chat.dart';
