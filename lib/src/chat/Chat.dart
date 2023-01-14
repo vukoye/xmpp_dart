@@ -131,7 +131,10 @@ class ChatImpl implements Chat {
 
     stanza.addChild(XmppElement(elementName)
       ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:chat-markers:0'))
-      ..addAttribute(XmppAttribute('id', messageId!)));
+      ..addAttribute(XmppAttribute('id', messageId)));
+
+    stanza.addChild(XmppElement('store')
+      ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:hints')));
 
     _newChatMarkerController.add(Message.fromStanza(stanza));
     _connection.writeStanza(stanza);
