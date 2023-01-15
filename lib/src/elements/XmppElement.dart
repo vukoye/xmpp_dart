@@ -42,7 +42,7 @@ class XmppElement {
     _children.add(element);
   }
 
-  bool removeChild(XmppElement element) {
+  bool removeChild(XmppElement? element) {
     return _children.remove(element);
   }
 
@@ -59,7 +59,7 @@ class XmppElement {
     var xmlNodes = <xml.XmlNode>[];
     _attributes.forEach((xmppAttribute) {
       xmlAttributes.add(xml.XmlAttribute(
-        xml.XmlName(xmppAttribute.name), xmppAttribute.value));
+          xml.XmlName(xmppAttribute.name), xmppAttribute.value));
     });
     _children.forEach((xmppChild) {
       xmlNodes.add(xmppChild.buildXml());

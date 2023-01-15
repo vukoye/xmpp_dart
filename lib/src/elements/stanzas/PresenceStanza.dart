@@ -117,7 +117,7 @@ class PresenceStanza extends AbstractStanza {
   }
 
   bool _removeChildWithName(String childName) {
-    final child = getChild(childName)!;
+    final child = getChild(childName);
     return removeChild(child);
   }
 
@@ -134,7 +134,8 @@ class PresenceStanza extends AbstractStanza {
   }
 
   void _setAttributeValue(String attrName, String value) {
-    var attr = attributes.firstWhereOrNull((attribute) => attribute.name == name);
+    var attr =
+        attributes.firstWhereOrNull((attribute) => attribute.name == name);
     if (attr == null) {
       var element = XmppElement(attrName);
       element.textValue = value;
