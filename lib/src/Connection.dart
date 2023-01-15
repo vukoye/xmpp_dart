@@ -12,7 +12,6 @@ import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.d
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
-
 enum XmppConnectionState {
   Idle,
   Closed,
@@ -399,10 +398,9 @@ xml:lang='en'
   }
 
   bool elementHasAttribute(xml.XmlElement element, xml.XmlAttribute attribute) {
-    var list = element.attributes.firstWhereOrNull(
-        (attr) =>
-            attr.name.local == attribute.name.local &&
-            attr.value == attribute.value);
+    var list = element.attributes.firstWhereOrNull((attr) =>
+        attr.name.local == attribute.name.local &&
+        attr.value == attribute.value);
     return list != null;
   }
 
