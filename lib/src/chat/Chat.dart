@@ -7,6 +7,7 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
 import 'package:xmpp_stone/src/logger/Log.dart';
 
 class ChatImpl implements Chat {
@@ -14,6 +15,7 @@ class ChatImpl implements Chat {
 
   final Connection _connection;
   final Jid _jid;
+  final StreamManagementModule _smm;
 
   @override
   Jid get jid => _jid;
@@ -43,7 +45,8 @@ class ChatImpl implements Chat {
   @override
   Stream<ChatState> get remoteStateStream => _remoteStateController.stream;
 
-  ChatImpl(this._jid, this._connection);
+  ChatImpl(this._jid, this._connection)
+      : _smm = StreamManagementModule.getInstance(_connection);
 
   bool _requestedChatState = false;
 
@@ -66,7 +69,7 @@ class ChatImpl implements Chat {
   }
 
   @override
-  void sendMessage(String text) {
+  Future sendMessage(String text) {
     var stanza =
         MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
     stanza.toJid = _jid;
@@ -79,10 +82,18 @@ class ChatImpl implements Chat {
     }
     stanza.addChild(XmppElement('markable')
       ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:chat-markers:0')));
+    stanza.addChild(XmppElement('origin-id')
+      ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:sid:0'))
+      ..addAttribute(XmppAttribute('id', stanza.id!)));
+    stanza.addChild(XmppElement('request')
+      ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:receipts')));
+
     var message = Message.fromStanza(stanza);
     messages.add(message);
     _newMessageController.add(message);
     _connection.writeStanza(stanza);
+    return _smm.deliveredStanzasStream
+        .firstWhere((element) => element.id == stanza.id);
   }
 
   @override
@@ -103,7 +114,7 @@ class ChatImpl implements Chat {
   }
 
   @override
-  void sendChatMarker(Jid toJid, String messageId, ChatMarkerType markerType,
+  Future sendChatMarker(Jid toJid, String messageId, ChatMarkerType markerType,
       {String? threadId}) {
     var stanza = MessageStanza(AbstractStanza.getRandomId(), null);
     stanza.toJid = toJid;
@@ -117,7 +128,11 @@ class ChatImpl implements Chat {
     switch (markerType) {
       case ChatMarkerType.MARKABLE:
         Log.e('Chat', 'Cannot send standalone markable chat marker');
-        return;
+        throw ArgumentError.value(
+          markerType,
+          'markerType',
+          'Cannot send standalone markable chat marker',
+        );
       case ChatMarkerType.RECEIVED:
         elementName = 'received';
         break;
@@ -138,6 +153,8 @@ class ChatImpl implements Chat {
 
     _newChatMarkerController.add(Message.fromStanza(stanza));
     _connection.writeStanza(stanza);
+    return _smm.deliveredStanzasStream
+        .firstWhere((element) => element.id == stanza.id);
   }
 }
 
@@ -149,8 +166,8 @@ abstract class Chat {
   Stream<Message> get newChatMarkerStream;
   Stream<ChatState> get remoteStateStream;
   List<Message> messages = [];
-  void sendMessage(String text);
-  void sendChatMarker(Jid toJid, String messageId, ChatMarkerType markerType,
+  Future sendMessage(String text);
+  Future sendChatMarker(Jid toJid, String messageId, ChatMarkerType markerType,
       {String? threadId});
   set myState(ChatState? state);
 }
