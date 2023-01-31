@@ -69,9 +69,9 @@ class ChatImpl implements Chat {
   }
 
   @override
-  Future sendMessage(String text) {
-    var stanza =
-        MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+  Future<String> sendMessage(String text) async {
+    final messageId = AbstractStanza.getRandomId();
+    var stanza = MessageStanza(messageId, MessageStanzaType.CHAT);
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;
@@ -84,7 +84,7 @@ class ChatImpl implements Chat {
       ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:chat-markers:0')));
     stanza.addChild(XmppElement('origin-id')
       ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:sid:0'))
-      ..addAttribute(XmppAttribute('id', stanza.id!)));
+      ..addAttribute(XmppAttribute('id', messageId)));
     stanza.addChild(XmppElement('request')
       ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:receipts')));
 
@@ -92,8 +92,9 @@ class ChatImpl implements Chat {
     messages.add(message);
     _newMessageController.add(message);
     _connection.writeStanza(stanza);
-    return _smm.deliveredStanzasStream
-        .firstWhere((element) => element.id == stanza.id);
+    await _smm.deliveredStanzasStream
+        .firstWhere((element) => element.id == messageId);
+    return messageId;
   }
 
   @override
@@ -114,8 +115,9 @@ class ChatImpl implements Chat {
   }
 
   @override
-  Future sendChatMarker(Jid toJid, String messageId, ChatMarkerType markerType,
-      {String? threadId}) {
+  Future<String> sendChatMarker(
+      Jid toJid, String messageId, ChatMarkerType markerType,
+      {String? threadId}) async {
     var stanza = MessageStanza(AbstractStanza.getRandomId(), null);
     stanza.toJid = toJid;
     stanza.fromJid = _connection.fullJid;
@@ -153,8 +155,9 @@ class ChatImpl implements Chat {
 
     _newChatMarkerController.add(Message.fromStanza(stanza));
     _connection.writeStanza(stanza);
-    return _smm.deliveredStanzasStream
-        .firstWhere((element) => element.id == stanza.id);
+    await _smm.deliveredStanzasStream
+        .firstWhere((element) => element.id == messageId);
+    return messageId;
   }
 }
 
@@ -166,8 +169,9 @@ abstract class Chat {
   Stream<Message> get newChatMarkerStream;
   Stream<ChatState> get remoteStateStream;
   List<Message> messages = [];
-  Future sendMessage(String text);
-  Future sendChatMarker(Jid toJid, String messageId, ChatMarkerType markerType,
+  Future<String> sendMessage(String text);
+  Future<String> sendChatMarker(
+      Jid toJid, String messageId, ChatMarkerType markerType,
       {String? threadId});
   set myState(ChatState? state);
 }
