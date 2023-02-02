@@ -26,13 +26,30 @@ class PushNotificationsManager {
 
   void _processStanza(AbstractStanza? stanza) {}
 
-  void enablePush(String jid, String node) {
-    _connection
-        .writeStanza(IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET)
-          ..addChild(XmppElement('enable')
-            ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:push:0'))
-            ..addAttribute(XmppAttribute('jid', jid))
-            ..addAttribute(XmppAttribute('node', node))));
+  void enablePush(
+    String jid,
+    String node, [
+    Map<String, String> data = const {},
+  ]) {
+    final enableElement = XmppElement('enable')
+      ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:push:0'))
+      ..addAttribute(XmppAttribute('jid', jid))
+      ..addAttribute(XmppAttribute('node', node));
+    if (data.isNotEmpty) {
+      final xElement = XmppElement('x')
+        ..addAttribute(XmppAttribute('xmlns', 'jabber:x:data'))
+        ..addAttribute(XmppAttribute('type', 'submit'));
+      data.forEach((key, value) {
+        final fieldElement = XmppElement('field')
+          ..addAttribute(XmppAttribute('var', key))
+          ..addChild(XmppElement('value')..textValue = value);
+        xElement.addChild(fieldElement);
+      });
+      enableElement.addChild(xElement);
+    }
+    final stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET)
+      ..addChild(enableElement);
+    _connection.writeStanza(stanza);
   }
 
   void disablePush(String jid, String? node) {
