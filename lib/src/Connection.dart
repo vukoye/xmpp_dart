@@ -1,11 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:universal_io/io.dart';
-import 'package:collection/collection.dart' show IterableExtension;
-import 'package:xml/xml.dart' as xml;
-import 'package:synchronized/synchronized.dart';
-import 'package:xmpp_stone/src/ReconnectionManager.dart';
 
+import 'package:collection/collection.dart' show IterableExtension;
+import 'package:synchronized/synchronized.dart';
+import 'package:universal_io/io.dart';
+import 'package:xml/xml.dart' as xml;
+import 'package:xmpp_stone/src/ReconnectionManager.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart';
@@ -18,8 +18,6 @@ import 'package:xmpp_stone/xmpp_stone.dart';
 import 'connection/XmppWebsocketApi.dart'
     if (dart.library.io) 'connection/XmppWebsocketIo.dart'
     if (dart.library.html) 'connection/XmppWebsocketHtml.dart' as xmppSocket;
-
-import 'logger/Log.dart';
 
 enum XmppConnectionState {
   Idle,
@@ -303,7 +301,9 @@ class Connection {
     if (fullResponse.isNotEmpty) {
       xml.XmlNode? xmlResponse;
       try {
-        xmlResponse = xml.XmlDocument.parse(fullResponse.replaceAll(RegExp(r'<\?(xml.+?)\>'), '')).firstChild;
+        xmlResponse = xml.XmlDocument.parse(
+                fullResponse.replaceAll(RegExp(r'<\?(xml.+?)\>'), ''))
+            .firstChild;
       } catch (e) {
         _unparsedXmlResponse += fullResponse.substring(
             0, fullResponse.length - 13); //remove  xmpp_stone end tag

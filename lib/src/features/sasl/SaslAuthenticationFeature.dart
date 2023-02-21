@@ -3,11 +3,9 @@ import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
+import 'package:xmpp_stone/src/features/sasl/AnonymousHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/PlainSaslHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
-import 'package:xmpp_stone/src/features/sasl/AnonymousHandler.dart';
-
-import '../../elements/nonzas/Nonza.dart';
 
 class SaslAuthenticationFeature extends Negotiator {
   final Connection _connection;
@@ -27,7 +25,8 @@ class SaslAuthenticationFeature extends Negotiator {
   // improve this
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhereOrNull((element) => element.name == 'mechanisms');
+    var nonza =
+        requests.firstWhereOrNull((element) => element.name == 'mechanisms');
     return nonza != null ? [nonza] : [];
   }
 
