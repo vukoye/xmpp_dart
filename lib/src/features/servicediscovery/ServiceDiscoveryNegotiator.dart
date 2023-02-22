@@ -146,10 +146,12 @@ class ServiceDiscoveryNegotiator extends Negotiator {
     //iqStanza.fromJid = _connection.fullJid; //do not send for now
     iqStanza.toJid = request.fromJid;
     var query = XmppElement();
+    query.name = 'query';
     query.addAttribute(XmppAttribute('xmlns', NAMESPACE_DISCO_INFO));
     SERVICE_DISCOVERY_SUPPORT_LIST.forEach((featureName) {
       var featureElement = XmppElement();
-      featureElement.addAttribute(XmppAttribute('feature', featureName));
+      featureElement.name = 'feature';
+      featureElement.addAttribute(XmppAttribute('var', featureName));
       query.addChild(featureElement);
     });
     iqStanza.addChild(query);
