@@ -6,7 +6,6 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 
-import '../elements/nonzas/Nonza.dart';
 import '../logger/Log.dart';
 
 class StartTlsNegotiator extends Negotiator {
@@ -23,11 +22,9 @@ class StartTlsNegotiator extends Negotiator {
   @override
   void negotiate(List<Nonza> nonzas) {
     Log.d(TAG, 'negotiating starttls');
-    if (match(nonzas) != null) {
-      state = NegotiatorState.NEGOTIATING;
-      subscription = _connection.inNonzasStream.listen(checkNonzas);
-      _connection.writeNonza(StartTlsResponse());
-    }
+    state = NegotiatorState.NEGOTIATING;
+    subscription = _connection.inNonzasStream.listen(checkNonzas);
+    _connection.writeNonza(StartTlsResponse());
   }
 
   void checkNonzas(Nonza nonza) {
@@ -42,10 +39,9 @@ class StartTlsNegotiator extends Negotiator {
 
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhereOrNull(
-        (request) =>
-            request.name == 'starttls' &&
-            request.getAttribute('xmlns')?.value == expectedNameSpace);
+    var nonza = requests.firstWhereOrNull((request) =>
+        request.name == 'starttls' &&
+        request.getAttribute('xmlns')?.value == expectedNameSpace);
     return nonza != null ? [nonza] : [];
   }
 }

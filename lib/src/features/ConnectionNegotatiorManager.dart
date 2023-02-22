@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:collection';
 
+import 'package:xml/xml.dart' as xml;
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/account/XmppAccountSettings.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
@@ -13,13 +14,9 @@ import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart'
 import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
-import 'package:xml/xml.dart' as xml;
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
 
-import '../elements/nonzas/Nonza.dart';
 import '../logger/Log.dart';
-import 'Negotiator.dart';
-import 'servicediscovery/ServiceDiscoveryNegotiator.dart';
 
 class ConnectionNegotiatorManager {
   static const String TAG = 'ConnectionNegotiatorManager';
@@ -113,7 +110,6 @@ class ConnectionNegotiatorManager {
     //     .add(ServiceDiscoveryNegotiator.getInstance(_connection));
     supportedNegotiatorList.add(CarbonsNegotiator.getInstance(_connection));
     supportedNegotiatorList.add(MAMNegotiator.getInstance(_connection));
-
   }
 
   void stateListener(NegotiatorState state) {

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:crypto/crypto.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';

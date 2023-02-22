@@ -1,8 +1,5 @@
 import 'dart:async';
 
-import 'package:xmpp_stone/src/Connection.dart';
-import 'package:xmpp_stone/src/chat/Chat.dart';
-import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
 class ChatManager {
@@ -25,10 +22,12 @@ class ChatManager {
         .where((abstractStanza) => abstractStanza is MessageStanza)
         .map((stanza) => stanza as MessageStanza?)
         .listen((stanza) {
-          var message = Message.fromStanza(stanza!);
-          // find jid different from mine
-          var buddyJid = _connection.fullJid.userAtDomain == message.to!.userAtDomain ?
-              message.from! : message.to!;
+      var message = Message.fromStanza(stanza!);
+      // find jid different from mine
+      var buddyJid =
+          _connection.fullJid.userAtDomain == message.to!.userAtDomain
+              ? message.from!
+              : message.to!;
       var chat = _getChat(buddyJid);
       chat.parseMessage(message);
     });

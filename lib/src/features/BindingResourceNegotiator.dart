@@ -9,7 +9,6 @@ import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
-import '../elements/nonzas/Nonza.dart';
 
 class BindingResourceConnectionNegotiator extends Negotiator {
   final Connection _connection;
@@ -23,7 +22,8 @@ class BindingResourceConnectionNegotiator extends Negotiator {
   }
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhereOrNull((request) => request.name == BIND_NAME);
+    var nonza =
+        requests.firstWhereOrNull((request) => request.name == BIND_NAME);
     return nonza != null ? [nonza] : [];
   }
 

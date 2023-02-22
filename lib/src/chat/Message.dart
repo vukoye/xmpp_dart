@@ -2,8 +2,8 @@ import 'package:collection/collection.dart' show IterableExtension;
 import 'package:xmpp_stone/src/chat/Chat.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+
 import '../elements/XmppElement.dart';
-import '../elements/stanzas/MessageStanza.dart';
 import '../logger/Log.dart';
 
 class Message {
@@ -72,12 +72,14 @@ class Message {
         var message = forwarded.getChild('message');
         if (message != null) {
           Jid? to;
-          if(message.getAttribute('to') != null && message.getAttribute('to')!.value != null){
+          if (message.getAttribute('to') != null &&
+              message.getAttribute('to')!.value != null) {
             to = Jid.fromFullJid(message.getAttribute('to')!.value!);
           }
 
           Jid? from;
-          if(message.getAttribute('from') != null && message.getAttribute('from')!.value != null){
+          if (message.getAttribute('from') != null &&
+              message.getAttribute('from')!.value != null) {
             from = Jid.fromFullJid(message.getAttribute('from')!.value!);
           }
 
@@ -103,8 +105,8 @@ class Message {
   }
 
   static Message? _parseArchived(MessageStanza stanza) {
-    var result = stanza.children.firstWhereOrNull(
-        (element) => (element.name == 'result'));
+    var result = stanza.children
+        .firstWhereOrNull((element) => (element.name == 'result'));
 
     try {
       var queryId = result?.getAttribute('queryId')?.value;
@@ -177,10 +179,9 @@ class Message {
   }
 
   static ChatState? _parseState(XmppElement element) {
-    var stateElement = element.children.firstWhereOrNull(
-        (element) =>
-            element.getAttribute('xmlns')?.value ==
-            'http://jabber.org/protocol/chatstates');
+    var stateElement = element.children.firstWhereOrNull((element) =>
+        element.getAttribute('xmlns')?.value ==
+        'http://jabber.org/protocol/chatstates');
     if (stateElement != null) {
       return _stateFromString(stateElement.name);
     } else {
