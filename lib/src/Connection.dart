@@ -311,7 +311,8 @@ class Connection {
       }
 
       //TODO: Improve parser for children only
-      xmlResponse!.childElements
+      xmlResponse!.descendants
+          .whereType<xml.XmlElement>()
           .where((element) => startMatcher(element))
           .forEach((element) => processInitialStream(element));
 
@@ -320,7 +321,8 @@ class Connection {
           .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
           .forEach((stanza) => _inStanzaStreamController.add(stanza));
 
-      xmlResponse.childElements
+      xmlResponse.descendants
+          .whereType<xml.XmlElement>()
           .where((element) => featureMatcher(element))
           .forEach((feature) =>
               connectionNegotatiorManager.negotiateFeatureList(feature));
