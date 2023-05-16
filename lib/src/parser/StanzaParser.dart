@@ -111,7 +111,7 @@ class StanzaParser {
       if (xmlChild is xml.XmlElement) {
         xmppElement.addChild(parseElement(xmlChild));
       } else if (xmlChild is xml.XmlText) {
-        xmppElement.textValue = xmlChild.text;
+        xmppElement.textValue = xmlChild.value;
       }
     });
     return xmppElement;

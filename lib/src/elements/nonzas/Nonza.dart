@@ -42,7 +42,7 @@ class Nonza extends XmppElement {
       if (xmlChild is xml.XmlElement) {
         nonza.addChild(StanzaParser.parseElement(xmlChild));
       } else if (xmlChild is xml.XmlText) {
-        nonza.textValue = xmlChild.text;
+        nonza.textValue = xmlChild.value;
       }
     });
     return nonza;

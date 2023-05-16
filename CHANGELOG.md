@@ -60,6 +60,10 @@ Introducing optional parameter for domain name in account settings
 - Initial published version
 
 
+## 0.4.4-dev.4
+
+- update dependencies to latest possible versions;
+
 ## 0.4.4-dev.3
 
 - Revert `descendants` processing (fix some issues on the different Chat Servers);
