@@ -56,10 +56,8 @@ class ChatImpl implements Chat {
       _newChatMarkerController.add(message);
     }
     if (message.type == MessageStanzaType.CHAT) {
-      if (message.text != null && message.text!.isNotEmpty) {
-        messages.add(message);
-        _newMessageController.add(message);
-      }
+      messages.add(message);
+      _newMessageController.add(message);
 
       if (message.chatState != null && !message.isDelayed) {
         _remoteState = message.chatState;
