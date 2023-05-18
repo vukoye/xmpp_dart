@@ -9,6 +9,7 @@ import '../logger/Log.dart';
 class Message {
   static String TAG = 'Message';
   MessageStanza _messageStanza;
+  final XmppElement unwrappedMessageElement;
 
   MessageStanza get messageStanza => _messageStanza;
 
@@ -37,19 +38,24 @@ class Message {
   ChatMarkerType? chatMarkerType;
   String? chatMarkerId;
 
-  Message(this._messageStanza, this._to, this._from, this._text, this._time,
-      {String? stanzaId = '',
-      String? threadId = '',
-      bool isForwarded = false,
-      DateTime? delayTime,
-      String? queryId,
-      String? messageId,
-      MessageStanzaType? type,
-      ChatState? chatState,
-      this.chatMarkerType,
-      this.chatMarkerId,
-      }) :
-      this._isForwarded = isForwarded {
+  Message(
+    this._messageStanza,
+    this._to,
+    this._from,
+    this._text,
+    this._time, {
+    String? stanzaId = '',
+    String? threadId = '',
+    bool isForwarded = false,
+    DateTime? delayTime,
+    String? queryId,
+    String? messageId,
+    MessageStanzaType? type,
+    ChatState? chatState,
+    this.chatMarkerType,
+    this.chatMarkerId,
+    required this.unwrappedMessageElement,
+  }) : this._isForwarded = isForwarded {
     _stanzaId = stanzaId;
     _threadId = threadId;
     _queryId = queryId;
@@ -97,18 +103,25 @@ class Message {
           var threadId = message.getChild('thread')?.textValue;
           var delayTime = _parseDelayed(forwarded);
           if (delayTime == null) {
-            Log.e(TAG, 'No delay found in forwarded message ${stanza.buildXml().toXmlString()}');
+            Log.e(TAG,
+                'No delay found in forwarded message ${stanza.buildXml().toXmlString()}');
           }
           final chatMarker = _parserChatMarker(message);
-          return Message(stanza, to, from, body, DateTime.now(),
-              messageId: message.getAttribute('id')?.value,
-              threadId: threadId,
-              isForwarded: true,
-              delayTime: delayTime,
-              chatState: chatState,
-              type: type,
-              chatMarkerType: chatMarker.item1,
-              chatMarkerId: chatMarker.item2,
+          return Message(
+            stanza,
+            to,
+            from,
+            body,
+            DateTime.now(),
+            messageId: message.getAttribute('id')?.value,
+            threadId: threadId,
+            isForwarded: true,
+            delayTime: delayTime,
+            chatState: chatState,
+            type: type,
+            chatMarkerType: chatMarker.item1,
+            chatMarkerId: chatMarker.item2,
+            unwrappedMessageElement: message,
           );
         }
       }
@@ -119,8 +132,8 @@ class Message {
   }
 
   static Message? _parseArchived(MessageStanza stanza) {
-    var result = stanza.children.firstWhereOrNull(
-        (element) => (element.name == 'result'));
+    var result = stanza.children
+        .firstWhereOrNull((element) => (element.name == 'result'));
     if (result == null) {
       Log.e(TAG, 'Error while parsing archived message, couldn\'t find result');
       return null;
@@ -141,17 +154,23 @@ class Message {
           var dateTime = _parseDelayed(forwarded) ?? DateTime.now();
           var chatState = _parseState(message);
           final chatMarker = _parserChatMarker(message);
-          return Message(stanza, to, from, body, dateTime,
-              messageId: message.getAttribute('id')?.value,
-              threadId: threadId,
-              isForwarded: true,
-              queryId: queryId,
-              stanzaId: stanzaId,
-              chatState: chatState,
-              type: type,
-              chatMarkerType: chatMarker.item1,
-              chatMarkerId: chatMarker.item2,
-            );
+          return Message(
+            stanza,
+            to,
+            from,
+            body,
+            dateTime,
+            messageId: message.getAttribute('id')?.value,
+            threadId: threadId,
+            isForwarded: true,
+            queryId: queryId,
+            stanzaId: stanzaId,
+            chatState: chatState,
+            type: type,
+            chatMarkerType: chatMarker.item1,
+            chatMarkerId: chatMarker.item2,
+            unwrappedMessageElement: message,
+          );
         }
       }
     } catch (e) {
@@ -188,10 +207,9 @@ class Message {
   }
 
   static ChatState? _parseState(XmppElement element) {
-    var stateElement = element.children.firstWhereOrNull(
-        (element) =>
-            element.getAttribute('xmlns')?.value ==
-            'http://jabber.org/protocol/chatstates');
+    var stateElement = element.children.firstWhereOrNull((element) =>
+        element.getAttribute('xmlns')?.value ==
+        'http://jabber.org/protocol/chatstates');
     if (stateElement != null) {
       return _stateFromString(stateElement.name);
     } else {
@@ -199,17 +217,16 @@ class Message {
     }
   }
 
-  static Tuple2<ChatMarkerType?, String?> _parserChatMarker(XmppElement element) {
-    var marker = element.children.firstWhereOrNull(
-        (element) =>
-          element.getAttribute('xmlns')?.value == 'urn:xmpp:chat-markers:0'
-    );
+  static Tuple2<ChatMarkerType?, String?> _parserChatMarker(
+      XmppElement element) {
+    var marker = element.children.firstWhereOrNull((element) =>
+        element.getAttribute('xmlns')?.value == 'urn:xmpp:chat-markers:0');
     if (marker == null) {
       return Tuple2(null, null);
     }
     late final ChatMarkerType markerType;
     late final String? markerId;
-    switch(marker.name) {
+    switch (marker.name) {
       case 'markable':
         markerType = ChatMarkerType.MARKABLE;
         break;
@@ -257,14 +274,19 @@ class Message {
   static Message _parseRegularMessage(MessageStanza stanza) {
     final chatMarker = _parserChatMarker(stanza);
     return Message(
-        stanza, stanza.toJid!, stanza.fromJid!, stanza.body, DateTime.now(),
-        messageId: stanza.id,
-        chatState: _parseState(stanza),
-        threadId: stanza.thread,
-        type: _parseType(stanza),
-        chatMarkerType: chatMarker.item1,
-        chatMarkerId: chatMarker.item2,
-      );
+      stanza,
+      stanza.toJid!,
+      stanza.fromJid!,
+      stanza.body,
+      DateTime.now(),
+      messageId: stanza.id,
+      chatState: _parseState(stanza),
+      threadId: stanza.thread,
+      type: _parseType(stanza),
+      chatMarkerType: chatMarker.item1,
+      chatMarkerId: chatMarker.item2,
+      unwrappedMessageElement: stanza,
+    );
   }
 
   static DateTime? _parseDelayed(XmppElement element) {
