@@ -1,5 +1,3 @@
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
-import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
 class PushNotificationsManager {
