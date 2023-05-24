@@ -6,19 +6,20 @@ import 'logger/Log.dart';
 class ReconnectionManager {
   static const TAG = 'ReconnectionManager';
 
-  Connection _connection;
+  late Connection _connection;
   bool isActive = false;
   int initialTimeout = 1000;
   int maxTimeout = -1;
   int totalReconnections = 3;
-  int timeOutInMs;
+  late int timeOutInMs;
   int counter = 0;
   Timer? timer;
+  late StreamSubscription<XmppConnectionState> _xmppConnectionStateSubscription;
 
-  ReconnectionManager(Connection connection)
-      : this._connection = connection,
-        timeOutInMs = connection.account.reconnectionTimeout {
-    _connection.connectionStateStream.listen(connectionStateHandler);
+  ReconnectionManager(Connection connection) {
+    _connection = connection;
+    _xmppConnectionStateSubscription =
+        _connection.connectionStateStream.listen(connectionStateHandler);
     initialTimeout = _connection.account.reconnectionTimeout;
     maxTimeout = _connection.account.maxReconnectionTimeout;
     totalReconnections = _connection.account.totalReconnections;
@@ -57,5 +58,10 @@ class ReconnectionManager {
     } else {
       _connection.close();
     }
+  }
+
+  void close() {
+    timer?.cancel();
+    _xmppConnectionStateSubscription.cancel();
   }
 }

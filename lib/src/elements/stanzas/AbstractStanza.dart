@@ -11,26 +11,16 @@ abstract class AbstractStanza extends XmppElement {
 
   Jid? get fromJid => _fromJid;
 
-  AbstractStanza(String name) : super(name);
-
   set fromJid(Jid? value) {
     _fromJid = value;
-    if (value == null) {
-      removeAttribute('from');
-    } else {
-      addAttribute(XmppAttribute('from', value.fullJid));
-    }
+    addAttribute(XmppAttribute('from', _fromJid!.fullJid));
   }
 
   Jid? get toJid => _toJid;
 
   set toJid(Jid? value) {
     _toJid = value;
-    if (value == null) {
-      removeAttribute('to');
-    } else {
-      addAttribute(XmppAttribute('to', value.userAtDomain));
-    }
+    addAttribute(XmppAttribute('to', _toJid!.userAtDomain));
   }
 
   String? get id => _id;
@@ -43,6 +33,8 @@ abstract class AbstractStanza extends XmppElement {
       addAttribute(XmppAttribute('id', value));
     }
   }
+
+  AbstractStanza(super.name);
 
   static String getRandomId() {
     const ASCII_START = 65;

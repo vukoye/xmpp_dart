@@ -5,8 +5,6 @@ import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xml/xml.dart' as xml;
 
 class Nonza extends XmppElement {
-  Nonza(String name) : super(name);
-
   Jid? _fromJid;
   Jid? _toJid;
 
@@ -14,22 +12,14 @@ class Nonza extends XmppElement {
 
   set fromJid(Jid? value) {
     _fromJid = value;
-    if (value == null) {
-      removeAttribute('from');
-    } else {
-      addAttribute(XmppAttribute('from', value.fullJid));
-    }
+    addAttribute(XmppAttribute('from', _fromJid!.fullJid));
   }
 
   Jid? get toJid => _toJid;
 
   set toJid(Jid? value) {
     _toJid = value;
-    if (value == null) {
-      removeAttribute('to');
-    } else {
-      addAttribute(XmppAttribute('to', value.userAtDomain));
-    }
+    addAttribute(XmppAttribute('to', _toJid!.userAtDomain));
   }
 
   static Nonza parse(xml.XmlElement xmlElement) {
@@ -51,9 +41,11 @@ class Nonza extends XmppElement {
       if (xmlChild is xml.XmlElement) {
         nonza.addChild(StanzaParser.parseElement(xmlChild));
       } else if (xmlChild is xml.XmlText) {
-        nonza.textValue = xmlChild.text;
+        nonza.textValue = xmlChild.value;
       }
     });
     return nonza;
   }
+
+  Nonza(super.name);
 }

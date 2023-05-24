@@ -3,33 +3,31 @@ import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 import 'package:xmpp_stone/src/features/sasl/AbstractSaslHandler.dart';
+import 'package:xmpp_stone/src/features/sasl/AnonymousHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/PlainSaslHandler.dart';
 import 'package:xmpp_stone/src/features/sasl/ScramSaslHandler.dart';
 
-import '../../elements/nonzas/Nonza.dart';
-
 class SaslAuthenticationFeature extends Negotiator {
-  Connection _connection;
+  final Connection _connection;
+  final String _password;
 
-  final Set<SaslMechanism> _offeredMechanisms = <SaslMechanism>{};
-  final Set<SaslMechanism> _supportedMechanisms = <SaslMechanism>{};
+  final Set<SaslMechanism> _offeredMechanisms = {};
+  final Set<SaslMechanism> _supportedMechanisms = {};
 
-  String _password;
-
-  SaslAuthenticationFeature(Connection connection, String password) :
-    _connection = connection,
-    _password = password {
+  SaslAuthenticationFeature(this._connection, this._password) {
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_1);
     _supportedMechanisms.add(SaslMechanism.SCRAM_SHA_256);
     _supportedMechanisms.add(SaslMechanism.PLAIN);
+    _supportedMechanisms.add(SaslMechanism.ANONYMOUS);
     expectedName = 'SaslAuthenticationFeature';
   }
 
   // improve this
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhereOrNull((element) => element.name == 'mechanisms');
-    return nonza != null? [nonza] : [];
+    var nonza =
+        requests.firstWhereOrNull((element) => element.name == 'mechanisms');
+    return nonza != null ? [nonza] : [];
   }
 
   @override
@@ -56,6 +54,9 @@ class SaslAuthenticationFeature extends Negotiator {
       case SaslMechanism.SCRAM_SHA_1_PLUS:
         break;
       case SaslMechanism.EXTERNAL:
+        break;
+      case SaslMechanism.ANONYMOUS:
+        saslHandler = AnonymousHandler(_connection, mechanism);
         break;
       case SaslMechanism.NOT_SUPPORTED:
         break;
@@ -92,6 +93,9 @@ class SaslAuthenticationFeature extends Negotiator {
         case 'SCRAM-SHA-1':
           _offeredMechanisms.add(SaslMechanism.SCRAM_SHA_1);
           break;
+        case 'ANONYMOUS':
+          _offeredMechanisms.add(SaslMechanism.ANONYMOUS);
+          break;
         case 'PLAIN':
           _offeredMechanisms.add(SaslMechanism.PLAIN);
           break;
@@ -113,5 +117,6 @@ enum SaslMechanism {
   SCRAM_SHA_1,
   SCRAM_SHA_256,
   PLAIN,
+  ANONYMOUS,
   NOT_SUPPORTED
 }

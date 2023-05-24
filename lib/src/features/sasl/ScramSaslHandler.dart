@@ -19,27 +19,26 @@ class ScramSaslHandler implements AbstractSaslHandler {
   static const CLIENT_NONCE_LENGTH = 48;
   static const TAG = 'ScramSaslHandler';
 
-  Connection _connection;
+  final Connection _connection;
   late StreamSubscription<Nonza> subscription;
   final _completer = Completer<AuthenticationResult>();
   ScramStates _scramState = ScramStates.INITIAL;
-  String _password;
-  late String _username;
+  String? _password;
+  String? _username;
   late String _clientNonce;
   String? _initialMessage;
 
   final SaslMechanism _mechanism;
   late Hash _hash;
 
-  late String _mechanismString;
+  String? _mechanismString;
 
   late var serverSignature;
 
-  ScramSaslHandler(Connection connection, String password, this._mechanism) :
-    _connection = connection,
-    _password = password {
-    _username = connection.fullJid.local;
-    initMechanism();
+  ScramSaslHandler(this._connection, String? password, this._mechanism) {
+    _username = _connection.fullJid.local;
+    _password = password;
+    _initMechanism();
     _generateRandomClientNonce();
   }
 
@@ -50,7 +49,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
     return _completer.future;
   }
 
-  void initMechanism() {
+  void _initMechanism() {
     if (_mechanism == SaslMechanism.SCRAM_SHA_1) {
       _hash = sha1;
       _mechanismString = 'SCRAM-SHA-1';
@@ -61,15 +60,13 @@ class ScramSaslHandler implements AbstractSaslHandler {
   }
 
   void _generateRandomClientNonce() {
-    var bytes = List<int>.filled(CLIENT_NONCE_LENGTH, 0, growable: false);
-    for (var i = 0; i < CLIENT_NONCE_LENGTH; i++) {
-      bytes[i] = Random.secure().nextInt(256);
-    }
+    var bytes = List<int>.generate(
+        CLIENT_NONCE_LENGTH, (index) => Random.secure().nextInt(256));
     _clientNonce = base64.encode(bytes);
   }
 
   void _sendInitialMessage() {
-    _initialMessage = 'n=${saslEscape(normalize(_username))},r=${_clientNonce}';
+    _initialMessage = 'n=${saslEscape(normalize(_username!))},r=$_clientNonce';
     var bytes = utf8.encode('n,,$_initialMessage');
     var message = CryptoUtils.bytesToBase64(bytes, false, false);
     var nonza = Nonza('auth');
@@ -164,7 +161,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
     var authMessage = utf8.encode(
         '$_initialMessage,${utf8.decode(serverFirstMessage)},$clientFinalMessageBare');
     var saltB = base64.decode(salt);
-    var saltedPassword = PBKDF2(utf8.encode(_password), saltB, iterationsNo);
+    var saltedPassword = PBKDF2(utf8.encode(_password!), saltB, iterationsNo);
     var serverKey = hmac(saltedPassword, utf8.encode('Server Key'));
     var clientKey = hmac(saltedPassword, utf8.encode('Client Key'));
     late List<int> clientSignature;
@@ -175,10 +172,10 @@ class ScramSaslHandler implements AbstractSaslHandler {
     } catch (e) {
       _fireAuthFailed('Invalid key');
     }
-    var clientProof = List<int>.filled(clientKey.length, 0, growable: false);
-    for (var i = 0; i < clientKey.length; i++) {
-      clientProof[i] = clientKey[i] ^ clientSignature[i];
-    }
+
+    var clientProof = List<int>.generate(
+        clientKey.length, (i) => clientKey[i] ^ clientSignature[i]);
+
     var clientFinalMessage =
         '$clientFinalMessageBare,p=${base64.encode(clientProof)}';
     var response = Nonza('response');

@@ -20,7 +20,6 @@ class ChatImpl implements Chat {
   @override
   Jid get jid => _jid;
   ChatState? _myState;
-
   @override
   ChatState? get myState => _myState;
 
@@ -29,13 +28,13 @@ class ChatImpl implements Chat {
   ChatState? get remoteState => _remoteState;
 
   @override
-  List<Message> messages = [];
+  List<Message>? messages = [];
 
   final StreamController<Message> _newMessageController =
       StreamController.broadcast();
   final StreamController<Message> _newChatMarkerController =
       StreamController.broadcast();
-  final StreamController<ChatState> _remoteStateController =
+  final StreamController<ChatState?> _remoteStateController =
       StreamController.broadcast();
 
   @override
@@ -43,7 +42,7 @@ class ChatImpl implements Chat {
   @override
   Stream<Message> get newChatMarkerStream => _newChatMarkerController.stream;
   @override
-  Stream<ChatState> get remoteStateStream => _remoteStateController.stream;
+  Stream<ChatState?> get remoteStateStream => _remoteStateController.stream;
 
   ChatImpl(this._jid, this._connection)
       : _smm = StreamManagementModule.getInstance(_connection);
@@ -57,11 +56,11 @@ class ChatImpl implements Chat {
     }
     if (message.type == MessageStanzaType.CHAT) {
       if (message.text != null && message.text!.isNotEmpty) {
-        messages.add(message);
+        messages!.add(message);
         _newMessageController.add(message);
       }
 
-      if (message.chatState != null && !message.isDelayed) {
+      if (message.chatState != null && !(message.isDelayed ?? false)) {
         _remoteState = message.chatState;
         _remoteStateController.add(message.chatState!);
       }
@@ -89,7 +88,7 @@ class ChatImpl implements Chat {
       ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:receipts')));
 
     var message = Message.fromStanza(stanza);
-    messages.add(message);
+    messages!.add(message);
     _newMessageController.add(message);
     _connection.writeStanza(stanza);
     await _smm.deliveredStanzasStream
@@ -99,19 +98,17 @@ class ChatImpl implements Chat {
 
   @override
   set myState(ChatState? state) {
-    if (state != null) {
-      var stanza =
-          MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
-      stanza.toJid = _jid;
-      stanza.fromJid = _connection.fullJid;
-      var stateElement =
-          XmppElement(state.toString().split('.').last.toLowerCase());
-      stateElement.addAttribute(
-          XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates'));
-      stanza.addChild(stateElement);
-      _connection.writeStanza(stanza);
-      _myState = state;
-    }
+    var stanza =
+        MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+    stanza.toJid = _jid;
+    stanza.fromJid = _connection.fullJid;
+    var stateElement =
+        XmppElement(state.toString().split('.').last.toLowerCase());
+    stateElement.addAttribute(
+        XmppAttribute('xmlns', 'http://jabber.org/protocol/chatstates'));
+    stanza.addChild(stateElement);
+    _connection.writeStanza(stanza);
+    _myState = state;
   }
 
   @override
@@ -167,12 +164,12 @@ abstract class Chat {
   ChatState? get remoteState;
   Stream<Message> get newMessageStream;
   Stream<Message> get newChatMarkerStream;
-  Stream<ChatState> get remoteStateStream;
-  List<Message> messages = [];
+  Stream<ChatState?> get remoteStateStream;
   Future<String> sendMessage(String text);
   Future<String> sendChatMarker(
       Jid toJid, String messageId, ChatMarkerType markerType,
       {String? threadId});
+  List<Message>? messages;
   set myState(ChatState? state);
 }
 

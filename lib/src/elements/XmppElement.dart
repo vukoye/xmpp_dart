@@ -3,26 +3,17 @@ import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xml/xml.dart' as xml;
 
 class XmppElement {
-  String _name;
-  String get name => _name;
-  set name(String value) {
-    _name = value;
-  }
-
-  XmppElement(this._name);
-
-  String? _textValue;
-  String? get textValue => _textValue;
-
-  set textValue(String? value) {
-    _textValue = value;
-  }
+  final String name;
+  String? textValue;
 
   final List<XmppElement> _children = <XmppElement>[];
   List<XmppElement> get children => _children;
 
   final List<XmppAttribute> _attributes = <XmppAttribute>[];
-  XmppAttribute? getAttribute(String name) {
+
+  XmppElement(this.name);
+
+  XmppAttribute? getAttribute(String? name) {
     return _attributes.firstWhereOrNull((attr) => attr.name == name);
   }
 
@@ -42,10 +33,6 @@ class XmppElement {
     _children.add(element);
   }
 
-  bool removeChild(XmppElement? element) {
-    return _children.remove(element);
-  }
-
   XmppElement? getChild(String name) {
     return _children.firstWhereOrNull((element) => element.name == name);
   }
@@ -58,8 +45,10 @@ class XmppElement {
     var xmlAttributes = <xml.XmlAttribute>[];
     var xmlNodes = <xml.XmlNode>[];
     _attributes.forEach((xmppAttribute) {
-      xmlAttributes.add(xml.XmlAttribute(
-          xml.XmlName(xmppAttribute.name), xmppAttribute.value));
+      if (xmppAttribute.value != null) {
+        xmlAttributes.add(xml.XmlAttribute(
+            xml.XmlName(xmppAttribute.name), xmppAttribute.value!));
+      }
     });
     _children.forEach((xmppChild) {
       xmlNodes.add(xmppChild.buildXml());

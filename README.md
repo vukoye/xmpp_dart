@@ -21,6 +21,7 @@ __Actively working on:__
 
 ## Latest news
 
+ - 2021-12-14: Added support for XEP-0016: Privacy Lists
  - 2020-10-30: Added support for XEP-0280: Message Carbons
  - 2020-10-30: Added initial support for XEP-0313: Message Archive Management
  - 2020-10-30: Added logging mechanism
@@ -36,7 +37,12 @@ __Actively working on:__
 import 'package:xmpp_stone/xmpp_stone.dart' as xmpp;
 
 main() {
-  xmpp.Connection connection = new xmpp.Connection("user@domain", "password", 5222);
+  xmpp.XmppAccountSettings accountSettings = xmpp.XmppAccountSettings.fromJid('nick@damain.com/resource', 'password');
+  accountSettings.port = kIsWeb ? 5291 : 5222;
+  accountSettings.wsPath = 'xmpp-websocket'; // null or your custom xmpp path
+  accountSettings.wsProtocols = ['xmpp']; // or your custom protocols
+
+  xmpp.Connection connection = xmpp.Connection.getInstance(accountSettings);
   connection.open();
 }
 ```

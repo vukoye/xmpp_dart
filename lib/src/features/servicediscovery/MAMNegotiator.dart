@@ -6,16 +6,15 @@ import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
+
 import '../../Connection.dart';
-import '../../elements/nonzas/Nonza.dart';
 import '../Negotiator.dart';
 import 'Feature.dart';
 
 class MAMNegotiator extends Negotiator {
   static const TAG = 'MAMNegotiator';
 
-  static final Map<Connection, MAMNegotiator> _instances =
-      <Connection, MAMNegotiator>{};
+  static final Map<Connection, MAMNegotiator> _instances = {};
 
   static MAMNegotiator getInstance(Connection connection) {
     var instance = _instances[connection];
@@ -26,9 +25,14 @@ class MAMNegotiator extends Negotiator {
     return instance;
   }
 
+  static void removeInstance(Connection connection) {
+    _instances[connection]?._subscription?.cancel();
+    _instances.remove(connection);
+  }
+
   late IqStanza _myUnrespondedIqStanza;
 
-  late StreamSubscription<AbstractStanza> _subscription;
+  StreamSubscription<AbstractStanza?>? _subscription;
 
   final Connection _connection;
 
@@ -82,13 +86,13 @@ class MAMNegotiator extends Negotiator {
     _connection.writeStanza(iqStanza);
   }
 
-  void checkStanzas(AbstractStanza stanza) {
+  void checkStanzas(AbstractStanza? stanza) {
     if (stanza is IqStanza && stanza.id == _myUnrespondedIqStanza.id) {
       var x = stanza.getChild('query')?.getChild('x');
       if (x != null) {
         x.children.forEach((element) {
           if (element is FieldElement) {
-            switch(element.varAttr) {
+            switch (element.varAttr) {
               case 'start':
                 _supportedParameters.add(MamQueryParameters.START);
                 break;
@@ -112,7 +116,7 @@ class MAMNegotiator extends Negotiator {
         });
       }
       state = NegotiatorState.DONE;
-      _subscription.cancel();
+      _subscription?.cancel();
     }
   }
 

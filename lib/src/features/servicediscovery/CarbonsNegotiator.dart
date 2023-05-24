@@ -3,17 +3,13 @@ import 'dart:async';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 
 import '../../../xmpp_stone.dart';
-import '../../elements/XmppAttribute.dart';
-import '../../elements/nonzas/Nonza.dart';
-import '../../elements/stanzas/IqStanza.dart';
 import '../Negotiator.dart';
 import 'Feature.dart';
 
 class CarbonsNegotiator extends Negotiator {
   static const TAG = 'CarbonsNegotiator';
 
-  static final Map<Connection, CarbonsNegotiator> _instances =
-      <Connection, CarbonsNegotiator>{};
+  static final Map<Connection, CarbonsNegotiator> _instances = {};
 
   static CarbonsNegotiator getInstance(Connection connection) {
     var instance = _instances[connection];
@@ -24,11 +20,16 @@ class CarbonsNegotiator extends Negotiator {
     return instance;
   }
 
+  static void removeInstance(Connection connection) {
+    _instances[connection]?._subscription?.cancel();
+    _instances.remove(connection);
+  }
+
   final Connection _connection;
 
   bool enabled = false;
 
-  late StreamSubscription<AbstractStanza> _subscription;
+  StreamSubscription<AbstractStanza?>? _subscription;
   late IqStanza _myUnrespondedIqStanza;
 
   CarbonsNegotiator(this._connection) {
@@ -47,12 +48,12 @@ class CarbonsNegotiator extends Negotiator {
   void negotiate(List<Nonza> nonzas) {
     if (match(nonzas).isNotEmpty) {
       state = NegotiatorState.NEGOTIATING;
-      _sendRequest();
-      _subscription = _connection.inStanzasStream.listen(_checkStanzas);
+      sendRequest();
+      _subscription = _connection.inStanzasStream.listen(checkStanzas);
     }
   }
 
-  void _sendRequest() {
+  void sendRequest() {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     iqStanza.addAttribute(XmppAttribute('xmlns', 'jabber:client'));
     var element = XmppElement('enable');
@@ -62,11 +63,11 @@ class CarbonsNegotiator extends Negotiator {
     _connection.writeStanza(iqStanza);
   }
 
-  void _checkStanzas(AbstractStanza stanza) {
+  void checkStanzas(AbstractStanza? stanza) {
     if (stanza is IqStanza && stanza.id == _myUnrespondedIqStanza.id) {
       enabled = stanza.type == IqStanzaType.RESULT;
       state = NegotiatorState.DONE;
-      _subscription.cancel();
+      _subscription?.cancel();
     }
   }
 }

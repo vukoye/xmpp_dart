@@ -9,20 +9,19 @@ import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
 
-import '../elements/nonzas/Nonza.dart';
-
 class SessionInitiationNegotiator extends Negotiator {
-  Connection _connection;
-  StreamSubscription<AbstractStanza>? subscription;
+  final Connection _connection;
+  StreamSubscription<AbstractStanza?>? subscription;
 
   IqStanza? sentRequest;
 
-  SessionInitiationNegotiator(Connection connection) : _connection = connection {
+  SessionInitiationNegotiator(this._connection) {
     expectedName = 'SessionInitiationNegotiator';
   }
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhereOrNull((request) => request.name == 'session');
+    var nonza =
+        requests.firstWhereOrNull((request) => request.name == 'session');
     return nonza != null ? [nonza] : [];
   }
 
@@ -35,7 +34,7 @@ class SessionInitiationNegotiator extends Negotiator {
     }
   }
 
-  void parseStanza(AbstractStanza stanza) {
+  void parseStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       var idValue = stanza.getAttribute('id')?.value;
       if (idValue != null &&

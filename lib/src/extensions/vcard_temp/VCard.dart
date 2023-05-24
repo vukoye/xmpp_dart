@@ -46,7 +46,7 @@ class VCard extends XmppElement {
 
   String? getItem(String itemName) => getChild(itemName)?.textValue;
 
-  dynamic/*?*/ get imageData => _imageData;
+  dynamic /*?*/ get imageData => _imageData;
 
   img.Image? get image => _image;
 
@@ -72,20 +72,18 @@ class VCard extends XmppElement {
   }
 
   String? get emailHome {
-    var element = children.firstWhereOrNull(
-        (element) =>
-            (element.name == 'EMAIL' && element.getChild('HOME') != null));
+    var element = children.firstWhereOrNull((element) =>
+        (element.name == 'EMAIL' && element.getChild('HOME') != null));
     return element?.getChild('USERID')?.textValue;
   }
 
   String? get emailWork {
-    var element = children.firstWhereOrNull(
-        (element) =>
-            (element.name == 'EMAIL' && element.getChild('WORK') != null));
+    var element = children.firstWhereOrNull((element) =>
+        (element.name == 'EMAIL' && element.getChild('WORK') != null));
     return element?.getChild('USERID')?.textValue;
   }
 
-  static PhoneType getPhoneTypeFromString(String phoneTypeString) {
+  static PhoneType getPhoneTypeFromString(String? phoneTypeString) {
     switch (phoneTypeString) {
       case 'VOICE':
         return PhoneType.VOICE;

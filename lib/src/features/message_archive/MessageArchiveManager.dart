@@ -1,18 +1,15 @@
 import 'dart:async';
 
-import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
 import 'package:xmpp_stone/src/elements/forms/QueryElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
-import '../../elements/stanzas/IqStanza.dart';
 import '../../elements/forms/FieldElement.dart';
 
 class MessageArchiveManager {
   static const TAG = 'MessageArchiveManager';
 
-  static final Map<Connection, MessageArchiveManager> _instances =
-      <Connection, MessageArchiveManager>{};
+  static final Map<Connection, MessageArchiveManager> _instances = {};
 
   static MessageArchiveManager getInstance(Connection connection) {
     var instance = _instances[connection];
@@ -84,9 +81,9 @@ class MessageArchiveManager {
             messages,
           ));
         } catch (e) {
-          completer.completeError(Exception('Unable to parse result: ${event.buildXmlString()}'));
+          completer.completeError(
+              Exception('Unable to parse result: ${event?.buildXmlString()}'));
         }
-        
       },
       onError: (Object error, StackTrace stackTrace) {
         completer.completeError(error, stackTrace);
@@ -155,8 +152,7 @@ class MessageArchiveManager {
     }
   }
 
-  Future<QueryResult> queryById(
-      {String? beforeId, String? afterId, Jid? jid}) {
+  Future<QueryResult> queryById({String? beforeId, String? afterId, Jid? jid}) {
     if (beforeId == null && afterId == null && jid == null) {
       return queryAll();
     } else {

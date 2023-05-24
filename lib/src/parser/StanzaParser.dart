@@ -1,7 +1,7 @@
 import 'package:xml/xml.dart' as xml;
 import 'package:xmpp_stone/src/data/Jid.dart';
-import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
+import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/forms/FieldElement.dart';
 import 'package:xmpp_stone/src/elements/forms/XElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
@@ -11,15 +11,14 @@ import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Identity.dart';
 import 'package:xmpp_stone/src/parser/IqParser.dart';
 
-import '../elements/stanzas/MessageStanza.dart';
 import '../logger/Log.dart';
 
 class StanzaParser {
   static const TAG = 'StanzaParser';
 
   //TODO: Improve this!
-  static AbstractStanza parseStanza(xml.XmlElement element) {
-    AbstractStanza stanza;
+  static AbstractStanza? parseStanza(xml.XmlElement element) {
+    AbstractStanza? stanza;
     var id = element.getAttribute('id');
     if (id == null) {
       Log.d(TAG, 'No id found for stanza');
@@ -46,11 +45,11 @@ class StanzaParser {
       stanza.toJid = to;
     }
     element.attributes.forEach((xmlAttribute) {
-      stanza.addAttribute(
+      stanza!.addAttribute(
           XmppAttribute(xmlAttribute.name.local, xmlAttribute.value));
     });
     element.children.forEach((child) {
-      if (child is xml.XmlElement) stanza.addChild(parseElement(child));
+      if (child is xml.XmlElement) stanza!.addChild(parseElement(child));
     });
     return stanza;
   }
@@ -114,7 +113,7 @@ class StanzaParser {
       if (xmlChild is xml.XmlElement) {
         xmppElement.addChild(parseElement(xmlChild));
       } else if (xmlChild is xml.XmlText) {
-        xmppElement.textValue = xmlChild.text;
+        xmppElement.textValue = xmlChild.value;
       }
     });
     return xmppElement;

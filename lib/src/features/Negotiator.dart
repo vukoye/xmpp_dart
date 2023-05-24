@@ -5,8 +5,8 @@ import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 abstract class Negotiator {
   static int defaultPriorityLevel = 1000;
 
-  String? _expectedName;
-  String? _expectedNameSpace;
+  String? expectedName;
+  String? expectedNameSpace;
   NegotiatorState _state = NegotiatorState.IDLE;
   int priorityLevel = defaultPriorityLevel;
 
@@ -24,20 +24,8 @@ abstract class Negotiator {
     negotiatorStateStreamController.add(state);
   }
 
-  String? get expectedNameSpace => _expectedNameSpace;
-
-  set expectedNameSpace(String? value) {
-    _expectedNameSpace = value;
-  }
-
-  String? get expectedName => _expectedName;
-
-  set expectedName(String? value) {
-    _expectedName = value;
-  }
-
   //goes trough all features and match only needed nonzas
-  List<Nonza> match(List<Nonza> request);
+  List<Nonza>? match(List<Nonza> request);
 
   void negotiate(List<Nonza> nonza);
 
@@ -46,12 +34,13 @@ abstract class Negotiator {
   }
 
   bool isReady() {
-    return _state != NegotiatorState.DONE && state != NegotiatorState.DONE_CLEAN_OTHERS;
+    return _state != NegotiatorState.DONE &&
+        state != NegotiatorState.DONE_CLEAN_OTHERS;
   }
 
   @override
   String toString() {
-    return '{name: ${expectedName}, name_space: ${expectedNameSpace}, priority: ${priorityLevel}, state: ${state}}, isReady: ${isReady()}';
+    return '{name: $expectedName, name_space: $expectedNameSpace, priority: $priorityLevel, state: $state}, isReady: ${isReady()}';
   }
 }
 

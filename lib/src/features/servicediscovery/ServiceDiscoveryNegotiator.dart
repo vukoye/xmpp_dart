@@ -11,14 +11,12 @@ import 'package:xmpp_stone/src/features/Negotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Feature.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/Identity.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoverySupport.dart';
-import 'Feature.dart';
 
 class ServiceDiscoveryNegotiator extends Negotiator {
   static const String NAMESPACE_DISCO_INFO =
       'http://jabber.org/protocol/disco#info';
 
-  static final Map<Connection, ServiceDiscoveryNegotiator> _instances =
-      <Connection, ServiceDiscoveryNegotiator>{};
+  static final Map<Connection, ServiceDiscoveryNegotiator> _instances = {};
 
   static ServiceDiscoveryNegotiator getInstance(Connection connection) {
     var instance = _instances[connection];
@@ -29,9 +27,14 @@ class ServiceDiscoveryNegotiator extends Negotiator {
     return instance;
   }
 
+  static void removeInstance(Connection connection) {
+    _instances[connection]?.subscription?.cancel();
+    _instances.remove(connection);
+  }
+
   IqStanza? fullRequestStanza;
 
-  late StreamSubscription<AbstractStanza> subscription;
+  StreamSubscription<AbstractStanza?>? subscription;
 
   final Connection _connection;
 
@@ -52,7 +55,7 @@ class ServiceDiscoveryNegotiator extends Negotiator {
     return _errorStreamController.stream;
   }
 
-  void _parseStanza(AbstractStanza stanza) {
+  void _parseStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       var idValue = stanza.getAttribute('id')?.value;
       if (idValue != null &&
@@ -110,14 +113,14 @@ class ServiceDiscoveryNegotiator extends Negotiator {
         _errorStreamController.add(errorStanza);
       }
     }
-    subscription.cancel();
+    subscription?.cancel();
     _connection.connectionNegotatiorManager.addFeatures(_supportedFeatures);
     state = NegotiatorState.DONE;
   }
 
   bool isFeatureSupported(String feature) {
-    return _supportedFeatures.firstWhereOrNull(
-            (element) => element.textValue == feature) !=
+    return _supportedFeatures
+            .firstWhereOrNull((element) => element.xmppVar == feature) !=
         null;
   }
 

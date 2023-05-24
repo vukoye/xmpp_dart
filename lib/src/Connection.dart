@@ -1,16 +1,23 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
-import 'package:collection/collection.dart' show IterableExtension;
-import 'package:xml/xml.dart' as xml;
-import 'package:synchronized/synchronized.dart';
-import 'package:xmpp_stone/src/ReconnectionManager.dart';
 
+import 'package:collection/collection.dart' show IterableExtension;
+import 'package:synchronized/synchronized.dart';
+import 'package:universal_io/io.dart';
+import 'package:xml/xml.dart' as xml;
+import 'package:xmpp_stone/src/ReconnectionManager.dart';
 import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/features/ConnectionNegotatiorManager.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
+import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
 import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
+
+import 'connection/XmppWebsocketApi.dart'
+    if (dart.library.io) 'connection/XmppWebsocketIo.dart'
+    if (dart.library.html) 'connection/XmppWebsocketHtml.dart' as xmppSocket;
 
 enum XmppConnectionState {
   Idle,
@@ -39,7 +46,7 @@ class Connection {
 
   static String TAG = 'Connection';
 
-  static Map<String, Connection> instances = <String, Connection>{};
+  static Map<String, Connection> instances = {};
 
   XmppAccountSettings account;
 
@@ -64,17 +71,15 @@ class Connection {
     return connection;
   }
 
-  String? _errorMessage;
-
-  String? get errorMessage => _errorMessage;
-
-  set errorMessage(String? value) {
-    _errorMessage = value;
+  static void removeInstance(XmppAccountSettings account) {
+    instances.removeWhere((key, value) => key == account.fullJid.userAtDomain);
   }
+
+  String? errorMessage;
 
   bool authenticated = false;
 
-  final StreamController<AbstractStanza> _inStanzaStreamController =
+  final StreamController<AbstractStanza?> _inStanzaStreamController =
       StreamController.broadcast();
 
   final StreamController<AbstractStanza> _outStanzaStreamController =
@@ -89,7 +94,7 @@ class Connection {
   final StreamController<XmppConnectionState> _connectionStateStreamController =
       StreamController.broadcast();
 
-  Stream<AbstractStanza> get inStanzasStream {
+  Stream<AbstractStanza?> get inStanzasStream {
     return _inStanzaStreamController.stream;
   }
 
@@ -117,16 +122,16 @@ class Connection {
     account.resource = jid.resource;
   }
 
-  Socket? _socket;
+  xmppSocket.XmppWebSocket? _socket;
 
   // for testing purpose
-  set socket(Socket value) {
+  set socket(xmppSocket.XmppWebSocket? value) {
     _socket = value;
   }
 
   XmppConnectionState _state = XmppConnectionState.Idle;
 
-  late ReconnectionManager reconnectionManager;
+  ReconnectionManager? reconnectionManager;
 
   Connection(this.account) {
     RosterManager.getInstance(this);
@@ -138,13 +143,7 @@ class Connection {
   }
 
   void _openStream() {
-    var streamOpeningString = """
-<?xml version='1.0'?>
-<stream:stream xmlns='jabber:client' version='1.0' xmlns:stream='http://etherx.jabber.org/streams'
-to='${fullJid.domain}'
-xml:lang='en'
->
-""";
+    var streamOpeningString = _socket?.getStreamOpeningElement(fullJid.domain);
     write(streamOpeningString);
   }
 
@@ -201,24 +200,29 @@ xml:lang='en'
     connectionNegotatiorManager.init();
     setState(XmppConnectionState.SocketOpening);
     try {
-      return await Socket.connect(account.host ?? account.domain, account.port)
-          .then((Socket socket) {
+      var socket = xmppSocket.createSocket();
+
+      return await socket
+          .connect(
+        account.host ?? account.domain,
+        account.port,
+        wsProtocols: account.wsProtocols,
+        wsPath: account.wsPath,
+        map: prepareStreamResponse,
+      )
+          .then((socket) {
         // if not closed in meantime
         if (_state != XmppConnectionState.Closed) {
           setState(XmppConnectionState.SocketOpened);
           _socket = socket;
-          socket
-              .cast<List<int>>()
-              .transform(utf8.decoder)
-              .map(prepareStreamResponse)
-              .listen(handleResponse, onDone: handleConnectionDone);
+          socket.listen(handleResponse, onDone: handleConnectionDone);
           _openStream();
         } else {
           Log.d(TAG, 'Closed in meantime');
           socket.close();
         }
       });
-    } on SocketException catch (error) {
+    } catch (error) {
       Log.e(TAG, 'Socket Exception' + error.toString());
       handleConnectionError(error.toString());
     }
@@ -241,6 +245,27 @@ xml:lang='en'
       }
       authenticated = false;
     }
+  }
+
+  /// Dispose of the connection so stops all activities and cannot be re-used.
+  /// For the connection to be garbage collected.
+  ///
+  /// If the Connection instance was created with [getInstance],
+  /// you must also call [Connection.removeInstance] after calling [dispose].
+  ///
+  /// If you intend to re-use the connection later, consider just calling [close] instead.
+  void dispose() {
+    close();
+    RosterManager.removeInstance(this);
+    PresenceManager.removeInstance(this);
+    MessageHandler.removeInstance(this);
+    PingManager.removeInstance(this);
+    ServiceDiscoveryNegotiator.removeInstance(this);
+    StreamManagementModule.removeInstance(this);
+    CarbonsNegotiator.removeInstance(this);
+    MAMNegotiator.removeInstance(this);
+    reconnectionManager?.close();
+    _socket?.close();
   }
 
   bool startMatcher(xml.XmlElement element) {
@@ -273,32 +298,31 @@ xml:lang='en'
       } else {
         fullResponse = _unparsedXmlResponse;
       }
-      Log.v(TAG, 'full response = ${fullResponse}');
+      Log.v(TAG, 'full response = $fullResponse');
       _unparsedXmlResponse = '';
     } else {
       fullResponse = response;
     }
 
     if (fullResponse.isNotEmpty) {
-      xml.XmlNode xmlResponse;
+      xml.XmlNode? xmlResponse;
       try {
-        xmlResponse = xml.XmlDocument.parse(fullResponse).firstChild!;
+        xmlResponse = xml.XmlDocument.parse(
+                fullResponse.replaceAll(RegExp(r'<\?(xml.+?)\>'), ''))
+            .firstChild;
       } catch (e) {
         _unparsedXmlResponse += fullResponse.substring(
             0, fullResponse.length - 13); //remove  xmpp_stone end tag
         xmlResponse = xml.XmlElement(xml.XmlName('error'));
       }
-//      xmlResponse.descendants.whereType<xml.XmlElement>().forEach((element) {
-//        Log.d("element: " + element.name.local);
-//      });
+
       //TODO: Improve parser for children only
-      xmlResponse.descendants
+      xmlResponse!.descendants
           .whereType<xml.XmlElement>()
           .where((element) => startMatcher(element))
           .forEach((element) => processInitialStream(element));
 
-      xmlResponse.children
-          .whereType<xml.XmlElement>()
+      xmlResponse.childElements
           .where((element) => stanzaMatcher(element))
           .map((xmlElement) => StanzaParser.parseStanza(xmlElement))
           .forEach((stanza) => _inStanzaStreamController.add(stanza));
@@ -310,8 +334,7 @@ xml:lang='en'
               connectionNegotatiorManager.negotiateFeatureList(feature));
 
       //TODO: Probably will introduce bugs!!!
-      xmlResponse.children
-          .whereType<xml.XmlElement>()
+      xmlResponse.childElements
           .where((element) => nonzaMatcher(element))
           .map((xmlElement) => Nonza.parse(xmlElement))
           .forEach((nonza) => _inNonzaStreamController.add(nonza));
@@ -354,7 +377,7 @@ xml:lang='en'
     _state = state;
     _fireConnectionStateChangedEvent(state);
     _processState(state);
-    Log.d(TAG, 'State: ${_state}');
+    Log.d(TAG, 'State: $_state');
   }
 
   XmppConnectionState get state {
@@ -365,6 +388,9 @@ xml:lang='en'
     if (state == XmppConnectionState.Authenticated) {
       authenticated = true;
       _openStream();
+    } else if (state == XmppConnectionState.Closed ||
+        state == XmppConnectionState.ForcefullyClosed) {
+      authenticated = false;
     }
   }
 
@@ -374,10 +400,13 @@ xml:lang='en'
 
   void startSecureSocket() {
     Log.d(TAG, 'startSecureSocket');
-    SecureSocket.secure(_socket!, onBadCertificate: _validateBadCertificate)
+
+    _socket!
+        .secure(onBadCertificate: _validateBadCertificate)
         .then((secureSocket) {
-      _socket = secureSocket;
-      _socket!
+      if (secureSocket == null) return;
+
+      secureSocket
           .cast<List<int>>()
           .transform(utf8.decoder)
           .map(prepareStreamResponse)
@@ -426,6 +455,10 @@ xml:lang='en'
 
   bool _validateBadCertificate(X509Certificate certificate) {
     return true;
+  }
+
+  bool isTlsRequired() {
+    return xmppSocket.isTlsRequired();
   }
 
   void handleConnectionDone() {

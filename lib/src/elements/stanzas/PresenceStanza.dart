@@ -12,12 +12,8 @@ class PresenceStanza extends AbstractStanza {
   }
 
   set type(PresenceType? value) {
-    if (value == null) {
-      removeAttribute('type');
-    } else {
-      var typeValue = value.toString().split('.').last.toLowerCase();
-      _setAttributeValue('type', typeValue);
-    }
+    var typeValue = value.toString().split('.').last.toLowerCase();
+    _setAttributeValue('type', typeValue);
   }
 
   PresenceType? get type {
@@ -26,12 +22,8 @@ class PresenceStanza extends AbstractStanza {
   }
 
   set show(PresenceShowElement? value) {
-    if (value == null) {
-      _removeChildWithName('show');
-    } else {
-      var showValue = value.toString().split('.').last.toLowerCase();
-      _setChildValue('show', showValue);
-    }
+    var showValue = value.toString().split('.').last.toLowerCase();
+    _setChildValue('show', showValue);
   }
 
   PresenceShowElement? get show {
@@ -47,8 +39,12 @@ class PresenceStanza extends AbstractStanza {
   }
 
   set status(String? value) {
-    if (value == null) {
-      _removeChildWithName('status');
+    var childElement = children.firstWhereOrNull(
+        (element) => element.name == 'status' && element.attributes.isEmpty);
+    if (childElement == null) {
+      var element = XmppElement('status');
+      element.textValue = value;
+      addChild(element);
     } else {
       var childElement = children.firstWhereOrNull(
           (element) => element.name == 'status' && element.attributes.isEmpty);
@@ -63,20 +59,15 @@ class PresenceStanza extends AbstractStanza {
   }
 
   int? get priority {
-    final priorityElement = getChild('priority');
-    if (priorityElement == null) {
-      return null;
-    } else {
-      return int.tryParse(priorityElement.textValue!);
-    }
+    var priority = getChild('priority');
+
+    return priority == null || priority.textValue == null
+        ? null
+        : int.tryParse(priority.textValue!);
   }
 
   set priority(int? value) {
-    if (value == null) {
-      _removeChildWithName('priority');
-    } else {
-      _setChildValue('priority', value.toString());
-    }
+    _setChildValue('priority', value.toString());
   }
 
   PresenceShowElement? showFromString(String? showString) {
@@ -114,11 +105,6 @@ class PresenceStanza extends AbstractStanza {
     }
 
     return null;
-  }
-
-  bool _removeChildWithName(String childName) {
-    final child = getChild(childName);
-    return removeChild(child);
   }
 
   void _setChildValue(String childName, String value) {

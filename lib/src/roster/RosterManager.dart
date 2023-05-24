@@ -1,4 +1,6 @@
 import 'dart:async';
+
+import 'package:tuple/tuple.dart';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/XmppAttribute.dart';
@@ -6,13 +8,11 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/roster/Buddy.dart';
-import 'package:tuple/tuple.dart';
 
 //todo check for rfc6121 2.6.2
 //todo add support for jid groups
 class RosterManager {
-  static Map<Connection, RosterManager> instances =
-      <Connection, RosterManager>{};
+  static Map<Connection, RosterManager> instances = {};
 
   static RosterManager getInstance(Connection connection) {
     var manager = instances[connection];
@@ -23,26 +23,34 @@ class RosterManager {
     return manager;
   }
 
-  final Map<String, Tuple2<IqStanza, Completer?>> _myUnrespondedIqStanzas =
-      <String, Tuple2<IqStanza, Completer?>>{};
+  static void removeInstance(Connection connection) {
+    instances[connection]?._abstractStanzaSubscription.cancel();
+    instances[connection]?._xmppConnectionStateSubscription.cancel();
+    instances.remove(connection);
+  }
+
+  final Map<String, Tuple2<IqStanza, Completer?>> _myUnrespondedIqStanzas = {};
 
   final StreamController<List<Buddy>> _rosterController =
       StreamController<List<Buddy>>.broadcast();
+
+  late StreamSubscription<XmppConnectionState> _xmppConnectionStateSubscription;
+  late StreamSubscription<AbstractStanza?> _abstractStanzaSubscription;
 
   Stream<List<Buddy>> get rosterStream {
     return _rosterController.stream;
   }
 
-  final Map<Jid, Buddy> _rosterMap = <Jid, Buddy>{};
+  final Map<Jid, Buddy> _rosterMap = {};
 
-  Connection _connection;
+  late Connection _connection;
 
   void queryForRoster() {
     var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     var element = XmppElement('query');
     element.addAttribute(XmppAttribute('xmlns', 'jabber:iq:roster'));
     iqStanza.addChild(element);
-    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, null);
+    _myUnrespondedIqStanzas[iqStanza.id!] = Tuple2(iqStanza, null);
     _connection.writeStanza(iqStanza);
   }
 
@@ -62,11 +70,12 @@ class RosterManager {
     iqStanza.addChild(queryElement);
     var itemElement = XmppElement('item');
     queryElement.addChild(itemElement);
-    itemElement.addAttribute(XmppAttribute('jid', rosterItem.jid.userAtDomain));
+    itemElement
+        .addAttribute(XmppAttribute('jid', rosterItem.jid!.userAtDomain));
     if (rosterItem.name != null) {
       itemElement.addAttribute(XmppAttribute('name', rosterItem.name!));
     }
-    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+    _myUnrespondedIqStanzas[iqStanza.id!] = Tuple2(iqStanza, completer);
     _connection.writeStanza(iqStanza);
     return completer.future;
   }
@@ -79,17 +88,21 @@ class RosterManager {
     iqStanza.addChild(queryElement);
     var itemElement = XmppElement('item');
     queryElement.addChild(itemElement);
-    itemElement.addAttribute(XmppAttribute('jid', rosterItem.jid.userAtDomain));
+    itemElement
+        .addAttribute(XmppAttribute('jid', rosterItem.jid!.userAtDomain));
     itemElement.addAttribute(XmppAttribute('subscription', 'remove'));
-    _myUnrespondedIqStanzas[iqStanza.id] = Tuple2(iqStanza, completer);
+    _myUnrespondedIqStanzas[iqStanza.id!] = Tuple2(iqStanza, completer);
     ;
     _connection.writeStanza(iqStanza);
     return completer.future;
   }
 
-  RosterManager(Connection connection) : _connection = connection {
-    connection.connectionStateStream.listen(_connectionStateProcessor);
-    connection.inStanzasStream.listen(_processStanza);
+  RosterManager(Connection connection) {
+    _connection = connection;
+    _xmppConnectionStateSubscription =
+        connection.connectionStateStream.listen(_connectionStateProcessor);
+    _abstractStanzaSubscription =
+        connection.inStanzasStream.listen(_processStanza);
   }
 
   void _connectionStateProcessor(XmppConnectionState state) {
@@ -101,14 +114,14 @@ class RosterManager {
     }
   }
 
-  void _processStanza(AbstractStanza stanza) {
+  void _processStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       final unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
       if (unrespondedStanza != null) {
         if (stanza.type == IqStanzaType.RESULT) {
           if (_isFullJidRequest(unrespondedStanza.item1)) {
             _handleFullRosterResponse(stanza);
-          } else if (_isRosterSet(stanza)) {
+          } else if (_isRosterSet(unrespondedStanza.item1)) {
             _handleRosterSetSuccessResponse(unrespondedStanza);
           }
         } else if (stanza.type == IqStanzaType.SET) {
@@ -144,7 +157,7 @@ class RosterManager {
       _rosterMap.clear();
       xmppElement.children.forEach((child) {
         if (child.name == 'item') {
-          var jid = Jid.fromFullJid(child.getAttribute('jid')!.value);
+          var jid = Jid.fromFullJid(child.getAttribute('jid')!.value!);
           var name = child.getAttribute('name')?.value;
           var subscriptionString = child.getAttribute('subscription')?.value;
           var buddy = Buddy(jid);
@@ -165,13 +178,13 @@ class RosterManager {
   }
 
   void _handleRosterSetSuccessResponse(Tuple2<IqStanza, Completer?> request) {
-    request.item2?.complete(true);
+    request.item2!.complete(IqStanzaResult()..type = IqStanzaType.SET);
     _myUnrespondedIqStanzas.remove(request.item1.id);
   }
 
   //todo add error description
   void _handleRosterSetErrorResponse(Tuple2<IqStanza, Completer?> request) {
-    request.item2?.complete(IqStanzaResult()
+    request.item2!.complete(IqStanzaResult()
       ..type = IqStanzaType.ERROR
       ..description = '');
     _myUnrespondedIqStanzas.remove(request.item1.id);

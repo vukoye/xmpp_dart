@@ -4,8 +4,7 @@ import '../XmppElement.dart';
 class FieldElement extends XmppElement {
   FieldElement() : super('field');
 
-  FieldElement.build(
-      {String? varAttr, String? typeAttr, String? value})
+  FieldElement.build({String? varAttr, String? typeAttr, String? value})
       : super('field') {
     if (varAttr != null) {
       addAttribute(XmppAttribute('var', varAttr));

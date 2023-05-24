@@ -3,32 +3,28 @@ import 'package:tuple/tuple.dart';
 import 'package:xmpp_stone/src/chat/Chat.dart';
 import 'package:xmpp_stone/src/data/Jid.dart';
 import 'package:xmpp_stone/src/elements/stanzas/MessageStanza.dart';
+
 import '../elements/XmppElement.dart';
 import '../logger/Log.dart';
 
 class Message {
   static String TAG = 'Message';
-  MessageStanza _messageStanza;
+
   final XmppElement unwrappedMessageElement;
 
-  MessageStanza get messageStanza => _messageStanza;
-
-  set messageStanza(MessageStanza value) {
-    _messageStanza = value;
-  }
-
-  Jid _to;
-  Jid _from;
-  String? _text;
-  DateTime _time;
-  DateTime? _delayTime;
+  MessageStanza messageStanza;
+  Jid? to;
+  Jid? from;
+  String? text;
+  DateTime time;
 
   //TODO: check purpose vs stanza_id
   String? _messageId;
   String? _stanzaId;
   String? _threadId;
   String? _queryId; //To be determined if needed
-  bool _isForwarded;
+  bool? _isDelayed;
+  bool? _isForwarded;
   MessageStanzaType? _type;
 
   ChatState? _chatState; // optional element
@@ -39,15 +35,15 @@ class Message {
   String? chatMarkerId;
 
   Message(
-    this._messageStanza,
-    this._to,
-    this._from,
-    this._text,
-    this._time, {
+    this.messageStanza,
+    this.to,
+    this.from,
+    this.text,
+    this.time, {
     String? stanzaId = '',
     String? threadId = '',
     bool isForwarded = false,
-    DateTime? delayTime,
+    bool? isDelayed,
     String? queryId,
     String? messageId,
     MessageStanzaType? type,
@@ -55,14 +51,13 @@ class Message {
     this.chatMarkerType,
     this.chatMarkerId,
     required this.unwrappedMessageElement,
-  }) : this._isForwarded = isForwarded {
+  }) {
     _stanzaId = stanzaId;
     _threadId = threadId;
     _queryId = queryId;
     _messageId = messageId;
     _type = type;
     _chatState = chatState;
-    this._delayTime = delayTime;
   }
 
   ChatState? get chatState => _chatState;
@@ -84,28 +79,28 @@ class Message {
 
   static Message? _parseCarbon(MessageStanza stanza) {
     var carbon = stanza.children.firstWhereOrNull(
-        (element) => (element.name == 'sent' || element.name == 'received'));
-    if (carbon == null) {
-      Log.e(TAG,
-          'Error while parsing message, coudn\'t find \'sent\' or \'received\' element');
-      return null;
-    }
+        (element) => (element.name == 'sent' || element.name == 'received'))!;
     try {
       var forwarded = carbon.getChild('forwarded');
       if (forwarded != null) {
         var message = forwarded.getChild('message');
         if (message != null) {
-          var to = Jid.fromFullJid(message.getAttribute('to')!.value);
-          var from = Jid.fromFullJid(message.getAttribute('from')!.value);
+          Jid? to;
+          if (message.getAttribute('to') != null &&
+              message.getAttribute('to')!.value != null) {
+            to = Jid.fromFullJid(message.getAttribute('to')!.value!);
+          }
+
+          Jid? from;
+          if (message.getAttribute('from') != null &&
+              message.getAttribute('from')!.value != null) {
+            from = Jid.fromFullJid(message.getAttribute('from')!.value!);
+          }
+
           var body = message.getChild('body')?.textValue;
           var type = (_parseType(message));
           var chatState = _parseState(message);
           var threadId = message.getChild('thread')?.textValue;
-          var delayTime = _parseDelayed(forwarded);
-          if (delayTime == null) {
-            Log.e(TAG,
-                'No delay found in forwarded message ${stanza.buildXml().toXmlString()}');
-          }
           final chatMarker = _parserChatMarker(message);
           return Message(
             stanza,
@@ -116,7 +111,6 @@ class Message {
             messageId: message.getAttribute('id')?.value,
             threadId: threadId,
             isForwarded: true,
-            delayTime: delayTime,
             chatState: chatState,
             type: type,
             chatMarkerType: chatMarker.item1,
@@ -132,27 +126,34 @@ class Message {
   }
 
   static Message? _parseArchived(MessageStanza stanza) {
-    var result = stanza.children
+    final result = stanza.children
         .firstWhereOrNull((element) => (element.name == 'result'));
-    if (result == null) {
-      Log.e(TAG, 'Error while parsing archived message, couldn\'t find result');
-      return null;
-    }
+
     try {
-      var queryId = result.getAttribute('queryid')?.value;
-      var forwarded = result.getChild('forwarded');
+      final queryId = result?.getAttribute('queryId')?.value;
+      final forwarded = result?.getChild('forwarded');
       if (forwarded != null) {
-        var message = forwarded.getChild('message');
+        final message = forwarded.getChild('message');
         if (message != null) {
-          var to = Jid.fromFullJid(message.getAttribute('to')!.value);
-          var from = Jid.fromFullJid(message.getAttribute('from')!.value);
-          var body = message.getChild('body')?.textValue;
-          var threadId = message.getChild('thread')?.textValue;
-          var stanzaId =
+          Jid? to;
+          if (message.getAttribute('to') != null &&
+              message.getAttribute('to')!.value != null) {
+            to = Jid.fromFullJid(message.getAttribute('to')!.value!);
+          }
+
+          Jid? from;
+          if (message.getAttribute('from') != null &&
+              message.getAttribute('from')!.value != null) {
+            from = Jid.fromFullJid(message.getAttribute('from')!.value!);
+          }
+
+          final body = message.getChild('body')?.textValue;
+          final threadId = message.getChild('thread')?.textValue;
+          final stanzaId =
               message.getChild('stanza-id')?.getAttribute('id')?.value;
-          var type = (_parseType(message));
-          var dateTime = _parseDelayed(forwarded) ?? DateTime.now();
-          var chatState = _parseState(message);
+          final type = (_parseType(message));
+          final dateTime = _parseDelayed(forwarded) ?? DateTime.now();
+          final chatState = _parseState(message);
           final chatMarker = _parserChatMarker(message);
           return Message(
             stanza,
@@ -174,7 +175,7 @@ class Message {
         }
       }
     } catch (e) {
-      Log.e(TAG, 'Error while parsing archived message ${e}');
+      Log.e(TAG, 'Error while parsing archived message $e');
     }
     return null;
   }
@@ -292,7 +293,7 @@ class Message {
   static DateTime? _parseDelayed(XmppElement element) {
     var delayed = element.getChild('delay');
     if (delayed != null) {
-      var stamped = delayed.getAttribute('stamp')!.value;
+      var stamped = delayed.getAttribute('stamp')!.value!;
       try {
         var dateTime = DateTime.parse(stamped);
         return dateTime;
@@ -303,45 +304,15 @@ class Message {
     return null;
   }
 
-  Jid get to => _to;
-
-  set to(Jid value) {
-    _to = value;
-  }
-
-  Jid get from => _from;
-
-  set from(Jid value) {
-    _from = value;
-  }
-
-  String? get text => _text;
-
-  set text(String? value) {
-    _text = value;
-  }
-
-  DateTime get time => _time;
-
-  set time(DateTime value) {
-    _time = value;
-  }
-
-  DateTime? get delayTime => _delayTime;
-
-  set delayTime(DateTime? value) {
-    _delayTime = value;
-  }
-
   String? get stanzaId => _stanzaId;
 
   String? get threadId => _threadId;
 
   String? get queryId => _queryId;
 
-  bool get isDelayed => _isForwarded || _delayTime != null;
+  bool? get isDelayed => _isDelayed;
 
-  bool get isForwarded => _isForwarded;
+  bool? get isForwarded => _isForwarded;
 
   MessageStanzaType? get type => _type;
 }

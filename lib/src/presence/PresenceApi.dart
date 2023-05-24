@@ -27,17 +27,13 @@ class PresenceData {
 enum SubscriptionEventType { REQUEST, ACCEPTED, DECLINED }
 
 class SubscriptionEvent {
-  SubscriptionEventType type;
+  SubscriptionEventType? type;
   Jid? jid;
-
-  SubscriptionEvent(this.type);
 }
 
 class PresenceErrorEvent {
-  PresenceStanza presenceStanza;
+  PresenceStanza? presenceStanza;
   PresenceErrorType? type;
-
-  PresenceErrorEvent(this.presenceStanza);
 }
 
 enum PresenceErrorType { MODIFY }

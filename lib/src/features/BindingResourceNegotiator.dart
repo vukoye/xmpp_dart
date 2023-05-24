@@ -9,21 +9,21 @@ import 'package:xmpp_stone/src/elements/nonzas/Nonza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 import 'package:xmpp_stone/src/elements/stanzas/IqStanza.dart';
 import 'package:xmpp_stone/src/features/Negotiator.dart';
-import '../elements/nonzas/Nonza.dart';
 
 class BindingResourceConnectionNegotiator extends Negotiator {
-  Connection _connection;
-  StreamSubscription<AbstractStanza>? subscription;
+  final Connection _connection;
+  late StreamSubscription<AbstractStanza?> subscription;
   static const String BIND_NAME = 'bind';
   static const String BIND_ATTRIBUTE = 'urn:ietf:params:xml:ns:xmpp-bind';
 
-  BindingResourceConnectionNegotiator(Connection connection) : _connection = connection {
+  BindingResourceConnectionNegotiator(this._connection) {
     priorityLevel = 100;
     expectedName = 'BindingResourceConnectionNegotiator';
   }
   @override
   List<Nonza> match(List<Nonza> requests) {
-    var nonza = requests.firstWhereOrNull((request) => request.name == BIND_NAME);
+    var nonza =
+        requests.firstWhereOrNull((request) => request.name == BIND_NAME);
     return nonza != null ? [nonza] : [];
   }
 
@@ -36,7 +36,7 @@ class BindingResourceConnectionNegotiator extends Negotiator {
     }
   }
 
-  void parseStanza(AbstractStanza stanza) {
+  void parseStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
       var element = stanza.getChild(BIND_NAME);
       var jidValue = element?.getChild('jid')?.textValue;
@@ -44,12 +44,12 @@ class BindingResourceConnectionNegotiator extends Negotiator {
         var jid = Jid.fromFullJid(jidValue);
         _connection.fullJidRetrieved(jid);
         state = NegotiatorState.DONE;
-        subscription?.cancel();
+        subscription.cancel();
       }
     }
   }
 
-  void sendBindRequestStanza(String resource) {
+  void sendBindRequestStanza(String? resource) {
     var stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
     var bindElement = XmppElement(BIND_NAME);
     var resourceElement = XmppElement('resource');
