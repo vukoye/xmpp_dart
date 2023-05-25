@@ -130,7 +130,7 @@ class Message {
         .firstWhereOrNull((element) => (element.name == 'result'));
 
     try {
-      final queryId = result?.getAttribute('queryId')?.value;
+      final queryId = result?.getAttribute('queryid')?.value;
       final forwarded = result?.getChild('forwarded');
       if (forwarded != null) {
         final message = forwarded.getChild('message');
