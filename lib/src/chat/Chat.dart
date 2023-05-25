@@ -68,8 +68,8 @@ class ChatImpl implements Chat {
   }
 
   @override
-  Future<String> sendMessage(String text) async {
-    final messageId = AbstractStanza.getRandomId();
+  Future<String> sendMessage(String text, {String? messageId}) async {
+    messageId ??= AbstractStanza.getRandomId();
     var stanza = MessageStanza(messageId, MessageStanzaType.CHAT);
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
@@ -165,7 +165,7 @@ abstract class Chat {
   Stream<Message> get newMessageStream;
   Stream<Message> get newChatMarkerStream;
   Stream<ChatState?> get remoteStateStream;
-  Future<String> sendMessage(String text);
+  Future<String> sendMessage(String text, {String? messageId});
   Future<String> sendChatMarker(
       Jid toJid, String messageId, ChatMarkerType markerType,
       {String? threadId});
