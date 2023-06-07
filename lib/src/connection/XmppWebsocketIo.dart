@@ -11,7 +11,7 @@ XmppWebSocket createSocket() {
 }
 
 bool isTlsRequired() {
-  return false;
+  return true;
 }
 
 class XmppWebSocketIo extends XmppWebSocket {
@@ -23,7 +23,9 @@ class XmppWebSocketIo extends XmppWebSocket {
 
   @override
   Future<XmppWebSocket> connect<S>(String host, int port,
-      {String Function(String event)? map, List<String>? wsProtocols, String? wsPath}) async {
+      {String Function(String event)? map,
+      List<String>? wsProtocols,
+      String? wsPath}) async {
     await Socket.connect(host, port).then((Socket socket) {
       _socket = socket;
 
@@ -62,8 +64,13 @@ class XmppWebSocketIo extends XmppWebSocket {
       {host,
       SecurityContext? context,
       bool Function(X509Certificate certificate)? onBadCertificate,
-      List<String>? supportedProtocols}) {
-    return SecureSocket.secure(_socket!, onBadCertificate: onBadCertificate);
+      List<String>? supportedProtocols}) async {
+    final socket =
+        await SecureSocket.secure(_socket!, onBadCertificate: onBadCertificate);
+    // Overwrite previous socket, since calling SecureSocket.secure makes
+    // previous socket unusable.
+    _socket = socket;
+    return socket;
   }
 
   @override
