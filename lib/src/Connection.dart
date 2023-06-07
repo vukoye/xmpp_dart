@@ -12,7 +12,6 @@ import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart'
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
-import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
 import 'connection/XmppWebsocketApi.dart'
