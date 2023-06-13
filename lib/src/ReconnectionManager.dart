@@ -23,6 +23,7 @@ class ReconnectionManager {
     initialTimeout = _connection.account.reconnectionTimeout;
     maxTimeout = _connection.account.maxReconnectionTimeout;
     totalReconnections = _connection.account.totalReconnections;
+    timeOutInMs = initialTimeout;
   }
 
   void connectionStateHandler(XmppConnectionState state) {
