@@ -22,7 +22,7 @@ class PresenceStanza extends AbstractStanza {
   }
 
   set show(PresenceShowElement? value) {
-    var showValue = value.toString().split('.').last.toLowerCase();
+    var showValue = value?.toString().split('.').last.toLowerCase();
     _setChildValue('show', showValue);
   }
 
@@ -39,23 +39,8 @@ class PresenceStanza extends AbstractStanza {
   }
 
   set status(String? value) {
-    var childElement = children.firstWhereOrNull(
-        (element) => element.name == 'status' && element.attributes.isEmpty);
-    if (childElement == null) {
-      var element = XmppElement('status');
-      element.textValue = value;
-      addChild(element);
-    } else {
-      var childElement = children.firstWhereOrNull(
-          (element) => element.name == 'status' && element.attributes.isEmpty);
-      if (childElement == null) {
-        var element = XmppElement('status');
-        element.textValue = value;
-        addChild(element);
-      } else {
-        childElement.textValue = value;
-      }
-    }
+    var statusValue = value?.toString().split('.').last.toLowerCase();
+    _setChildValue('status', statusValue);
   }
 
   int? get priority {
@@ -67,7 +52,7 @@ class PresenceStanza extends AbstractStanza {
   }
 
   set priority(int? value) {
-    _setChildValue('priority', value.toString());
+    _setChildValue('priority', value?.toString());
   }
 
   PresenceShowElement? showFromString(String? showString) {
@@ -107,15 +92,21 @@ class PresenceStanza extends AbstractStanza {
     return null;
   }
 
-  void _setChildValue(String childName, String value) {
+  void _setChildValue(String childName, String? value) {
     var childElement = children.firstWhereOrNull(
         (element) => element.name == childName && element.attributes.isEmpty);
     if (childElement == null) {
-      var element = XmppElement(childName);
-      element.textValue = value;
-      addChild(element);
+      if (value != null) {
+        var element = XmppElement(childName);
+        element.textValue = value;
+        addChild(element);
+      }
     } else {
-      childElement.textValue = value;
+      if (value != null) {
+        childElement.textValue = value;
+      } else {
+        removeChild(childElement);
+      }
     }
   }
 
