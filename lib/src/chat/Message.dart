@@ -58,6 +58,7 @@ class Message {
     _messageId = messageId;
     _type = type;
     _chatState = chatState;
+    _isForwarded = isForwarded;
   }
 
   ChatState? get chatState => _chatState;
