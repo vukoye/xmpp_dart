@@ -54,10 +54,10 @@ class ConnectionNegotiatorManager {
       waitingNegotiators.add(NegotiatorWithSupportedNonzas(
           ServiceDiscoveryNegotiator.getInstance(_connection), []));
     }
-    negotiateNextFeature();
+    _negotiateNextFeature();
   }
 
-  void cleanNegotiators() {
+  void _cleanNegotiators() {
     waitingNegotiators.clear();
     if (activeNegotiator != null) {
       activeNegotiator!.backToIdle();
@@ -68,8 +68,8 @@ class ConnectionNegotiatorManager {
     }
   }
 
-  void negotiateNextFeature() {
-    var negotiatorWithData = pickNextNegotiator();
+  void _negotiateNextFeature() {
+    var negotiatorWithData = _pickNextNegotiator();
     if (negotiatorWithData != null) {
       activeNegotiator = negotiatorWithData.negotiator;
       activeNegotiator!.negotiate(negotiatorWithData.supportedNonzas);
@@ -117,13 +117,13 @@ class ConnectionNegotiatorManager {
     if (state == NegotiatorState.NEGOTIATING) {
       Log.d(TAG, 'Feature Started Parsing');
     } else if (state == NegotiatorState.DONE_CLEAN_OTHERS) {
-      cleanNegotiators();
+      _cleanNegotiators();
     } else if (state == NegotiatorState.DONE) {
-      negotiateNextFeature();
+      _negotiateNextFeature();
     }
   }
 
-  NegotiatorWithSupportedNonzas? pickNextNegotiator() {
+  NegotiatorWithSupportedNonzas? _pickNextNegotiator() {
     if (waitingNegotiators.isEmpty) return null;
     var negotiatorWithData = waitingNegotiators.firstWhereOrNull((element) {
       Log.d(TAG,
