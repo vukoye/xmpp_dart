@@ -54,7 +54,8 @@ class ChatImpl implements Chat {
         message.chatMarkerType != ChatMarkerType.MARKABLE) {
       _newChatMarkerController.add(message);
     }
-    if (message.type == MessageStanzaType.CHAT) {
+    if (message.type == MessageStanzaType.CHAT ||
+        message.type == MessageStanzaType.GROUPCHAT) {
       if (message.text != null && message.text!.isNotEmpty) {
         messages!.add(message);
         _newMessageController.add(message);
@@ -68,12 +69,19 @@ class ChatImpl implements Chat {
   }
 
   @override
-  Future<String> sendMessage(String text, {String? messageId}) async {
+  Future<String> sendMessage(
+    String text, {
+    String? messageId,
+    bool isGroupChat = false,
+  }) async {
     messageId ??= AbstractStanza.getRandomId();
-    var stanza = MessageStanza(messageId, MessageStanzaType.CHAT);
-    stanza.toJid = _jid;
-    stanza.fromJid = _connection.fullJid;
-    stanza.body = text;
+    final stanza = composeMessage(
+      text,
+      messageId: messageId,
+      fromJid: _connection.fullJid,
+      toJid: _jid,
+      type: isGroupChat ? MessageStanzaType.GROUPCHAT : MessageStanzaType.CHAT,
+    );
     if (_requestedChatState) {
       stanza.addChild(XmppElement('active')
         ..addAttribute(
@@ -81,13 +89,13 @@ class ChatImpl implements Chat {
     }
     stanza.addChild(XmppElement('markable')
       ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:chat-markers:0')));
+    stanza.addChild(XmppElement('request')
+      ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:receipts')));
     stanza.addChild(XmppElement('origin-id')
       ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:sid:0'))
       ..addAttribute(XmppAttribute('id', messageId)));
-    stanza.addChild(XmppElement('request')
-      ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:receipts')));
 
-    var message = Message.fromStanza(stanza);
+    var message = Message.fromStanza(stanza).first;
     messages!.add(message);
     _newMessageController.add(message);
     _connection.writeStanza(stanza);
@@ -96,10 +104,36 @@ class ChatImpl implements Chat {
     return messageId;
   }
 
+  static MessageStanza composeMessage(
+    String text, {
+    MessageStanzaType type = MessageStanzaType.CHAT,
+    String? messageId,
+    Jid? fromJid,
+    Jid? toJid,
+  }) {
+    final stanza = MessageStanza(
+      messageId,
+      type: type,
+    );
+    if (fromJid != null) {
+      stanza.fromJid = fromJid;
+    }
+    if (toJid != null) {
+      stanza.toJid = toJid;
+    }
+    stanza.body = text;
+    return stanza;
+  }
+
   @override
-  set myState(ChatState? state) {
-    var stanza =
-        MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+  void setChatState(
+    ChatState? state, {
+    bool isGroupChat = false,
+  }) {
+    var stanza = MessageStanza(
+      AbstractStanza.getRandomId(),
+      type: isGroupChat ? MessageStanzaType.GROUPCHAT : MessageStanzaType.CHAT,
+    );
     stanza.toJid = _jid;
     stanza.fromJid = _connection.fullJid;
     var stateElement =
@@ -115,7 +149,7 @@ class ChatImpl implements Chat {
   Future<String> sendChatMarker(
       Jid toJid, String messageId, ChatMarkerType markerType,
       {String? threadId}) async {
-    var stanza = MessageStanza(AbstractStanza.getRandomId(), null);
+    final stanza = MessageStanza(AbstractStanza.getRandomId());
     stanza.toJid = toJid;
     stanza.fromJid = _connection.fullJid;
     if (threadId != null) {
@@ -150,7 +184,7 @@ class ChatImpl implements Chat {
     stanza.addChild(XmppElement('store')
       ..addAttribute(XmppAttribute('xmlns', 'urn:xmpp:hints')));
 
-    _newChatMarkerController.add(Message.fromStanza(stanza));
+    _newChatMarkerController.add(Message.fromStanza(stanza).first);
     _connection.writeStanza(stanza);
     await _smm.deliveredStanzasStream
         .firstWhere((element) => element.id == messageId);
@@ -165,12 +199,19 @@ abstract class Chat {
   Stream<Message> get newMessageStream;
   Stream<Message> get newChatMarkerStream;
   Stream<ChatState?> get remoteStateStream;
-  Future<String> sendMessage(String text, {String? messageId});
+  Future<String> sendMessage(
+    String text, {
+    String? messageId,
+    bool isGroupChat = false,
+  });
   Future<String> sendChatMarker(
       Jid toJid, String messageId, ChatMarkerType markerType,
       {String? threadId});
   List<Message>? messages;
-  set myState(ChatState? state);
+  void setChatState(
+    ChatState? state, {
+    bool isGroupChat = false,
+  });
 }
 
 enum ChatState { INACTIVE, ACTIVE, GONE, COMPOSING, PAUSED }

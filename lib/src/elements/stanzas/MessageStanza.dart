@@ -4,9 +4,12 @@ import 'package:xmpp_stone/src/elements/XmppElement.dart';
 import 'package:xmpp_stone/src/elements/stanzas/AbstractStanza.dart';
 
 class MessageStanza extends AbstractStanza {
-  MessageStanzaType? type;
+  final MessageStanzaType? type;
 
-  MessageStanza(String? id, this.type) : super('message') {
+  MessageStanza(
+    String? id, {
+    this.type,
+  }) : super('message') {
     this.id = id;
     addAttribute(
         XmppAttribute('type', type.toString().split('.').last.toLowerCase()));

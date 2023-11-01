@@ -45,11 +45,15 @@ class MessageArchiveManager {
     late StreamSubscription dataSubscription;
     dataSubscription = _connection.inStanzasStream
         .where((event) => event is MessageStanza)
+        .where((event) =>
+            event?.children.any((element) =>
+                element.name == 'result' &&
+                element.getAttribute('queryid')?.value == query.queryId) ==
+            true)
         .map((event) => Message.fromStanza(event as MessageStanza))
-        .where((event) => event.queryId == query.queryId)
         .listen(
       (event) {
-        messages.add(event);
+        messages.addAll(event);
       },
       onError: (Object error, StackTrace stackTrace) {
         print(error);
@@ -238,4 +242,9 @@ class QueryResult {
   final List<Message> messages;
 
   QueryResult(this.complete, this.count, this.first, this.last, this.messages);
+
+  @override
+  String toString() {
+    return 'QueryResult(complete: $complete, count: $count, first: $first, last: $last, messages: $messages)';
+  }
 }

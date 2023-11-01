@@ -37,8 +37,10 @@ class MessageHandler implements MessageApi {
   }
 
   void _sendMessageStanza(Jid jid, String text) {
-    var stanza =
-        MessageStanza(AbstractStanza.getRandomId(), MessageStanzaType.CHAT);
+    var stanza = MessageStanza(
+      AbstractStanza.getRandomId(),
+      type: MessageStanzaType.CHAT,
+    );
     stanza.toJid = jid;
     stanza.fromJid = _connection.fullJid;
     stanza.body = text;

@@ -19,18 +19,13 @@ class StanzaParser {
   //TODO: Improve this!
   static AbstractStanza? parseStanza(xml.XmlElement element) {
     AbstractStanza? stanza;
-    var id = element.getAttribute('id');
-    if (id == null) {
-      Log.d(TAG, 'No id found for stanza');
-    }
-
     final elementName = element.name.local;
     if (elementName == 'iq') {
-      stanza = IqParser.parseIqStanza(id!, element);
+      stanza = IqParser.parseIqStanza(element);
     } else if (elementName == 'message') {
-      stanza = _parseMessageStanza(id, element);
+      stanza = _parseMessageStanza(element);
     } else if (elementName == 'presence') {
-      stanza = _parsePresenceStanza(id, element);
+      stanza = _parsePresenceStanza(element);
     } else {
       throw Exception('Not a stanza element: $elementName');
     }
@@ -54,7 +49,11 @@ class StanzaParser {
     return stanza;
   }
 
-  static MessageStanza _parseMessageStanza(String? id, xml.XmlElement element) {
+  static MessageStanza _parseMessageStanza(xml.XmlElement element) {
+    final id = element.getAttribute('id');
+    if (id == null) {
+      Log.d(TAG, 'No id found for stanza');
+    }
     var typeString = element.getAttribute('type');
     MessageStanzaType? type;
     if (typeString == null) {
@@ -78,13 +77,16 @@ class StanzaParser {
           break;
       }
     }
-    var stanza = MessageStanza(id, type);
+    var stanza = MessageStanza(id, type: type);
 
     return stanza;
   }
 
-  static PresenceStanza _parsePresenceStanza(
-      String? id, xml.XmlElement element) {
+  static PresenceStanza _parsePresenceStanza(xml.XmlElement element) {
+    final id = element.getAttribute('id');
+    if (id == null) {
+      Log.d(TAG, 'No id found for stanza');
+    }
     var presenceStanza = PresenceStanza();
     presenceStanza.id = id;
     return presenceStanza;
