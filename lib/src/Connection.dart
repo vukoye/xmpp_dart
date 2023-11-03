@@ -12,7 +12,6 @@ import 'package:xmpp_stone/src/features/servicediscovery/CarbonsNegotiator.dart'
 import 'package:xmpp_stone/src/features/servicediscovery/MAMNegotiator.dart';
 import 'package:xmpp_stone/src/features/servicediscovery/ServiceDiscoveryNegotiator.dart';
 import 'package:xmpp_stone/src/features/streammanagement/StreamManagmentModule.dart';
-import 'package:xmpp_stone/src/parser/StanzaParser.dart';
 import 'package:xmpp_stone/xmpp_stone.dart';
 
 import 'connection/XmppWebsocketApi.dart'
@@ -168,6 +167,12 @@ class Connection {
 
     //fix for multiple roots issue
     response1 = '<xmpp_stone>$response1</xmpp_stone>';
+
+    // Ignore declarations to avoid parsing problem
+    final xmlDeclarationMatcher = RegExp(r'<\?xml [^?]*\?>');
+    // final xmlDeclarations = xmlDeclarationMatcher.allMatches(response1);
+    // response1 = xmlDeclarations.map((e) => e[0]).join('') + '\n' + response1.replaceAll(xmlDeclarationMatcher, '');
+    response1 = response1.replaceAll(xmlDeclarationMatcher, '');
     return response1;
   }
 
@@ -470,6 +475,7 @@ class Connection {
   }
 
   void handleCloseState() {
+    StreamManagementModule.removeInstance(this);
     if (state == XmppConnectionState.WouldLikeToOpen) {
       setState(XmppConnectionState.Closed);
       connect();

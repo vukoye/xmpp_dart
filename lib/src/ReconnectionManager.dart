@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 import 'package:xmpp_stone/src/Connection.dart';
 import 'logger/Log.dart';
 
@@ -8,6 +9,7 @@ class ReconnectionManager {
   late Connection _connection;
   bool isActive = false;
   int initialTimeout = 1000;
+  int maxTimeout = -1;
   int totalReconnections = 3;
   late int timeOutInMs;
   int counter = 0;
@@ -19,6 +21,7 @@ class ReconnectionManager {
     _xmppConnectionStateSubscription =
         _connection.connectionStateStream.listen(connectionStateHandler);
     initialTimeout = _connection.account.reconnectionTimeout;
+    maxTimeout = _connection.account.maxReconnectionTimeout;
     totalReconnections = _connection.account.totalReconnections;
     timeOutInMs = initialTimeout;
   }
@@ -44,9 +47,13 @@ class ReconnectionManager {
     if (timer != null) {
       timer!.cancel();
     }
-    if (counter < totalReconnections) {
+    if (totalReconnections == -1 || counter < totalReconnections) {
       timer = Timer(Duration(milliseconds: timeOutInMs), _connection.reconnect);
-      timeOutInMs += timeOutInMs;
+      if (maxTimeout == -1) {
+        timeOutInMs *= 2;
+      } else {
+        timeOutInMs = min(timeOutInMs * 2, maxTimeout);
+      }
       Log.d(TAG, 'TimeOut is: $timeOutInMs reconnection counter $counter');
       counter++;
     } else {

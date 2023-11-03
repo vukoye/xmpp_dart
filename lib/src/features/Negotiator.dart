@@ -34,7 +34,8 @@ abstract class Negotiator {
   }
 
   bool isReady() {
-    return _state != NegotiatorState.DONE && state != NegotiatorState.DONE_CLEAN_OTHERS;
+    return _state != NegotiatorState.DONE &&
+        state != NegotiatorState.DONE_CLEAN_OTHERS;
   }
 
   @override

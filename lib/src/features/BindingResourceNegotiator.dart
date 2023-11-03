@@ -51,10 +51,8 @@ class BindingResourceConnectionNegotiator extends Negotiator {
 
   void sendBindRequestStanza(String? resource) {
     var stanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.SET);
-    var bindElement = XmppElement();
-    bindElement.name = BIND_NAME;
-    var resourceElement = XmppElement();
-    resourceElement.name = 'resource';
+    var bindElement = XmppElement(BIND_NAME);
+    var resourceElement = XmppElement('resource');
     resourceElement.textValue = resource;
     bindElement.addChild(resourceElement);
     var attribute = XmppAttribute('xmlns', BIND_ATTRIBUTE);

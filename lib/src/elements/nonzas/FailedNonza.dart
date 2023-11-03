@@ -7,7 +7,5 @@ class FailedNonza extends Nonza {
   static bool match(Nonza nonza) =>
       (nonza.name == NAME && nonza.getAttribute('xmlns')!.value == XMLNS);
 
-  FailedNonza() {
-    name = NAME;
-  }
+  FailedNonza() : super(NAME);
 }

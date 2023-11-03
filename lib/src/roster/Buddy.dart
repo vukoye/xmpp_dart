@@ -11,9 +11,7 @@ class Buddy {
 
   Jid? get jid => _jid;
 
-  Buddy(Jid jid) {
-    _jid = jid;
-  }
+  Buddy(Jid jid) : this._jid = jid;
 
   @override
   String toString() {

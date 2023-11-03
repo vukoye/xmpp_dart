@@ -1,9 +1,13 @@
-import 'dart:developer';
+import 'dart:developer' as dev;
 
 class Log {
   static LogLevel logLevel = LogLevel.VERBOSE;
 
   static bool logXmpp = true;
+
+  static void Function(String message) log = (String message) {
+    dev.log(message);
+  };
 
   static void v(String tag, String message) {
     if (logLevel.index <= LogLevel.VERBOSE.index) {

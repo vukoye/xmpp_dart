@@ -7,7 +7,5 @@ class EnabledNonza extends Nonza {
   static bool match(Nonza nonza) =>
       (nonza.name == NAME && nonza.getAttribute('xmlns')!.value == XMLNS);
 
-  EnabledNonza() {
-    name = NAME;
-  }
+  EnabledNonza() : super(NAME);
 }

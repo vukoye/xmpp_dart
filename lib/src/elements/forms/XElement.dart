@@ -3,12 +3,9 @@ import '../XmppAttribute.dart';
 import '../XmppElement.dart';
 
 class XElement extends XmppElement {
-  XElement() {
-    name = 'x';
-  }
+  XElement() : super('x');
 
-  XElement.build() {
-    name = 'x';
+  XElement.build() : super('x') {
     addAttribute(XmppAttribute('xmlns', 'jabber:x:data'));
   }
 

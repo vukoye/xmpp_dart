@@ -19,27 +19,25 @@ class StanzaParser {
   //TODO: Improve this!
   static AbstractStanza? parseStanza(xml.XmlElement element) {
     AbstractStanza? stanza;
-    var id = element.getAttribute('id');
-    if (id == null) {
-      Log.d(TAG, 'No id found for stanza');
-    }
-
-    if (element.name.local == 'iq') {
-      stanza = IqParser.parseIqStanza(id, element);
-    } else if (element.name.local == 'message') {
-      stanza = _parseMessageStanza(id, element);
-    } else if (element.name.local == 'presence') {
-      stanza = _parsePresenceStanza(id, element);
+    final elementName = element.name.local;
+    if (elementName == 'iq') {
+      stanza = IqParser.parseIqStanza(element);
+    } else if (elementName == 'message') {
+      stanza = _parseMessageStanza(element);
+    } else if (elementName == 'presence') {
+      stanza = _parsePresenceStanza(element);
+    } else {
+      throw Exception('Not a stanza element: $elementName');
     }
     var fromString = element.getAttribute('from');
     if (fromString != null) {
       var from = Jid.fromFullJid(fromString);
-      stanza!.fromJid = from;
+      stanza.fromJid = from;
     }
     var toString = element.getAttribute('to');
     if (toString != null) {
       var to = Jid.fromFullJid(toString);
-      stanza!.toJid = to;
+      stanza.toJid = to;
     }
     element.attributes.forEach((xmlAttribute) {
       stanza!.addAttribute(
@@ -51,7 +49,11 @@ class StanzaParser {
     return stanza;
   }
 
-  static MessageStanza _parseMessageStanza(String? id, xml.XmlElement element) {
+  static MessageStanza _parseMessageStanza(xml.XmlElement element) {
+    final id = element.getAttribute('id');
+    if (id == null) {
+      Log.d(TAG, 'No id found for stanza');
+    }
     var typeString = element.getAttribute('type');
     MessageStanzaType? type;
     if (typeString == null) {
@@ -75,13 +77,16 @@ class StanzaParser {
           break;
       }
     }
-    var stanza = MessageStanza(id, type);
+    var stanza = MessageStanza(id, type: type);
 
     return stanza;
   }
 
-  static PresenceStanza _parsePresenceStanza(
-      String? id, xml.XmlElement element) {
+  static PresenceStanza _parsePresenceStanza(xml.XmlElement element) {
+    final id = element.getAttribute('id');
+    if (id == null) {
+      Log.d(TAG, 'No id found for stanza');
+    }
     var presenceStanza = PresenceStanza();
     presenceStanza.id = id;
     return presenceStanza;
@@ -100,9 +105,8 @@ class StanzaParser {
     } else if (name == 'field') {
       xmppElement = FieldElement();
     } else {
-      xmppElement = XmppElement();
+      xmppElement = XmppElement(name);
     }
-    xmppElement.name = xmlElement.name.local;
     xmlElement.attributes.forEach((xmlAttribute) {
       xmppElement.addAttribute(
           XmppAttribute(xmlAttribute.name.local, xmlAttribute.value));

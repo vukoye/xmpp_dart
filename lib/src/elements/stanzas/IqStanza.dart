@@ -5,8 +5,7 @@ import 'AbstractStanza.dart';
 class IqStanza extends AbstractStanza {
   IqStanzaType type = IqStanzaType.SET;
 
-  IqStanza(String? id, IqStanzaType type) {
-    name = 'iq';
+  IqStanza(String? id, IqStanzaType type) : super('iq') {
     this.id = id;
     this.type = type;
     addAttribute(

@@ -27,8 +27,14 @@ abstract class AbstractStanza extends XmppElement {
 
   set id(String? value) {
     _id = value;
-    addAttribute(XmppAttribute('id', _id));
+    if (value == null) {
+      removeAttribute('id');
+    } else {
+      addAttribute(XmppAttribute('id', value));
+    }
   }
+
+  AbstractStanza(super.name);
 
   static String getRandomId() {
     const ASCII_START = 65;

@@ -38,18 +38,18 @@ class ScramSaslHandler implements AbstractSaslHandler {
   ScramSaslHandler(this._connection, String? password, this._mechanism) {
     _username = _connection.fullJid.local;
     _password = password;
-    initMechanism();
-    generateRandomClientNonce();
+    _initMechanism();
+    _generateRandomClientNonce();
   }
 
   @override
   Future<AuthenticationResult> start() {
     subscription = _connection.inNonzasStream.listen(_parseAnswer);
-    sendInitialMessage();
+    _sendInitialMessage();
     return _completer.future;
   }
 
-  void initMechanism() {
+  void _initMechanism() {
     if (_mechanism == SaslMechanism.SCRAM_SHA_1) {
       _hash = sha1;
       _mechanismString = 'SCRAM-SHA-1';
@@ -59,18 +59,17 @@ class ScramSaslHandler implements AbstractSaslHandler {
     }
   }
 
-  void generateRandomClientNonce() {
+  void _generateRandomClientNonce() {
     var bytes = List<int>.generate(
         CLIENT_NONCE_LENGTH, (index) => Random.secure().nextInt(256));
     _clientNonce = base64.encode(bytes);
   }
 
-  void sendInitialMessage() {
+  void _sendInitialMessage() {
     _initialMessage = 'n=${saslEscape(normalize(_username!))},r=$_clientNonce';
     var bytes = utf8.encode('n,,$_initialMessage');
     var message = CryptoUtils.bytesToBase64(bytes, false, false);
-    var nonza = Nonza();
-    nonza.name = 'auth';
+    var nonza = Nonza('auth');
     nonza.addAttribute(
         XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
     nonza.addAttribute(XmppAttribute('mechanism', _mechanismString));
@@ -85,7 +84,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
         _fireAuthFailed('Auth Error in sent username');
       } else if (nonza.name == 'challenge') {
         //challenge
-        challengeFirst(nonza.textValue!);
+        _challengeFirst(nonza.textValue!);
       }
     } else if (_scramState == ScramStates.RESPONSE_SENT) {
       if (nonza.name == 'failure') {
@@ -115,7 +114,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
     return utf8.decode(list).split(',').map((i) => i.trim()).toList();
   }
 
-  void challengeFirst(String content) {
+  void _challengeFirst(String content) {
     var serverFirstMessage = base64.decode(content);
     var tokens = tokenizeGS2header(serverFirstMessage);
 
@@ -179,8 +178,7 @@ class ScramSaslHandler implements AbstractSaslHandler {
 
     var clientFinalMessage =
         '$clientFinalMessageBare,p=${base64.encode(clientProof)}';
-    var response = Nonza();
-    response.name = 'response';
+    var response = Nonza('response');
     response.addAttribute(
         XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
     response.textValue = base64.encode(utf8.encode(clientFinalMessage));

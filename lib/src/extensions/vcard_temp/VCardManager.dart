@@ -35,11 +35,9 @@ class VCardManager {
 
   Future<VCard> getSelfVCard() {
     var completer = Completer<VCard>();
-    var iqStanza =
-        IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
-    var vCardElement = XmppElement();
-    vCardElement.name = 'vCard';
+    var vCardElement = XmppElement('vCard');
     vCardElement.addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     iqStanza.addChild(vCardElement);
     _myUnrespondedIqStanzas[iqStanza.id!] = Tuple2(iqStanza, completer);
@@ -49,12 +47,10 @@ class VCardManager {
 
   Future<VCard> getVCardFor(Jid jid) {
     var completer = Completer<VCard>();
-    var iqStanza =
-        IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
+    var iqStanza = IqStanza(AbstractStanza.getRandomId(), IqStanzaType.GET);
     iqStanza.fromJid = _connection.fullJid;
     iqStanza.toJid = jid;
-    var vCardElement = XmppElement();
-    vCardElement.name = 'vCard';
+    var vCardElement = XmppElement('vCard');
     vCardElement.addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     iqStanza.addChild(vCardElement);
     _myUnrespondedIqStanzas[iqStanza.id!] = Tuple2(iqStanza, completer);
@@ -70,8 +66,8 @@ class VCardManager {
 
   void _processStanza(AbstractStanza? stanza) {
     if (stanza is IqStanza) {
-      var unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
-      if (_myUnrespondedIqStanzas[stanza.id] != null) {
+      final unrespondedStanza = _myUnrespondedIqStanzas[stanza.id];
+      if (unrespondedStanza != null) {
         if (stanza.type == IqStanzaType.RESULT) {
           var vCardChild = stanza.getChild('vCard');
           if (vCardChild != null) {
@@ -81,10 +77,10 @@ class VCardManager {
             } else {
               _vCards[_connection.fullJid.userAtDomain] = vCard;
             }
-            unrespondedStanza!.item2.complete(vCard);
+            unrespondedStanza.item2.complete(vCard);
           }
         } else if (stanza.type == IqStanzaType.ERROR) {
-          unrespondedStanza!.item2
+          unrespondedStanza.item2
               .complete(InvalidVCard(stanza.getChild('vCard')));
         }
       }

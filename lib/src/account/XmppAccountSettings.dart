@@ -12,10 +12,13 @@ class XmppAccountSettings {
   List<String>? wsProtocols;
   int totalReconnections = 3;
   int reconnectionTimeout = 1000;
+  int maxReconnectionTimeout = -1;
   bool ackEnabled = true;
   bool smResumable = true;
 
-  XmppAccountSettings(this.name, this.username, this.domain, this.password, this.port, {this.host, this.resource, this.wsPath, this.wsProtocols} );
+  XmppAccountSettings(
+      this.name, this.username, this.domain, this.password, this.port,
+      {this.host, this.resource, this.wsPath, this.wsProtocols});
 
   Jid get fullJid => Jid(username, domain, resource);
 

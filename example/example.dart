@@ -28,7 +28,7 @@ void main(List<String> arguments) {
   presenceManager.subscriptionStream.listen((streamEvent) {
     if (streamEvent.type == xmpp.SubscriptionEventType.REQUEST) {
       Log.d(TAG, 'Accepting presence request');
-      presenceManager.acceptSubscription(streamEvent.jid);
+      presenceManager.acceptSubscription(streamEvent.jid!);
     }
   });
   var receiver = 'nemanja2@test';

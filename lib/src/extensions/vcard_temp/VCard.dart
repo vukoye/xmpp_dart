@@ -10,11 +10,10 @@ class VCard extends XmppElement {
 
   img.Image? _image;
 
-  VCard(XmppElement? element) {
+  VCard(XmppElement? element) : super('vCard') {
     if (element != null) {
       element.children.forEach((child) => addChild(child));
     }
-    name = 'vCard';
     addAttribute(XmppAttribute('xmlns', 'vcard-temp'));
     _parseImage();
   }
@@ -47,7 +46,7 @@ class VCard extends XmppElement {
 
   String? getItem(String itemName) => getChild(itemName)?.textValue;
 
-  dynamic get imageData => _imageData;
+  dynamic /*?*/ get imageData => _imageData;
 
   img.Image? get image => _image;
 
@@ -73,16 +72,14 @@ class VCard extends XmppElement {
   }
 
   String? get emailHome {
-    var element = children.firstWhereOrNull(
-        (element) =>
-            (element.name == 'EMAIL' && element.getChild('HOME') != null));
+    var element = children.firstWhereOrNull((element) =>
+        (element.name == 'EMAIL' && element.getChild('HOME') != null));
     return element?.getChild('USERID')?.textValue;
   }
 
   String? get emailWork {
-    var element = children.firstWhereOrNull(
-        (element) =>
-            (element.name == 'EMAIL' && element.getChild('WORK') != null));
+    var element = children.firstWhereOrNull((element) =>
+        (element.name == 'EMAIL' && element.getChild('WORK') != null));
     return element?.getChild('USERID')?.textValue;
   }
 

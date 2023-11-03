@@ -8,8 +8,7 @@ class RNonza extends Nonza {
   static bool match(Nonza nonza) =>
       (nonza.name == NAME && nonza.getAttribute('xmlns')!.value == XMLNS);
 
-  RNonza() {
-    name = NAME;
+  RNonza() : super(NAME) {
     addAttribute(XmppAttribute('xmlns', XMLNS));
   }
 }

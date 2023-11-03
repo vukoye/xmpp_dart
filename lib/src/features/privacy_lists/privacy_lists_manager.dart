@@ -194,7 +194,7 @@ class PrivacyListsManager {
 
     var queryStanza = QueryElement();
     queryStanza.setXmlns('jabber:iq:privacy');
-    queryStanza.addChild(XmppElement()..name = 'active');
+    queryStanza.addChild(XmppElement('active'));
     iqStanza.addChild(queryStanza);
 
     _unrespondedStanzas[iqStanza.id!] = Tuple2((resultStanza) {
@@ -242,7 +242,7 @@ class PrivacyListsManager {
 
     var queryStanza = QueryElement();
     queryStanza.setXmlns('jabber:iq:privacy');
-    queryStanza.addChild(XmppElement()..name = 'default');
+    queryStanza.addChild(XmppElement('default'));
     iqStanza.addChild(queryStanza);
 
     _unrespondedStanzas[iqStanza.id!] = Tuple2((resultStanza) {

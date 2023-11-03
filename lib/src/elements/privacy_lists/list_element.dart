@@ -2,10 +2,7 @@ import '../XmppElement.dart';
 import 'named_element.dart';
 
 class ListElement extends NamedElement {
-  ListElement(String name) {
-    this.name = 'list';
-    setName(name);
-  }
+  ListElement(String name) : super('list', name);
 
   void setItems(List<XmppElement> items) {
     items.forEach((element) {

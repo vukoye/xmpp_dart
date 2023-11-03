@@ -22,14 +22,16 @@ class ChatManager {
         .where((abstractStanza) => abstractStanza is MessageStanza)
         .map((stanza) => stanza as MessageStanza?)
         .listen((stanza) {
-      var message = Message.fromStanza(stanza!);
-      // find jid different from mine
-      var buddyJid =
-          _connection.fullJid.userAtDomain == message.to!.userAtDomain
-              ? message.from!
-              : message.to!;
-      var chat = _getChat(buddyJid);
-      chat.parseMessage(message);
+      final messages = Message.fromStanza(stanza!);
+      for (final message in messages) {
+        // find jid different from mine
+        var buddyJid =
+            _connection.fullJid.userAtDomain == message.to!.userAtDomain
+                ? message.from!
+                : message.to!;
+        var chat = _getChat(buddyJid);
+        chat.parseMessage(message);
+      }
     });
   }
 

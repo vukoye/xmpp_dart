@@ -5,7 +5,11 @@ import '../logger/Log.dart';
 class IqParser {
   static const TAG = 'IqParser';
 
-  static IqStanza parseIqStanza(String? id, xml.XmlElement element) {
+  static IqStanza parseIqStanza(xml.XmlElement element) {
+    final id = element.getAttribute('id');
+    if (id == null) {
+      Log.d(TAG, 'No id found for stanza');
+    }
     var typeString = element.getAttribute('type');
     return IqStanza(id, _parseIqType(typeString));
   }

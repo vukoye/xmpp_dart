@@ -10,13 +10,9 @@ class PrivacyListItemElement extends XmppElement {
 
   PrivacyListItemElement({
     required this.item,
-  }) {
-    name = 'item';
-  }
+  }) : super('item');
 
-  PrivacyListItemElement.fromXml(XmppElement element) {
-    name = element.name;
-
+  PrivacyListItemElement.fromXml(XmppElement element) : super(element.name) {
     var type = element.getAttribute('type')?.value?.toEnum(PrivacyType.values);
     var value = element.getAttribute('value')?.value;
     var action =
@@ -67,13 +63,16 @@ class PrivacyListItemElement extends XmppElement {
 
     if (item.controlStanzas != null && item.controlStanzas!.isNotEmpty) {
       item.controlStanzas?.forEach((controlStanza) {
-        addChild(XmppElement()
-          ..name = controlStanza
-              .toString()
-              .split('.')
-              .last
-              .toLowerCase()
-              .replaceAll('_', '-'));
+        addChild(
+          XmppElement(
+            controlStanza
+                .toString()
+                .split('.')
+                .last
+                .toLowerCase()
+                .replaceAll('_', '-'),
+          ),
+        );
       });
     }
 

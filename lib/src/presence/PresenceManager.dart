@@ -14,11 +14,13 @@ class PresenceManager implements PresenceApi {
 
   List<PresenceStanza> requests = <PresenceStanza>[];
 
-  final StreamController<PresenceData> _presenceStreamController = StreamController<PresenceData>.broadcast();
+  final StreamController<PresenceData> _presenceStreamController =
+      StreamController<PresenceData>.broadcast();
 
   final StreamController<SubscriptionEvent> _subscribeStreamController =
       StreamController<SubscriptionEvent>.broadcast();
-  final StreamController<PresenceErrorEvent> _errorStreamController = StreamController<PresenceErrorEvent>.broadcast();
+  final StreamController<PresenceErrorEvent> _errorStreamController =
+      StreamController<PresenceErrorEvent>.broadcast();
 
   PresenceData _selfPresence = PresenceData(PresenceShowElement.CHAT, '', null);
 
@@ -133,7 +135,8 @@ class PresenceManager implements PresenceApi {
   void _processPresenceStanza(PresenceStanza? presenceStanza) {
     if (presenceStanza!.type == null) {
       //presence event
-      _presenceStreamController.add(PresenceData(presenceStanza.show, presenceStanza.status, presenceStanza.fromJid));
+      _presenceStreamController.add(PresenceData(
+          presenceStanza.show, presenceStanza.status, presenceStanza.fromJid));
     } else {
       switch (presenceStanza.type) {
         case PresenceType.SUBSCRIBE:
@@ -163,7 +166,10 @@ class PresenceManager implements PresenceApi {
           break;
         case PresenceType.UNAVAILABLE:
           //presence event
-          _presenceStreamController.add(PresenceData(PresenceShowElement.XA, 'Unavailable', presenceStanza.fromJid));
+          _presenceStreamController.add(PresenceData(
+              PresenceShowElement.XA, 'Unavailable', presenceStanza.fromJid));
+          break;
+        default:
           break;
       }
     }
@@ -187,9 +193,9 @@ class PresenceManager implements PresenceApi {
 
   void _handleErrorEvent(PresenceStanza presenceStanza) {
     //TODO Add more handling
-    var errorEvent = PresenceErrorEvent();
-    errorEvent.presenceStanza = presenceStanza;
-    var errorTypeString = presenceStanza.getChild('error')?.getAttribute('type')?.value;
+    var errorEvent = PresenceErrorEvent()..presenceStanza = presenceStanza;
+    var errorTypeString =
+        presenceStanza.getChild('error')?.getAttribute('type')?.value;
     if (errorTypeString != null && errorTypeString == 'modify') {
       errorEvent.type = PresenceErrorType.MODIFY;
     }

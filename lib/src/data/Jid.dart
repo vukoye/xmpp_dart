@@ -1,3 +1,4 @@
+import 'package:collection/collection.dart';
 import 'package:quiver/core.dart';
 
 class Jid {
@@ -13,7 +14,10 @@ class Jid {
 
   @override
   bool operator ==(other) {
-    return other is Jid && local == other.local && domain == other.domain && resource == other.resource;
+    return other is Jid &&
+        local == other.local &&
+        domain == other.domain &&
+        resource == other.resource;
   }
 
   String get local => _local;

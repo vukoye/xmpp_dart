@@ -23,8 +23,7 @@ class Nonza extends XmppElement {
   }
 
   static Nonza parse(xml.XmlElement xmlElement) {
-    var nonza = Nonza();
-    nonza.name = xmlElement.name.local;
+    var nonza = Nonza(xmlElement.name.local);
 
     var fromString = xmlElement.getAttribute('from');
     if (fromString != null) {
@@ -47,4 +46,6 @@ class Nonza extends XmppElement {
     });
     return nonza;
   }
+
+  Nonza(super.name);
 }

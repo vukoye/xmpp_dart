@@ -2,13 +2,10 @@ import '../XmppAttribute.dart';
 import '../XmppElement.dart';
 
 class FieldElement extends XmppElement {
+  FieldElement() : super('field');
 
-  FieldElement() {
-    name = 'field';
-  }
-
-  FieldElement.build({String? varAttr, String? typeAttr, String? value}) {
-    name = 'field';
+  FieldElement.build({String? varAttr, String? typeAttr, String? value})
+      : super('field') {
     if (varAttr != null) {
       addAttribute(XmppAttribute('var', varAttr));
     }
@@ -16,8 +13,7 @@ class FieldElement extends XmppElement {
       addAttribute(XmppAttribute('type', typeAttr));
     }
     if (value != null) {
-      var valueElement = XmppElement();
-      valueElement.name = 'value';
+      var valueElement = XmppElement('value');
       valueElement.textValue = value;
       addChild(valueElement);
     }

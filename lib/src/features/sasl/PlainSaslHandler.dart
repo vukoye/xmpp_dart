@@ -41,8 +41,7 @@ class PlainSaslHandler implements AbstractSaslHandler {
         '\u0000' + _connection.fullJid.local + '\u0000' + _password!;
     var bytes = utf8.encode(authString);
     var base64 = CryptoUtils.bytesToBase64(bytes);
-    var nonza = Nonza();
-    nonza.name = 'auth';
+    var nonza = Nonza('auth');
     nonza.addAttribute(
         XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
     nonza.addAttribute(XmppAttribute('mechanism', 'PLAIN'));

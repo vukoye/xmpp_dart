@@ -7,7 +7,7 @@ version: 0.4.4-dev.4
 homepage: https://vukoye.github.io
 
 environment:
-  sdk: '>=2.12.0 <4.0.0'
+  sdk: '>=2.19.0 <3.0.0'
 
 #dependencies:
 #  path: ^1.4.1
@@ -21,7 +21,6 @@ dependencies:
   image: ^4.0.17
   quiver: ^3.2.1 #hash code generator
   console: ^4.1.0 #for example
-  intl: ^0.18.1
   collection: ^1.17.1
   universal_io: ^2.2.0
   web_socket_channel: ^2.4.0

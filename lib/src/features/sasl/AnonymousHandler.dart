@@ -23,25 +23,24 @@ class AnonymousHandler implements AbstractSaslHandler {
   late var serverSignature;
 
   AnonymousHandler(this._connection, this._mechanism) {
-    initMechanism();
+    _initMechanism();
   }
 
   @override
   Future<AuthenticationResult> start() {
     subscription = _connection.inNonzasStream.listen(_parseAnswer);
-    sendInitialMessage();
+    _sendInitialMessage();
     return _completer.future;
   }
 
-  void initMechanism() {
+  void _initMechanism() {
     if (_mechanism == SaslMechanism.ANONYMOUS) {
       _mechanismString = 'ANONYMOUS';
     }
   }
 
-  void sendInitialMessage() {
-    var nonza = Nonza();
-    nonza.name = 'auth';
+  void _sendInitialMessage() {
+    var nonza = Nonza('auth');
     nonza.addAttribute(
         XmppAttribute('xmlns', 'urn:ietf:params:xml:ns:xmpp-sasl'));
     nonza.addAttribute(XmppAttribute('mechanism', _mechanismString));

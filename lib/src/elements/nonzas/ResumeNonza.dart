@@ -8,8 +8,7 @@ class ResumeNonza extends Nonza {
   static bool match(Nonza nonza) =>
       (nonza.name == NAME && nonza.getAttribute('xmlns')!.value == XMLNS);
 
-  ResumeNonza(String? id, int hValue) {
-    name = NAME;
+  ResumeNonza(String? id, int hValue) : super(NAME) {
     addAttribute(XmppAttribute('xmlns', XMLNS));
     addAttribute(XmppAttribute('h', hValue.toString()));
     addAttribute(XmppAttribute('previd', id));

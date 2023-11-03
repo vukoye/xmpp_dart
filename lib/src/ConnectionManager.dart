@@ -3,6 +3,6 @@ class ConnectionManager {
 
   static ConnectionManager? getInstance() {
     _instance ??= ConnectionManager();
-    return _instance;
+    return _instance!;
   }
 }
