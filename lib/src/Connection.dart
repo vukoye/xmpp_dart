@@ -475,6 +475,7 @@ class Connection {
   }
 
   void handleCloseState() {
+    StreamManagementModule.removeInstance(this);
     if (state == XmppConnectionState.WouldLikeToOpen) {
       setState(XmppConnectionState.Closed);
       connect();
