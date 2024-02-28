@@ -2,7 +2,7 @@ name: xmpp_stone
 
 description: "Xmpp Stone is lightweight XMPP client library written completely in Dart."
 
-version: 0.4.4-dev.4
+version: 0.4.4-dev.5
 
 homepage: https://vukoye.github.io
 
@@ -12,20 +12,20 @@ environment:
 #dependencies:
 #  path: ^1.4.1
 dependencies:
-  xml: ^6.3.0
+  xml: ^6.5.0
   cryptoutils: ^0.5.0
   crypto: ^3.0.3
-  synchronized: ^3.1.0
-  tuple: ^2.0.1
-  unorm_dart: ^0.2.0
-  image: ^4.0.17
+  synchronized: ^3.1.0+1
+  tuple: ^2.0.2
+  unorm_dart: ^0.3.0
+  image: ^4.1.7
   quiver: ^3.2.1 #hash code generator
   console: ^4.1.0 #for example
-  intl: ^0.18.1
-  collection: ^1.17.1
-  universal_io: ^2.2.0
-  web_socket_channel: ^2.4.0
+  intl: ^0.19.0
+  collection: ^1.18.0
+  universal_io: ^2.2.2
+  web_socket_channel: ^2.4.4
 
 dev_dependencies:
-  test: ^1.21.4
-  mockito: ^5.3.1
+  test: ^1.25.2
+  mockito: ^5.4.4
