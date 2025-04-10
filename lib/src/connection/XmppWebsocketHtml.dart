@@ -78,6 +78,12 @@ class XmppWebSocketHtml extends XmppWebSocket {
 
   @override
   String getStreamOpeningElement(String domain) {
-    return """<open xmlns='urn:ietf:params:xml:ns:xmpp-framing' to='$domain' version='1.0'/>""";
+    // many servers (especially Prosody in c2s mode or with limited framing support) expected the traditional stream open stanza:
+    return """<stream:stream
+    to='$domain'
+    xmlns='jabber:client'
+    xmlns:stream='http://etherx.jabber.org/streams'
+    version='1.0'>""";
+    //return """<open xmlns='urn:ietf:params:xml:ns:xmpp-framing' to='$domain' version='1.0'/>""";
   }
 }
