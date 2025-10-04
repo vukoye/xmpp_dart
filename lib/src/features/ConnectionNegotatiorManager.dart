@@ -42,6 +42,15 @@ class ConnectionNegotiatorManager {
     Log.d(TAG, 'Negotiating features');
     var nonzas =
         element.childElements.map((element) => Nonza.parse(element)).toList();
+    // --- Dynamic TLS feature detection ---
+    // Read raw <stream:features> from the server and check for <starttls><required/>.
+    final xmlString = element.toXmlString(pretty: false);
+    if (xmlString.contains('<starttls') && xmlString.contains('<required')) {
+      print('[ConnectionNegotiatorManager] ⚡ TLS feature with <required/> detected → marking connection as TLS-required');
+      _connection.markTlsRequired();
+      // Reinitialize negotiator list so StartTlsNegotiator gets included
+      init();
+    }
     supportedNegotiatorList.forEach((negotiator) {
       var matchingNonzas = negotiator.match(nonzas);
       if (matchingNonzas != null && matchingNonzas.isNotEmpty) {

@@ -133,6 +133,17 @@ class Connection {
 
   ReconnectionManager? reconnectionManager;
 
+  // === Dynamic TLS detection support ===
+  // Flag indicating if the server required STARTTLS dynamically.
+  bool _tlsRequired = false;
+
+  /// Called when the server advertised <starttls><required/>.
+  /// Enables TLS negotiation for this connection.
+  void markTlsRequired() {
+    _tlsRequired = true;
+    print('[Connection] TLS marked as "required" (reported by server)');
+  }
+
   Connection(this.account) {
     RosterManager.getInstance(this);
     PresenceManager.getInstance(this);
@@ -451,8 +462,12 @@ class Connection {
     return true;
   }
 
+  /// Overridden behavior:
+  /// 1. Return true if we already detected TLS requirement dynamically.
+  /// 2. Otherwise, use the default setting from xmppSocket.
   bool isTlsRequired() {
-    return xmppSocket.isTlsRequired();
+    if (_tlsRequired) return true; // dynamic override
+    return xmppSocket.isTlsRequired(); // original fallback
   }
 
   void handleConnectionDone() {

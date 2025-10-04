@@ -58,13 +58,26 @@ class XmppWebSocketIo extends XmppWebSocket {
   }
 
   @override
-  Future<SecureSocket?> secure(
-      {host,
-      SecurityContext? context,
-      bool Function(X509Certificate certificate)? onBadCertificate,
-      List<String>? supportedProtocols}) {
-    return SecureSocket.secure(_socket!, onBadCertificate: onBadCertificate);
+  Future<SecureSocket?> secure({
+    host,
+    SecurityContext? context,
+    bool Function(X509Certificate certificate)? onBadCertificate,
+    List<String>? supportedProtocols,
+  }) async {
+    // Perform STARTTLS upgrade on the existing TCP socket
+    final newSocket = await SecureSocket.secure(
+      _socket!,
+      host: host,
+      context: context,
+      onBadCertificate: onBadCertificate,
+      supportedProtocols: supportedProtocols,
+    );
+
+    // Important: replace old unencrypted socket with the new TLS one
+    _socket = newSocket;
+    return newSocket;
   }
+
 
   @override
   String getStreamOpeningElement(String domain) {
