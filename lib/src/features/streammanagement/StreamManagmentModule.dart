@@ -34,7 +34,6 @@ class StreamManagementModule extends Negotiator {
     instance?.timer?.cancel();
     instance?.inNonzaSubscription?.cancel();
     instance?.outStanzaSubscription?.cancel();
-    instance?.inNonzaSubscription?.cancel();
     instance?._xmppConnectionStateSubscription.cancel();
     instances.remove(connection);
   }
@@ -94,6 +93,11 @@ class StreamManagementModule extends Negotiator {
       }
       ;
       if (state == XmppConnectionState.Closed) {
+        timer?.cancel();
+        inNonzaSubscription?.cancel();
+        outStanzaSubscription?.cancel();
+        inStanzaSubscription?.cancel();
+        _xmppConnectionStateSubscription.cancel();
         streamState = StreamState();
         //state = XmppConnectionState.Idle;
       }
@@ -113,7 +117,10 @@ class StreamManagementModule extends Negotiator {
         SMNonza.match(nonzas[0]) &&
         _connection.authenticated) {
       state = NegotiatorState.NEGOTIATING;
-      inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);
+      if (inNonzaSubscription == null) {
+        inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);
+      }
+      //inNonzaSubscription = _connection.inNonzasStream.listen(parseNonza);
       if (streamState.isResumeAvailable()) {
         tryToResumeStream();
       } else {
@@ -152,18 +159,39 @@ class StreamManagementModule extends Negotiator {
     } else if (state == NegotiatorState.DONE) {
       if (ANonza.match(nonza)) {
         parseAckResponse(nonza.getAttribute('h')!.value!);
-      } else if (RNonza.match(nonza)) {
+      } else if (RNonza.match(nonza) && streamState.streamManagementEnabled) {
+        Log.w(TAG, 'Sending <a> in response to <r>');
         sendAckResponse();
       }
+      /*) {
+        if (!streamState.streamManagementEnabled) {
+          Log.w(TAG, 'Received <r> but stream management is not enabled');
+          return;
+        }
+          Log.w(TAG, 'Sending <a>');
+          sendAckResponse();
+        }
+      }*/
     }
   }
 
   void parseOutStanza(AbstractStanza stanza) {
+    if (!streamState.streamManagementEnabled) return;
+
+    if (stanza is! AbstractStanza) {
+      print("⚠️ Unexpected type: ${stanza.runtimeType}");
+      return;
+    }
+
     streamState.lastSentStanza++;
     streamState.nonConfirmedSentStanzas.addLast(stanza);
+    //if (!streamState.streamManagementEnabled) return;
+    //streamState.lastSentStanza++;
+    //streamState.nonConfirmedSentStanzas.addLast(stanza);
   }
 
   void parseInStanza(AbstractStanza? stanza) {
+    if (!streamState.streamManagementEnabled) return;
     streamState.lastReceivedStanza++;
   }
 
@@ -179,9 +207,35 @@ class StreamManagementModule extends Negotiator {
       timer!.cancel();
     }
     timer = Timer.periodic(
-        Duration(milliseconds: 5000), (Timer t) => sendAckRequest());
-    outStanzaSubscription = _connection.outStanzasStream.listen(parseOutStanza);
-    inStanzaSubscription = _connection.inStanzasStream.listen(parseInStanza);
+      Duration(milliseconds: 5000),
+          (Timer t) {
+        if (streamState.streamManagementEnabled) {
+          sendAckRequest();
+        } else {
+          Log.d(TAG, 'Skipping ack request – SM not enabled');
+        }
+      },
+    );
+    outStanzaSubscription ??= _connection.outStanzasStream.listen((stanzaOrList) {
+      if (stanzaOrList is AbstractStanza) {
+        // Handle a single stanza
+        parseOutStanza(stanzaOrList);
+      } else if (stanzaOrList is Iterable) {
+        Log.w(TAG, 'Unexpected item type in outStanzasStream list: ${stanzaOrList.runtimeType}');
+        // Explicitly cast and check contents of the list
+//        for (final item in stanzaOrList) {
+//          if (item is AbstractStanza) {
+//            parseOutStanza(item);
+//          } else {
+//            Log.w(TAG, 'Unexpected item type in outStanzasStream list: ${item.runtimeType}');
+//          }
+//        }
+      } else {
+        Log.w(TAG, 'Unexpected value from outStanzasStream: ${stanzaOrList.runtimeType}');
+      }
+    });
+    //outStanzaSubscription ??= _connection.outStanzasStream.listen(parseOutStanza);
+    inStanzaSubscription ??= _connection.inStanzasStream.listen(parseInStanza);
   }
 
   void handleResumed(Nonza nonza) {
@@ -198,8 +252,17 @@ class StreamManagementModule extends Negotiator {
   void sendEnableStreamManagement() =>
       _connection.writeNonza(EnableNonza(_connection.account.smResumable));
 
-  void sendAckResponse() =>
-      _connection.writeNonza(ANonza(streamState.lastReceivedStanza));
+  void sendAckResponse() {
+    if (!streamState.streamManagementEnabled) {
+      Log.d(TAG, 'Not sending <a> because SM is not enabled');
+      return;
+    }
+    Log.d(TAG, 'Sending sending <a> because SM enabled');
+    _connection.writeNonza(ANonza(streamState.lastReceivedStanza));
+  }
+
+//  void sendAckResponse() =>
+//      _connection.writeNonza(ANonza(streamState.lastReceivedStanza));
 
   void tryToResumeStream() {
     if (!streamState.tryingToResume) {

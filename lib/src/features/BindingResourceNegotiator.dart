@@ -59,6 +59,8 @@ class BindingResourceConnectionNegotiator extends Negotiator {
     bindElement.addChild(resourceElement);
     var attribute = XmppAttribute('xmlns', BIND_ATTRIBUTE);
     bindElement.addAttribute(attribute);
+    // we need the namespace to ensure iqStanza is recognized
+    stanza.addAttribute(XmppAttribute('xmlns', 'jabber:client'));
     stanza.addChild(bindElement);
     _connection.writeStanza(stanza);
   }
